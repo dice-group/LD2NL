@@ -22,7 +22,6 @@
  */
 package org.aksw.sparql2nl.naturallanguagegeneration;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,17 +62,17 @@ import simplenlg.lexicon.NIHDBLexicon;
 import simplenlg.phrasespec.NPPhraseSpec;
 import simplenlg.realiser.english.Realiser;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 /**
  * @author Lorenz Buehmann
@@ -168,7 +167,7 @@ public class SimpleSPARQL2NLConverter implements Sparql2NLConverter{
 			}
 			
 			@Override
-			public void edgeTraversed(EdgeTraversalEvent<Node, Edge> e) {
+			public void edgeTraversed(EdgeTraversalEvent<Edge> e) {
 			}
 			
 			@Override
@@ -388,8 +387,9 @@ public class SimpleSPARQL2NLConverter implements Sparql2NLConverter{
 		
 		query = QueryFactory.create(
 				"PREFIX : <http://sparql2nl.aksw.org/> SELECT DISTINCT  ?uri WHERE { :Mike :isKnownFor ?uri .}");
-		
-		Lexicon lexicon = new NIHDBLexicon("/home/me/tools/lexAccess2013lite/data/HSqlDb/lexAccess2013.data");
+		System.out.println("Working Directory = " +
+				System.getProperty("user.dir"));
+		Lexicon lexicon = new NIHDBLexicon("src/main/resources/lexAccess2013.data");
 		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
 		SimpleSPARQL2NLConverter sparql2nlConverter = new SimpleSPARQL2NLConverter(endpoint, "cache/sparql2nl", lexicon);
 		String nlr = sparql2nlConverter.getNLR(query);

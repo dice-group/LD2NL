@@ -56,20 +56,20 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.syntax.ElementGroup;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.util.FmtUtils;
+import org.apache.jena.vocabulary.RDF;
 
 import simplenlg.features.Feature;
 import simplenlg.features.InternalFeature;
@@ -307,7 +307,7 @@ public class MultipleChoiceQuestionGenerator extends AbstractQuestionGenerator {
         	if(isPersonType(range.asOWLClass().toStringID())) {
         		interrogativeType = InterrogativeType.WHO_OBJECT;
         	} else if(isLocationType(range.asOWLClass().toStringID())) {
-        		interrogativeType = InterrogativeType.WHERE_OBJECT;
+        		interrogativeType = InterrogativeType.WHERE;
         	}
     	}
 		
@@ -387,7 +387,7 @@ public class MultipleChoiceQuestionGenerator extends AbstractQuestionGenerator {
             	if(isPersonType(range.asOWLClass().toStringID())) {
             		interrogativeType = InterrogativeType.WHO_OBJECT;
             	} else if(isLocationType(range.asOWLClass().toStringID())) {
-            		interrogativeType = InterrogativeType.WHERE_OBJECT;
+            		interrogativeType = InterrogativeType.WHERE;
             	}
         	}
     		
@@ -655,7 +655,7 @@ public class MultipleChoiceQuestionGenerator extends AbstractQuestionGenerator {
 //        				,new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/killedBy"))
         				)
         );
-        SparqlEndpoint endpoint = SparqlEndpoint.create("http://sake.informatik.uni-leipzig.de:8890/sparql", "http://dbpedia.org");
+        SparqlEndpoint endpoint = SparqlEndpoint.create(" http://dbpedia.org/sparql", "http://dbpedia.org");
         endpoint = SparqlEndpoint.getEndpointDBpedia();
         SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
         ks.setCacheDir("/tmp/cache");

@@ -42,8 +42,8 @@ import simplenlg.phrasespec.NPPhraseSpec;
 import simplenlg.phrasespec.SPhraseSpec;
 import simplenlg.realiser.english.Realiser;
 
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 
 /**
  * @author Lorenz Buehmann
@@ -86,7 +86,7 @@ public class SimpleNLGTest {
 	@Test
 	public void testNIHLexicon() {
 		String cls = "airport";
-		Lexicon lexicon = new NIHDBLexicon("/home/me/tools/lexAccess2013lite/data/HSqlDb/lexAccess2013.data");
+		Lexicon lexicon = new NIHDBLexicon("src/main/resources/lexAccess2013.data");
 		NLGFactory nlgFactory = new NLGFactory(lexicon);
 		Realiser realiser = new Realiser(lexicon);
 		NLGElement word = nlgFactory.createWord(cls, LexicalCategory.NOUN);

@@ -31,7 +31,6 @@ import java.util.Set;
 import javax.swing.JFrame;
 
 import org.aksw.sparql2nl.queryprocessing.TriplePatternExtractor;
-import org.dllearner.algorithms.qtl.datastructures.rendering.Vertex;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.TraversalListener;
@@ -41,11 +40,11 @@ import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.Var;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.Var;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
@@ -194,7 +193,7 @@ public class QueryGraphGenerator {
 				}
 				
 				@Override
-				public void edgeTraversed(EdgeTraversalEvent<Node, Edge> e) {
+				public void edgeTraversed(EdgeTraversalEvent<Edge> e) {
 				}
 				
 				@Override

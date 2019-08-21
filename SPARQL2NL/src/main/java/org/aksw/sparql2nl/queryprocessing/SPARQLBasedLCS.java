@@ -27,9 +27,9 @@ import java.util.Set;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.kb.sparql.SparqlQuery;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.vocabulary.OWL;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.vocabulary.OWL;
 
 public class SPARQLBasedLCS implements LCS{
 	
@@ -67,7 +67,7 @@ public class SPARQLBasedLCS implements LCS{
 	private Set<String> getSuperClasses(String cls){
 		Set<String> superClasses = new HashSet<>();
 		String query = String.format("SELECT ?sup WHERE {<%s> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?sup}", cls);
-		ResultSet rs = new SparqlQuery(query, endpoint).send(false);
+		ResultSetRewindable rs = new SparqlQuery(query, endpoint).send(false);
 		QuerySolution qs;
 		while(rs.hasNext()){
 			qs = rs.next();

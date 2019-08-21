@@ -33,9 +33,9 @@ import org.aksw.triple2nl.converter.DefaultIRIConverter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.graph.impl.LiteralLabel;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.graph.impl.LiteralLabel;
 
 /**
  * Returns only canonical forms of numeric literals, e.g. for 800 cm and 8.00m the digits are the same.

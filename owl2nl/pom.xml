@@ -1,12 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.aksw.semweb2nl</groupId>
 		<artifactId>semweb2nl-parent</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>owl2nl</artifactId>
+  <version>0.2.0-SNAPSHOT</version>
 	<name>OWL2NL</name>
 	<description>OWL class expressions and axioms to Natural Language Converter</description>
 
@@ -14,15 +14,18 @@
 		<dependency>
 			<groupId>org.aksw.semweb2nl</groupId>
 			<artifactId>triple2nl</artifactId>
+			<!--<version>0.2.0-SNAPSHOT</version>-->
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.abdn</groupId>
 			<artifactId>SimpleNLG</artifactId>
+			<version>4.4.8</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
+			<version>5.1.11</version>
 		</dependency>
 		 <dependency>
             <groupId>org.gnu.glpk</groupId>
@@ -35,6 +38,15 @@
 			<version>2.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>net.sourceforge.owlapi</groupId>-->
+			<!--<artifactId>owlapi-distribution</artifactId>-->
+		<!--</dependency>-->
 	</dependencies>
 	
 	<repositories>

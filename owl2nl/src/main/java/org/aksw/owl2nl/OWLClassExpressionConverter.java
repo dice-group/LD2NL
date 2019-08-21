@@ -846,7 +846,7 @@ public class OWLClassExpressionConverter implements OWLClassExpressionVisitorEx<
 				phrase.setSubject(propertyNounPhrase);
 				
 				phrase.setVerb("is");
-				
+
 				NLGElement valueElement = nlgFactory.createNounPhrase(literalConverter.convert(value));
 				phrase.setObject(valueElement);
 				

@@ -25,18 +25,18 @@ import java.util.Set;
 import javax.xml.transform.TransformerConfigurationException;
 
 import org.aksw.sparql2nl.queryprocessing.TriplePatternExtractor;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.FloydWarshallShortestPaths;
-import org.jgrapht.ext.GraphMLExporter;
+import org.jgrapht.graph.AbstractBaseGraph; // DirectedGraph
+import org.jgrapht.alg.shortestpath.FloydWarshallShortestPaths;
+import org.jgrapht.io.GraphMLExporter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.xml.sax.SAXException;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Syntax;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class QueryStats {
 
 	private String queryString;
 	Set<Triple> triples;
-	DirectedGraph<Node, DefaultEdge> g;
+	AbstractBaseGraph<Node, DefaultEdge> g;
 	TriplePatternExtractor tpe;
 	FloydWarshallShortestPaths<Node, DefaultEdge> f;
 	
@@ -86,11 +86,11 @@ public class QueryStats {
 		return triples.size();
 	}
 
-	public double getDiameter() {
-		double d = f.getDiameter();
-		// workaround for https://github.com/jgrapht/jgrapht/issues/5#issuecomment-5408396
-		return d==0 ? 1 : d;
-	}
+//	public double getDiameter() {
+//		double d = f.getDiameter();
+//		// workaround for https://github.com/jgrapht/jgrapht/issues/5#issuecomment-5408396
+//		return d==0 ? 1 : d;
+//	}
 	
 	public int getShortestPathsCount() {
 		return f.getShortestPathsCount();
@@ -159,7 +159,7 @@ public class QueryStats {
 		// System.out.println(g);
 
 		// TODO: results look strange
-		System.out.println("graph diameter: " + qs.getDiameter());
+//		System.out.println("graph diameter: " + qs.getDiameter());
 		System.out.println("number of shortest paths: "
 				+ qs.getShortestPathsCount());
 
@@ -174,7 +174,7 @@ public class QueryStats {
 //		ge.export(new OutputStreamWriter(System.out), g);
 		
 		// bug report (diameter 0 instead of 1)
-		DirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+		AbstractBaseGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		String a = "a", b = "b", c = "c";
 		graph.addVertex(a);
 		graph.addVertex(b);

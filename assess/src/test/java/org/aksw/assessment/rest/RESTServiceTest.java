@@ -47,8 +47,9 @@ private RESTService restService = new RESTService();
 	
 	public RESTServiceTest() throws Exception {
 		HierarchicalINIConfiguration config = new HierarchicalINIConfiguration();
-		try(InputStream is = RESTService.class.getClassLoader().getResourceAsStream("assess_config_dsa.ini")){
+		try(InputStream is = RESTService.class.getClassLoader().getResourceAsStream("assess_config_dsa.ini")){ // missing file
 			config.load(is);
+
 		}
 		
 		RESTService.loadConfig(config);

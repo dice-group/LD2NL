@@ -25,9 +25,9 @@ package org.aksw.sparql2nl;
 
 import static org.junit.Assert.*;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Syntax;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 
 import java.net.URL;
 
@@ -50,7 +50,7 @@ public class SPARQL2NLTest {
 	
 	@Test
 	public void testSPARQL2NL() throws Exception {
-		Lexicon lexicon = new NIHDBLexicon("/home/me/tools/lexAccess2013lite/data/HSqlDb/lexAccess2013.data");
+		Lexicon lexicon = new NIHDBLexicon("src/main/resources/lexAccess2013.data");
 		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
 		SimpleSPARQL2NLConverter sparql2nlConverter = new SimpleSPARQL2NLConverter(endpoint, "cache/sparql2nl", lexicon);
 		

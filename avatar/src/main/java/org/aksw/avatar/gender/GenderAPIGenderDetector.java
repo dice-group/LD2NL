@@ -48,7 +48,7 @@ public class GenderAPIGenderDetector implements GenderDetector {
 	@Override
 	public Gender getGender(String name) {
 		try {
-			URL url = new URL(API_URL + name);
+			URL url = new URL(API_URL + name + "&key="); // add private key
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			if (conn.getResponseCode() != 200) {
 				throw new RuntimeException("Error: " + conn.getResponseCode());

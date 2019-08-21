@@ -1,0 +1,8 @@
+#2#
+SELECT DISTINCT  ?uri
+WHERE
+  { ?states rdf:type yago:AfricanCountries .
+    ?states dbo:capital ?uri .
+    ?uri dbo:population ?population
+    FILTER ( ?population < 1000000 )
+  }

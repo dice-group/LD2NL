@@ -37,6 +37,7 @@ import org.dllearner.kb.sparql.SparqlEndpoint;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
+import org.junit.Test;
 
 /**
  * @author Lorenz Buehmann

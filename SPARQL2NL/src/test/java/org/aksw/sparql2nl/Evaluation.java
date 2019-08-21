@@ -47,7 +47,7 @@ import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.aksw.triple2nl.property.PropertyVerbalizer;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
-import org.dllearner.kb.sparql.QueryExecutionFactoryHttp;
+import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -55,10 +55,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Syntax;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 
 public class Evaluation {
 	
@@ -93,7 +93,7 @@ public class Evaluation {
 //				System.out.println(line);
 				// we use JENA to expand all prefixes
 				try {
-					com.hp.hpl.jena.query.Query q = QueryFactory.create(line.substring(1, line.length()-1));
+					org.apache.jena.query.Query q = QueryFactory.create(line.substring(1, line.length()-1));
 					expandPrefixes(q);
 					queries.add(q.toString());
 				} catch (Exception e) {
@@ -162,7 +162,7 @@ public class Evaluation {
 		return queries;
 	}
 	
-	private void expandPrefixes(com.hp.hpl.jena.query.Query query){
+	private void expandPrefixes(org.apache.jena.query.Query query){
 		for(Entry<String, String> e : query.getPrefixMapping().getNsPrefixMap().entrySet()){
 			query.getPrefixMapping().removeNsPrefix(e.getKey());
 		}
