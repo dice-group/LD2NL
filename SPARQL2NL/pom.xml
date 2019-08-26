@@ -235,6 +235,11 @@
 			<version>1.18</version>
 		</dependency>
 
+<dependency>
+    <groupId>gov.nih.nlm.nls.lexaccess</groupId>
+    <artifactId>lexaccess-dist</artifactId>
+    <version>2013</version>
+</dependency>
 
 
 	</dependencies>

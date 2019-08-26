@@ -106,7 +106,7 @@ public class FilterExpressionConverterTest {
 		 * date literals
 		 */
 		Calendar cal = Calendar.getInstance();
-		cal.set(1999, 11, 20);
+		cal.set(1999, 11, 21);
 		value = NodeValue.makeDate(cal);
 		String valueString = "December 20, 1999";
 

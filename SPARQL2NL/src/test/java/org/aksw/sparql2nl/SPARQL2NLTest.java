@@ -50,7 +50,7 @@ public class SPARQL2NLTest {
 	
 	@Test
 	public void testSPARQL2NL() throws Exception {
-		Lexicon lexicon = new NIHDBLexicon("src/main/resources/lexAccess2013.data");
+		Lexicon lexicon = new NIHDBLexicon("../SPARQL2NL/src/main/resources/NIHLexicon/lexAccess2013.data");
 		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
 		SimpleSPARQL2NLConverter sparql2nlConverter = new SimpleSPARQL2NLConverter(endpoint, "cache/sparql2nl", lexicon);
 		
