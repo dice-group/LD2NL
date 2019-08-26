@@ -9,7 +9,7 @@ This project aims at delivering a framework for converting Linked Data related c
 LD2NL currently consists of the following modules:
 
 1. Triple2NL - Convert triples into natural language
-2. SPARQL2NL] - Convert SPARQL queries into natural language
+2. SPARQL2NL - Convert SPARQL queries into natural language
 3. AVATAR - Entity summarization
 
 
