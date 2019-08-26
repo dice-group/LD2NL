@@ -1,26 +1,30 @@
-SemWeb2NL
+LD2NL
 =========
 
 ### About
-Semantic Web related concepts converted to Natural language
+This project aims at delivering a framework for converting Linked Data related concepts to Natural language.
 
 ### Structure
 
-SemWeb2NL currently consists of the following modules:
+LD2NL currently consists of the following modules:
 
-1. [Triple2NL](https://github.com/AKSW/SemWeb2NL/wiki/Triple2NL) - Convert triples into natural language
-2. [SPARQL2NL](https://github.com/AKSW/SemWeb2NL/wiki/SPARQL2NL) - Convert SPARQL queries into natural language
-3. [AVATAR](https://github.com/AKSW/SemWeb2NL/wiki/AVATAR) - Entity summarization
-4. [ASSESS](https://github.com/AKSW/SemWeb2NL/wiki/ASSESS)  - Automatic Self Assessment
- 
-### Docker
-If you want to use Docker, build the assess-service.war file.
-Copy the .war file and the Dockerfile into a new folder and run
+1. [Triple2NL] - Convert triples into natural language
+2. [SPARQL2NL] - Convert SPARQL queries into natural language
+3. [AVATAR] - Entity summarization
 
-`sudo docker build -t assess-demo-backend .`
 
-to build the image.
+### Support and Feedback
+If you need help or you have questions do not hesitate to write an email to  <a href="mailto:diego.moussallem@uni-paderborn.de">Diego Moussallem</a>. Or use the issue tracker in the right sidebar.
 
-To run the image: 
+### How to cite
+```Tex
 
-`sudo docker run -d --restart=always --name assess-demo-backend  -p 9902:8080 assess-demo-backend`
+@InProceedings{Ngonga2019,
+  author       = {Axel-Cyrille {Ngonga Ngomo}, Diego Moussallem and Lorenz Bühman},
+  title        = {{A Holistic Natural Language Generation Framework for the Semantic Web}},
+  booktitle    = {Proceedings of the International Conference Recent Advances in Natural Language Processing},
+  year         = {2019},
+  pages        = {8},
+  organization={ACL (Association for Computational Linguistics)}
+}
+```
