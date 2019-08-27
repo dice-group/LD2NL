@@ -13,7 +13,8 @@
 		<module>Triple2NL</module>
 		<module>owl2nl</module>
 		<module>evaluation</module>
-	</modules>
+        <module>controller</module>
+    </modules>
 
 	<developers>
 		<developer>
@@ -129,6 +130,16 @@
 				<groupId>org.dllearner</groupId>
 				<artifactId>components-core</artifactId>
 				<version>${dllearner.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>jena-arq</artifactId>
+						<groupId>org.apache.jena</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sourceforge.owlapi</groupId>
+						<artifactId>owlapi-distribution</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ifi.uzh</groupId>
