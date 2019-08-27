@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.IRI;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
 
+
 /**
  * @author Lorenz Buehmann
  *

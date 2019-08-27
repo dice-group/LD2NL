@@ -40,9 +40,9 @@ import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.triple2nl.converter.DefaultIRIConverter;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
-//import org.aksw.triple2nl.gender.Gender;
-//import org.aksw.triple2nl.gender.GenderDetector;
-//import org.aksw.rdf2pt.triple2nl.gender.DictionaryBasedGenderDetector;
+import org.aksw.triple2nl.gender.Gender;
+import org.aksw.triple2nl.gender.GenderDetector;
+import org.aksw.triple2nl.gender.DictionaryBasedGenderDetector;
 import org.aksw.triple2nl.nlp.relation.BoaPatternSelector;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
 import simplenlg.features.Feature;
 import simplenlg.features.InternalFeature;
 import simplenlg.features.LexicalFeature;
-import simplenlg.features.Tense;
 import simplenlg.framework.*;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.phrasespec.NPPhraseSpec;
@@ -80,6 +79,9 @@ public class TripleConverter {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TripleConverter.class);
 
+	private static String DEFAULT_CACHE_BASE_DIR = System.getProperty("java.io.tmpdir");
+	private static String DEFAULT_CACHE_DIR = DEFAULT_CACHE_BASE_DIR + "/triple2nl-cache";
+
 	private NLGFactory nlgFactory;
 	private Realiser realiser;
 
@@ -96,8 +98,18 @@ public class TripleConverter {
 	//for multiple types use 'as well as' to coordinate the last type
 	private boolean useAsWellAsCoordination = true;
 
+	private boolean returnAsSentence = true;
+
+	private boolean useGenderInformation = true;
+
+	private GenderDetector genderDetector;
+
+	public TripleConverter() {
+		this(new QueryExecutionFactoryModel(ModelFactory.createDefaultModel()), DEFAULT_CACHE_DIR, Lexicon.getDefaultLexicon());
+	}
+
 	public TripleConverter(SparqlEndpoint endpoint) {
-		this(endpoint, null);
+		this(endpoint, DEFAULT_CACHE_DIR);
 	}
 	
 	public TripleConverter(QueryExecutionFactory qef, String cacheDirectory, Dictionary wordnetDirectory) {
@@ -133,7 +145,7 @@ public class TripleConverter {
 		this.uriConverter = uriConverter;
 		
 		if(propertyVerbalizer == null){
-			propertyVerbalizer = new PropertyVerbalizer(uriConverter, cacheDirectory, wordnetDirectory);
+			propertyVerbalizer = new PropertyVerbalizer(uriConverter, wordnetDirectory);
 		}
 		pp = propertyVerbalizer;
 		
@@ -148,20 +160,36 @@ public class TripleConverter {
 		literalConverter.setEncapsulateStringLiterals(encapsulateStringLiterals);
 		
 		reasoner = new SPARQLReasoner(qef);
+
+		genderDetector = new DictionaryBasedGenderDetector();
 	}
 	
 	/**
-	 * Converts a collection of triples into a list of phrases.
-	 * 
-	 * @param triples the triples
-	 * @return a list of phrases
+	 * Return a textual representation for the given triple.
+	 *
+	 * @param t the triple to convert
+	 * @return the textual representation
 	 */
-	public List<SPhraseSpec> convertTriples(Collection<Triple> triples) {
-		List<SPhraseSpec> phrases = new ArrayList<>();
-		for (Triple triple : triples) {
-			phrases.add(convertTriple(triple));
+	public String convert(Triple t){
+		return convert(t, false);
+	}
+
+	/**
+	 * Return a textual representation for the given triple.
+	 *
+	 * @param t the triple to convert
+	 * @param negated if phrase is negated
+	 * @return the textual representation
+	 */
+	public String convert(Triple t, boolean negated){
+		NLGElement phrase = convertToPhrase(t, negated);
+		String text;
+		if(returnAsSentence) {
+			text = realiser.realiseSentence(phrase);
+		} else {
+			text = realiser.realise(phrase).getRealisation();
 		}
-		return phrases;
+		return text;
 	}
 	
 	/**
@@ -171,26 +199,18 @@ public class TripleConverter {
 	 * @param triples the triples to convert
 	 * @return the textual representation
 	 */
-	public String convertTriplesToText(List<Triple> triples){
+	public String convert(List<Triple> triples){
 		// combine with conjunction
-		CoordinatedPhraseElement conjunction = nlgFactory.createCoordinatedPhrase();
+		CoordinatedPhraseElement typesConjunction = nlgFactory.createCoordinatedPhrase();
 		
-		// get the type triples first 
-		List<Triple> typeTriples = new ArrayList<>();
-		List<Triple> otherTriples = new ArrayList<>();
-		
-		for (Triple triple : triples) {
-			if(triple.predicateMatches(RDF.type.asNode())){
-				typeTriples.add(triple);
-			} else {
-				otherTriples.add(triple);
-			}
-		}
-		
+		// separate type triples from others
+		List<Triple> typeTriples = triples.stream().filter(t -> t.predicateMatches(RDF.type.asNode())).collect(Collectors.toList());
+		List<Triple> otherTriples = ListUtils.subtract(triples, typeTriples);
+
 		// convert the type triples
-		List<SPhraseSpec> typePhrases = convertTriples(typeTriples);
+		List<SPhraseSpec> typePhrases = convertToPhrases(typeTriples);
 		
-		// if there are more than one types, we combine them in a single clause
+		// if there is more than one type, we combine them into a single clause
 		if(typePhrases.size() > 1){
 			// combine all objects in a coordinated phrase
 			CoordinatedPhraseElement combinedObject = nlgFactory.createCoordinatedPhrase();
@@ -225,85 +245,77 @@ public class TripleConverter {
 			typePhrases = Lists.newArrayList(representative);
 		}
 		for (SPhraseSpec phrase : typePhrases) {
-			conjunction.addCoordinate(phrase);
+			typesConjunction.addCoordinate(phrase);
 		}
 		
-		//convert the other triples, but use place holders for the subject
-		//we have to use whose because the possessive form of who is who's
-		String placeHolderToken = (typeTriples.isEmpty() || otherTriples.size() == 1) ? "it" : "whose";
-		Node placeHolder = NodeFactory.createURI("http://sparql2nl.aksw.org/placeHolder/" + placeHolderToken);
-		Collection<Triple> placeHolderTriples = new ArrayList<>(otherTriples.size());
-		Iterator<Triple> iterator = otherTriples.iterator();
-		//we have to keep one triple with subject if we have no type triples
-		if(typeTriples.isEmpty() && iterator.hasNext()){
-			placeHolderTriples.add(iterator.next());
+		// convert the other triples
+		CoordinatedPhraseElement othersConjunction = nlgFactory.createCoordinatedPhrase();
+		List<SPhraseSpec> otherPhrases = convertToPhrases(otherTriples);
+		// we have to keep one triple with subject if we have no type triples
+		if(typeTriples.isEmpty()) {
+			othersConjunction.addCoordinate(otherPhrases.remove(0));
 		}
-		while (iterator.hasNext()) {
-			Triple triple = iterator.next();
-			Triple newTriple = Triple.create(placeHolder, triple.getPredicate(), triple.getObject());
-			placeHolderTriples.add(newTriple);
-		}
-		
-		Collection<SPhraseSpec> otherPhrases = convertTriples(placeHolderTriples);
-		
+		// make subject pronominal, i.e. -> he/she/it
+		otherPhrases.stream().forEach(p -> asPronoun(p.getSubject()));
 		for (SPhraseSpec phrase : otherPhrases) {
-			conjunction.addCoordinate(phrase);
+			othersConjunction.addCoordinate(phrase);
 		}
-        
-		String sentence = realiser.realiseSentence(conjunction);
-		return sentence;
+
+		List<DocumentElement> sentences = new ArrayList();
+		if(!typeTriples.isEmpty()) {
+			sentences.add(nlgFactory.createSentence(typesConjunction));
+		}
+
+		if(!otherTriples.isEmpty()) {
+			sentences.add(nlgFactory.createSentence(othersConjunction));
+		}
+
+		DocumentElement paragraph = nlgFactory.createParagraph(sentences);
+		String realisation = realiser.realise(paragraph).getRealisation().trim();
+
+		return realisation;
 	}
-	
-	/**
-	 * Return a textual representation for the given triple.
-	 * 
-	 * @param t the triple to convert
-	 * @return the textual representation
-	 */
-	public String convertTripleToText(Triple t){
-		return convertTripleToText(t, false);
-	}
-	
-	/**
-	 * Return a textual representation for the given triple.
-	 * 
-	 * @param t the triple to convert
-	 * @param negated if phrase is negated
-	 * @return the textual representation
-	 */
-	public String convertTripleToText(Triple t, boolean negated){
-		NLGElement phrase = convertTriple(t, negated);
-		phrase = realiser.realise(phrase);
-		return phrase.getRealisation();
-	}
-	
-	/**
-	 * Convert a triple into a phrase object
-	 * 
-	 * @param t the triple
-	 * @return the phrase
-	 */
-	public SPhraseSpec convertTriple(Triple t) {
-		return convertTriple(t, false);
-	}
-	
-	/**
-	 * Convert a triple into a phrase object
-	 * 
-	 * @param t the triple
-	 * @return the phrase
-	 */
-	public SPhraseSpec convertTriple(Triple t, boolean negated) {
-		return convertTriple(t, negated, false);
+
+	private void asPronoun(NLGElement el) {
+		if(el.hasFeature(InternalFeature.SPECIFIER)) {
+			NLGElement specifier = el.getFeatureAsElement(InternalFeature.SPECIFIER);
+			if(specifier.hasFeature(Feature.POSSESSIVE)) {
+				specifier.setFeature(Feature.PRONOMINAL, true);
+			}
+		} else {
+			el.setFeature(Feature.PRONOMINAL, true);
+		}
 	}
 
 	/**
 	 * Convert a triple into a phrase object
+	 * 
 	 * @param t the triple
-	 * @param negated if phrase is negated 
 	 * @return the phrase
 	 */
-	public SPhraseSpec convertTriple(Triple t, boolean negated, boolean reverse) {
+	public SPhraseSpec convertToPhrase(Triple t) {
+		return convertToPhrase(t, false);
+	}
+	
+	/**
+	 * Convert a triple into a phrase object
+	 * 
+	 * @param t the triple
+	 * @return the phrase
+	 */
+	public SPhraseSpec convertToPhrase(Triple t, boolean negated) {
+		return convertToPhrase(t, negated, false);
+	}
+
+	/**
+	 * Convert a triple into a phrase object
+	 *
+	 * @param t       the triple
+	 * @param negated if phrase is negated
+	 * @param reverse whether subject and object should be changed during verbalization
+	 * @return the phrase
+	 */
+	public SPhraseSpec convertToPhrase(Triple t, boolean negated, boolean reverse) {
 		logger.debug("Verbalizing triple " + t);
 		SPhraseSpec p = nlgFactory.createClause();
 
@@ -378,8 +390,8 @@ public class TripleConverter {
 					if(considerLiteralLanguage){
 						if(object.isLiteral() && object.getLiteralLanguage() != null && !object.getLiteralLanguage().isEmpty()){
 							String languageTag = object.getLiteralLanguage();
-							String language = Locale.forLanguageTag(languageTag).getDisplayLanguage();
-							predicateNounPhrase.setPreModifier(language);
+							String language = Locale.forLanguageTag(languageTag).getDisplayLanguage(Locale.ROOT);
+							predicateNounPhrase.addPreModifier(language);
 						}
 					}
 					
@@ -409,6 +421,7 @@ public class TripleConverter {
 					p.setSubject(subjectElement);
 					p.setVerb(pp.getInfinitiveForm(predicateAsString));
 					p.setObject(objectElement);
+					p.setFeature(Feature.TENSE, propertyVerbalization.getTense());
 				}// in other cases, use the BOA pattern
 				else {
 
@@ -453,9 +466,23 @@ public class TripleConverter {
 		}
 		
 		// set present time as tense
-		p.setFeature(Feature.TENSE, Tense.PRESENT);
+//		p.setFeature(Feature.TENSE, Tense.PRESENT);
 //		System.out.println(realiser.realise(p));
 		return p;
+	}
+
+	/**
+	 * Converts a collection of triples into a list of phrases.
+	 *
+	 * @param triples the triples
+	 * @return a list of phrases
+	 */
+	public List<SPhraseSpec> convertToPhrases(Collection<Triple> triples) {
+		List<SPhraseSpec> phrases = new ArrayList<>();
+		for (Triple triple : triples) {
+			phrases.add(convertToPhrase(triple));
+		}
+		return phrases;
 	}
 	
 	
@@ -489,7 +516,25 @@ public class TripleConverter {
 					|| reasoner.getRange(
 							new OWLDataPropertyImpl(IRI.create(triple.getPredicate().getURI()))).asOWLDatatype().getIRI().equals(OWL2Datatype.XSD_BOOLEAN.getIRI()));
 	}
-	
+
+	/**
+	 * @param returnAsSentence whether the style of the returned result is a proper English sentence or just a phrase
+	 */
+	public void setReturnAsSentence(boolean returnAsSentence) {
+		this.returnAsSentence = returnAsSentence;
+	}
+
+	/**
+	 * @param useGenderInformation whether to use the gender information about a resource
+	 */
+	public void setUseGenderInformation(boolean useGenderInformation) {
+		this.useGenderInformation = useGenderInformation;
+	}
+
+	public void setGenderDetector(GenderDetector genderDetector) {
+		this.genderDetector = genderDetector;
+	}
+
 	/**
 	 * Process the node and return an NLG element that contains the textual
 	 * representation. The output depends on the node type, i.e.
@@ -535,7 +580,7 @@ public class TripleConverter {
 				label = PlingStemmer.stem(label);
 				//we assume that classes are always used in lower case format
 				label = label.toLowerCase();
-				object = nlgFactory.createNounPhrase(nlgFactory.createInflectedWord(label, LexicalCategory.NOUN));
+				object = nlgFactory.createNounPhrase(nlgFactory.createWord(label, LexicalCategory.NOUN));
 			} else {
 				object = nlgFactory.createNounPhrase(GenericType.ENTITY.getNlr());
 			}
@@ -547,7 +592,7 @@ public class TripleConverter {
 	}
 	
 	public NPPhraseSpec processVarNode(Node varNode) {
-		return nlgFactory.createNounPhrase(varNode.toString());
+		return nlgFactory.createNounPhrase(nlgFactory.createWord(varNode.toString(), LexicalCategory.NOUN));
 	}
 	
 	public NPPhraseSpec processLiteralNode(Node node) {
@@ -560,9 +605,27 @@ public class TripleConverter {
 	}
 	
 	public NPPhraseSpec processResourceNode(Node node) {
+		// get string from URI
 		String s = uriConverter.convert(node.getURI());
+
+		// create word
 		NLGElement word = nlgFactory.createWord(s, LexicalCategory.NOUN);
+
+		// add gender information if enabled
+		if(useGenderInformation) {
+			Gender gender = genderDetector.getGender(s);
+
+			if(gender == Gender.FEMALE) {
+				word.setFeature(LexicalFeature.GENDER, simplenlg.features.Gender.FEMININE);
+			} else if(gender == Gender.MALE) {
+				word.setFeature(LexicalFeature.GENDER, simplenlg.features.Gender.MASCULINE);
+			}
+		}
+
+		// should be a proper noun, thus, will not be pluralized by morphology
 		word.setFeature(LexicalFeature.PROPER, true);
+
+		// wrap in NP
 		NPPhraseSpec np = nlgFactory.createNounPhrase(word);
 		return np;
 	}
@@ -626,7 +689,7 @@ public class TripleConverter {
 					//we assume that classes are always used in lower case format
 					label = label.toLowerCase();
 				}
-				object = nlgFactory.createNounPhrase(nlgFactory.createInflectedWord(label, LexicalCategory.NOUN));
+				object = nlgFactory.createNounPhrase(nlgFactory.createWord(label, LexicalCategory.NOUN));
 			} else {
 				object = nlgFactory.createNounPhrase(GenericType.ENTITY.getNlr());
 			}
@@ -635,5 +698,22 @@ public class TripleConverter {
 		object.setPlural(plural);
 
 		return object;
+	}
+
+	public static void main(String[] args) throws Exception {
+
+		System.out.println(new TripleConverter().convert(
+				Triple.create(
+						NodeFactory.createURI("http://dbpedia.org/resource/Albert_Einstein"),
+						NodeFactory.createURI("http://dbpedia.org/ontology/birthPlace"),
+						NodeFactory.createURI("http://dbpedia.org/resource/Ulm")
+						)));
+
+		System.out.println(new TripleConverter().convert(
+				Triple.create(
+						NodeFactory.createURI("http://dbpedia.org/resource/Albert_Einstein"),
+						NodeFactory.createURI("http://dbpedia.org/ontology/isHardWorking"),
+						NodeFactory.createLiteral("false", XSDDatatype.XSDboolean)
+				)));
 	}
 }

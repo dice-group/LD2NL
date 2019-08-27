@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+
 /**
  * Converts IRIs into natural language.
  * @author Lorenz Buehmann
@@ -113,7 +114,7 @@ public class DefaultIRIConverter implements IRIConverter{
 		} catch (IOException e) {
 			logger.error("Creation of folder + " + cacheDirectory + " failed.", e);
 		}
-		logger.warn("Using folder " + cacheDirectory + " as cache for IRI converter.");
+		logger.debug("Using folder " + cacheDirectory + " as cache for IRI converter.");
 		
 		uriDereferencer = new URIDereferencer(new File(cacheDirectory));
 	}
@@ -152,7 +153,7 @@ public class DefaultIRIConverter implements IRIConverter{
 			} catch (Exception e) {
 				logger.error("Getting label for " + iri + " from knowledge base failed.", e);
 			}
-			
+
 			// 2. try to get the label from the endpoint
 			if(label == null){
 				 try {
@@ -175,7 +176,11 @@ public class DefaultIRIConverter implements IRIConverter{
             if(label == null){
             	try {
 					label = sfp.getShortForm(IRI.create(URLDecoder.decode(iri, "UTF-8")));
-				} catch (UnsupportedEncodingException e) {
+
+		            // do some normalization, e.g. remove underscores
+		            label = normalize(label);
+
+            	} catch (UnsupportedEncodingException e) {
 					logger.error("Getting short form of " + iri + "failed.", e);
 				}
             }
@@ -184,9 +189,7 @@ public class DefaultIRIConverter implements IRIConverter{
             if(label == null){
             	label = iri;
             }
-            
-            // do some normalization, e.g. remove underscores
-            label = normalize(label);
+
 		}
 	    
 		// put into cache
@@ -257,12 +260,24 @@ public class DefaultIRIConverter implements IRIConverter{
 	}
 	
 	private String getLabelFromKnowledgebase(String iri){
-		String query = "SELECT ?label WHERE {<%s> <%s> ?label. FILTER (LANGMATCHES(LANG(?label),'" + language + "' ))} ORDER BY DESC(?label) LIMIT 1";
-		
+		ParameterizedSparqlString query = new ParameterizedSparqlString(
+				"SELECT ?label WHERE {" +
+						"?s ?p1 ?o ." +
+						"optional {" +
+						"		?s ?p ?label. " +
+						"		FILTER (LANGMATCHES(LANG(?label),'" + language + "' ))" +
+						"	}" +
+						"optional {" +
+						"     ?s ?p ?label" +
+						"   }" +
+						"} " +
+						"ORDER BY DESC(?label) LIMIT 1");
+		query.setIri("s", iri);
 		// for each label property
 		for (String labelProperty : labelProperties) {
-			try {
-				ResultSet rs = executeSelect(String.format(query, iri, labelProperty));
+			query.setIri("p", labelProperty);
+			try (QueryExecution qe = qef.createQueryExecution(query.toString())){
+				ResultSet rs = qe.execSelect();
 				if(rs.hasNext()){
 					return rs.next().getLiteral("label").getLexicalForm();
 				}
@@ -330,7 +345,17 @@ public class DefaultIRIConverter implements IRIConverter{
     private static String splitCamelCase(String s) {
     	StringBuilder sb = new StringBuilder();
     	for (String token : s.split(" ")) {
-			sb.append(StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(token), ' ')).append(" ");
+			String[] split = StringUtils.splitByCharacterTypeCamelCase(token);
+			Deque<String> list = new ArrayDeque<>();
+			for (int i = 0; i < split.length; i++) {
+				String s1 = split[i];
+				if(i > 0 && s1.length() == 1 && !org.apache.commons.lang3.StringUtils.isNumeric(s1)) { // single character -> append to previous token
+					list.add(list.pollLast() + s1);
+				} else {
+					list.add(s1);
+				}
+			}
+			sb.append(StringUtils.join(list, ' ')).append(" ");
 		}
     	return sb.toString().trim();
 //    	return s.replaceAll(
@@ -342,12 +367,7 @@ public class DefaultIRIConverter implements IRIConverter{
 //    	      " "
 //    	   );
     	}
-    
-    private ResultSet executeSelect(String query){
-    	ResultSet rs = qef.createQueryExecution(query).execSelect();
-    	return rs;
-    }
-    
+
     public static void main(String[] args) {
     	DefaultIRIConverter converter = new DefaultIRIConverter(SparqlEndpoint.getEndpointDBpedia());
     	

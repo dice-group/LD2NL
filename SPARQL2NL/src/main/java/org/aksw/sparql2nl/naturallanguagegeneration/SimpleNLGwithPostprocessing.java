@@ -196,7 +196,7 @@ public class SimpleNLGwithPostprocessing implements Sparql2NLConverter {
         literalConverter = new LiteralConverter(uriConverter);
         expressionConverter = new FilterExpressionConverter(uriConverter, literalConverter);
 
-        propertyVerbalizer = new PropertyVerbalizer(uriConverter, cacheDirectory, wordnetDirectory);
+        propertyVerbalizer = new PropertyVerbalizer(uriConverter, wordnetDirectory);
 
         functionalityDetector = new SPARQLFunctionalityDetector(qef);
         
@@ -976,7 +976,7 @@ public class SimpleNLGwithPostprocessing implements Sparql2NLConverter {
     }
 
     public SPhraseSpec getNLForTriple(Triple t, boolean outgoing) {
-        SPhraseSpec p = tripleConverter.convertTriple(t, false, !outgoing);
+        SPhraseSpec p = tripleConverter.convertToPhrase(t, false, !outgoing);
         return p;
     }
 

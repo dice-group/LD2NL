@@ -26,6 +26,12 @@ package org.aksw.triple2nl.property;
  * @author Lorenz Buehmann
  *
  */
+import simplenlg.features.Tense;
+
+/**
+ * @author Lorenz Buehmann
+ *
+ */
 public class PropertyVerbalization {
 	
 	private PropertyVerbalizationType verbalizationType;
@@ -33,6 +39,7 @@ public class PropertyVerbalization {
 	private String propertyText;
 	private String expandedVerbalization;
 	private String posTags;
+	private Tense tense = Tense.PRESENT;
 	
 	
 	public PropertyVerbalization(String propertyURI, String propertyText, PropertyVerbalizationType verbalizationType) {
@@ -74,7 +81,15 @@ public class PropertyVerbalization {
 	public PropertyVerbalizationType getVerbalizationType() {
 		return verbalizationType;
 	}
-	
+
+	public Tense getTense() {
+		return tense;
+	}
+
+	public void setTense(Tense tense) {
+		this.tense = tense;
+	}
+
 	/**
 	 * @param verbalizationType the verbalizationType to set
 	 */

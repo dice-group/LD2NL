@@ -27,11 +27,11 @@
 			<artifactId>owlapi-distribution</artifactId>
 			<version>5.1.11</version>
 		</dependency>
-		 <dependency>
-            <groupId>org.gnu.glpk</groupId>
-            <artifactId>glpk-java</artifactId>
-            <version>1.0.37</version>
-        </dependency>
+<dependency>
+    <groupId>org.gnu.glpk</groupId>
+    <artifactId>glpk-java</artifactId>
+    <version>1.7.0</version>
+</dependency>
 		<dependency>
 			<groupId>gr.aub.cs</groupId>
 			<artifactId>naturalowl</artifactId>

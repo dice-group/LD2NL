@@ -110,7 +110,7 @@ public class TrueFalseQuestionGenerator extends MultipleChoiceQuestionGenerator 
         if (Math.random() <= 0.5) {
             //true answer
             Triple t = new Triple(r.asNode(), property.asNode(), object.asNode());
-            SPhraseSpec p = tripleConverter.convertTriple(t);
+            SPhraseSpec p = tripleConverter.convertToPhrase(t);
             p.setFeature(Feature.INTERROGATIVE_TYPE, InterrogativeType.YES_NO);
             System.err.println(realiser.realiseSentence(p));
             return new SimpleQuestion("Is the following statement correct:\n"+nlg.realiser.realiseSentence(nlg.getNLForTriple(t)), trueAsAnswer, falseAsAnswer, DIFFICULTY, questionQuery, QuestionType.TRUEFALSE);

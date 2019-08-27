@@ -94,7 +94,7 @@ public class SubjectMergeRule {
      * @param phrases Set of phrases
      * @return Result of the rule being applied
      */
-    public List<NLGElement> apply(List<SPhraseSpec> phrases, Gender gender) {
+    public List<NLGElement> apply(List<SPhraseSpec> phrases, Gender male) {
 
         if (phrases.size() <= 1) {
             List<NLGElement> result = new ArrayList<NLGElement>();
@@ -163,10 +163,10 @@ public class SubjectMergeRule {
 
         elt.addCoordinate(phrases.get(phraseIndex));
         for (int index : toMerge) {
-            if (gender.equals(Gender.MALE)) {
+            if (male.equals(Gender.MALE)) {
                 ((NPPhraseSpec) phrases.get(index).getSubject()).setSpecifier("his");
 
-            } else if (gender.equals(Gender.FEMALE)) {
+            } else if (male.equals(Gender.FEMALE)) {
                 ((NPPhraseSpec) phrases.get(index).getSubject()).setSpecifier("her");
             } else {
                 ((NPPhraseSpec) phrases.get(index).getSubject()).setSpecifier("its");

@@ -7,7 +7,7 @@
 	<name>Semantic Web 2 Natural Language</name>
 
 	<modules>
-		<module>assess</module>
+		<!-- <module>assess</module> -->
 		<module>avatar</module>
 		<module>SPARQL2NL</module>
 		<module>Triple2NL</module>
