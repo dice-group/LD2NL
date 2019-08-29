@@ -135,10 +135,10 @@
 						<artifactId>jena-arq</artifactId>
 						<groupId>org.apache.jena</groupId>
 					</exclusion>
-					<exclusion>
-						<groupId>net.sourceforge.owlapi</groupId>
-						<artifactId>owlapi-distribution</artifactId>
-					</exclusion>
+					<!--<exclusion>-->
+						<!--<groupId>net.sourceforge.owlapi</groupId>-->
+						<!--<artifactId>owlapi-distribution</artifactId>-->
+					<!--</exclusion>-->
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -208,6 +208,7 @@
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
 				<version>5.1.11</version>
+				<!--<version>5.1.11</version>-->
 			</dependency>
 			<dependency>
 				<groupId>com.aliasi</groupId>

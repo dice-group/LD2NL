@@ -41,10 +41,12 @@ public class AvatarController {
 
     public static void main(String[] args){
         // gender detector
+        System.out.println("gender detection..");
         AvatarController ac = new AvatarController();
         Gender gender = ac.getGender("bob");
 
         // entity summarization
+        System.out.println("entity summarisation..");
         OWLIndividual ind = new OWLNamedIndividualImpl(IRI.create("http://dbpedia.org/resource/Albert_Einstein"));
         String summary = ac.summarizeIndvidual(ind);
         System.out.println(summary);

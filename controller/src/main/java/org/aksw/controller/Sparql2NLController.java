@@ -80,12 +80,14 @@ public class Sparql2NLController {
                 + "}";
 
         // expression converter
+        System.out.println("Converting expression..");
         Expr var = new ExprVar("s");
         NodeValue value = NodeValue.makeInteger(1);
         Expr expr = new E_Equals(var, value);
         System.out.println(cont.expressionConverter(expr));
 
         // fetchNLR
+        System.out.println("Converting expression..");
         try {
             query = Joiner.on("\n").join(Files.readLines(new File("src/main/resources/sparql_query.txt"), Charsets.UTF_8));
             Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);

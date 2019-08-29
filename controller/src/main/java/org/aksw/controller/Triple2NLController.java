@@ -8,23 +8,16 @@ import java.util.List;
 import org.aksw.triple2nl.converter.DefaultIRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
 import org.apache.jena.graph.impl.LiteralLabel;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.Lang;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.aksw.triple2nl.TripleConverter;
 
-import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 
-
-import simplenlg.lexicon.Lexicon;
 
 public class Triple2NLController {
     private static final SparqlEndpoint ENDPOINT_DBPEDIA = SparqlEndpoint.getEndpointDBpedia();
@@ -37,8 +30,8 @@ public class Triple2NLController {
     }
 
     public String TriplesToText(List<Triple> triples){
-        converter = new TripleConverter(KS.getQueryExecutionFactory(), "cache", (Lexicon) null);
-        return converter.convertTriplesToText(triples);
+        converter = new TripleConverter();
+        return converter.convert(triples);
     }
 
     public String convertLiteral(LiteralLabel lit){
@@ -51,10 +44,12 @@ public class Triple2NLController {
         Triple2NLController tc = new Triple2NLController();
 
         // literal converter
+        System.out.println("Converting literal..");
         LiteralLabel lit = NodeFactory.createLiteral("1869-06-27", null, XSDDatatype.XSDdate).getLiteral();
         System.out.println(lit + " --> " + tc.convertLiteral(lit));
 
         // triples to text
+        System.out.println("Converting triple to text..");
         List<Triple> triples = new ArrayList<Triple>();
         Node subject = NodeFactory.createURI("http://dbpedia.org/resource/Albert_Einstein");
         triples.add(Triple.create(
