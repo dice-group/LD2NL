@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.aksw.semweb2nl</groupId>
-	<artifactId>semweb2nl-parent</artifactId>
+	<groupId>org.dice-research</groupId>
+	<artifactId>LD2NL</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Semantic Web 2 Natural Language</name>
+	<name>Linked Data 2 Natural Language</name>
 
 	<modules>
 		<!-- <module>assess</module> -->
@@ -60,8 +60,8 @@
 	</developers>
 
 	<organization>
-		<name>Agile Knowledge Engineering and Semantic Web (AKSW)</name>
-		<url>http://aksw.org</url>
+		<name>Data and Web Science Research Group (DICE)</name>
+		<url>http://dice-research.org</url>
 	</organization>
 
 	<licenses>
@@ -101,7 +101,7 @@
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/AKSW/SemWeb2NL/issues</url>
+		<url>https://github.com/dice-group/LD2NL/issues</url>
 	</issueManagement>
 
 	<dependencyManagement>
