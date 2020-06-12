@@ -1,28 +1,11 @@
-/*
- * #%L
- * OWL2NL
- * %%
- * Copyright (C) 2015 Agile Knowledge Engineering and Semantic Web (AKSW)
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package org.aksw.owl2nl;
 
 import java.util.List;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+// import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -80,307 +63,284 @@ import simplenlg.lexicon.Lexicon;
 import simplenlg.phrasespec.SPhraseSpec;
 import simplenlg.realiser.english.Realiser;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-//import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
-import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+
 /**
  * Converts OWL axioms into natural language.
+ *
  * @author Lorenz Buehmann
  *
  */
-public class OWLAxiomConverter implements OWLAxiomVisitor{
-	
-	private static final Logger logger = LoggerFactory.getLogger(OWLAxiomConverter.class);
-	
-	private NLGFactory nlgFactory;
-	private Realiser realiser;
+public class OWLAxiomConverter implements OWLAxiomVisitor {
 
-	private OWLClassExpressionConverter ceConverter;
-	
-	private OWLDataFactory df = new OWLDataFactoryImpl();
-	
-	private String nl;
-	
-	public OWLAxiomConverter(Lexicon lexicon) {
-		nlgFactory = new NLGFactory(lexicon);
-		realiser = new Realiser(lexicon);
-		
-		ceConverter = new OWLClassExpressionConverter(lexicon);
-	}
-	
-	public OWLAxiomConverter() {
-		this(Lexicon.getDefaultLexicon());
-	}
-	
-	/**
-	 * Converts the OWL axiom into natural language. Only logical axioms are 
-	 * supported, i.e. declaration axioms and annotation axioms are not 
-	 * converted and <code>null</code> will be returned instead.
-	 * @param axiom the OWL axiom
-	 * @return the natural language expression
-	 */
-	public String convert(OWLAxiom axiom) throws OWLAxiomConversionException {
-		reset();
-		
-		if (axiom.isLogicalAxiom()) {
-			logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
-			try {
-				axiom.accept(this);
-				return nl;
-			} catch (Exception e) {
-				throw new OWLAxiomConversionException(axiom, e);
-			}
-		}
+  private static final Logger logger = LoggerFactory.getLogger(OWLAxiomConverter.class);
 
-		logger.warn("Conversion of non-logical axioms not supported yet!");
-		return null;
-	}
-	
-	private void reset() {
-		nl = null;
-	}
+  private final NLGFactory nlgFactory;
+  private final Realiser realiser;
 
-	/* (non-Javadoc)
-	 * @see org.semanticweb.owlapi.model.OWLAxiomVisitor#visit(org.semanticweb.owlapi.model.OWLSubClassOfAxiom)
-	 */
-	@Override
-	public void visit(OWLSubClassOfAxiom axiom) {
-		logger.debug("Converting SubClassOf axiom {}", axiom);
-		// convert the subclass
-		OWLClassExpression subClass = axiom.getSubClass();
-		NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
-		logger.debug("SubClass: " + realiser.realise(subClassElement));
-//		((PhraseElement)subClassElement).setPreModifier("every");
-		
-		// convert the superclass
-		OWLClassExpression superClass = axiom.getSuperClass();
-		NLGElement superClassElement = ceConverter.asNLGElement(superClass);
-		logger.debug("SuperClass: " + realiser.realise(superClassElement));
-		
-		SPhraseSpec clause = nlgFactory.createClause(subClassElement, "be", superClassElement);
-		superClassElement.setFeature(Feature.COMPLEMENTISER, null);
+  private final OWLClassExpressionConverter ceConverter;
 
-		nl = realiser.realise(clause).toString();
-		logger.debug(axiom + " = " + nl);
-	}
-	
-	@Override
-	public void visit(OWLEquivalentClassesAxiom axiom) {
-		List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
-		
-		for (int i = 0; i < classExpressions.size(); i++) {
-			for (int j = i + 1; j < classExpressions.size(); j++) {
-				OWLSubClassOfAxiom subClassAxiom = df.getOWLSubClassOfAxiom(
-						classExpressions.get(i), 
-						classExpressions.get(j));
-				subClassAxiom.accept(this);
-			}
-		}
-	}
+  private final OWLDataFactory df = new OWLDataFactoryImpl();
 
-	/*
-	 * We rewrite DisjointClasses(C_1,...,C_n) as SubClassOf(C_i, ObjectComplementOf(C_j)) for each subset {C_i,C_j} with i != j 
-	 */
-	@Override
-	public void visit(OWLDisjointClassesAxiom axiom) {
-		List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
-		
-		for (int i = 0; i < classExpressions.size(); i++) {
-			for (int j = i + 1; j < classExpressions.size(); j++) {
-				OWLSubClassOfAxiom subClassAxiom = df.getOWLSubClassOfAxiom(
-						classExpressions.get(i), 
-						df.getOWLObjectComplementOf(classExpressions.get(j)));
-				subClassAxiom.accept(this);
-			}
-		}
-	}
-	
-	@Override
-	public void visit(OWLDisjointUnionAxiom axiom) {
-	}
+  private String nl;
 
-	
-	//#########################################################
-	//################# object property axioms ################
-	//#########################################################
+  public OWLAxiomConverter(final Lexicon lexicon) {
+    nlgFactory = new NLGFactory(lexicon);
+    realiser = new Realiser(lexicon);
 
-	@Override
-	public void visit(OWLSubObjectPropertyOfAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLDisjointObjectPropertiesAxiom axiom) {
-	}
+    ceConverter = new OWLClassExpressionConverter(lexicon);
+  }
 
-	@Override
-	public void visit(OWLObjectPropertyDomainAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLObjectPropertyRangeAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLInverseObjectPropertiesAxiom axiom) {
-	}
+  public OWLAxiomConverter() {
+    this(Lexicon.getDefaultLexicon());
+  }
 
-	@Override
-	public void visit(OWLFunctionalObjectPropertyAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLAsymmetricObjectPropertyAxiom axiom) {
-	}
+  /**
+   * Converts the OWL axiom into natural language. Only logical axioms are supported, i.e.
+   * declaration axioms and annotation axioms are not converted and <code>null</code> will be
+   * returned instead.
+   *
+   * @param axiom the OWL axiom
+   * @return the natural language expression
+   */
+  public String convert(final OWLAxiom axiom) throws OWLAxiomConversionException {
+    reset();
 
-	@Override
-	public void visit(OWLReflexiveObjectPropertyAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLTransitiveObjectPropertyAxiom axiom) {
-	}
+    if (axiom.isLogicalAxiom()) {
+      logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
+      try {
+        axiom.accept(this);
+        return nl;
+      } catch (final Exception e) {
+        throw new OWLAxiomConversionException(axiom, e);
+      }
+    }
 
-	@Override
-	public void visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	//#########################################################
-	//################# data property axioms ##################
-	//#########################################################
-	
-	@Override
-	public void visit(OWLSubDataPropertyOfAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLDisjointDataPropertiesAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLDataPropertyDomainAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLDataPropertyRangeAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	@Override
-	public void visit(OWLFunctionalDataPropertyAxiom axiom) {
-		axiom.asOWLSubClassOfAxiom().accept(this);
-	}
-	
-	//#########################################################
-	//################# individual axioms #####################
-	//#########################################################
-	
-	@Override
-	public void visit(OWLClassAssertionAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLObjectPropertyAssertionAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLDataPropertyAssertionAxiom axiom) {
-	}
+    logger.warn("Conversion of non-logical axioms not supported yet!");
+    return null;
+  }
 
-	@Override
-	public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
-	}
+  private void reset() {
+    nl = null;
+  }
 
-	@Override
-	public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLAxiomVisitor#visit(org.semanticweb.owlapi.model.
+   * OWLSubClassOfAxiom)
+   */
+  @Override
+  public void visit(final OWLSubClassOfAxiom axiom) {
+    logger.debug("Converting SubClassOf axiom {}", axiom);
+    // convert the subclass
+    final OWLClassExpression subClass = axiom.getSubClass();
+    final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
+    logger.debug("SubClass: " + realiser.realise(subClassElement));
+    // ((PhraseElement)subClassElement).setPreModifier("every");
 
-	@Override
-	public void visit(OWLDifferentIndividualsAxiom axiom) {
-	}
+    // convert the superclass
+    final OWLClassExpression superClass = axiom.getSuperClass();
+    final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
+    logger.debug("SuperClass: " + realiser.realise(superClassElement));
 
-	@Override
-	public void visit(OWLSameIndividualAxiom axiom) {
-	}
+    final SPhraseSpec clause = nlgFactory.createClause(subClassElement, "be", superClassElement);
+    superClassElement.setFeature(Feature.COMPLEMENTISER, null);
 
-	//#########################################################
-	//################# other logical axioms ##################
-	//#########################################################
+    nl = realiser.realise(clause).toString();
+    logger.debug(axiom + " = " + nl);
+  }
 
-	@Override
-	public void visit(OWLSubPropertyChainOfAxiom axiom) {
-	}
-	
-	@Override
-	public void visit(OWLHasKeyAxiom axiom) {
-	}
+  @Override
+  public void visit(final OWLEquivalentClassesAxiom axiom) {
+    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
 
-	@Override
-	public void visit(OWLDatatypeDefinitionAxiom axiom) {
-	}
+    for (int i = 0; i < classExpressions.size(); i++) {
+      for (int j = i + 1; j < classExpressions.size(); j++) {
+        final OWLSubClassOfAxiom subClassAxiom =
+            df.getOWLSubClassOfAxiom(classExpressions.get(i), classExpressions.get(j));
+        subClassAxiom.accept(this);
+      }
+    }
+  }
 
-	@Override
-	public void visit(SWRLRule axiom) {
-	}
-	
-	//#########################################################
-	//################# non-logical axioms ####################
-	//#########################################################
-	
-	@Override
-	public void visit(OWLAnnotationAssertionAxiom axiom) {
-	}
+  /*
+   * We rewrite DisjointClasses(C_1,...,C_n) as SubClassOf(C_i, ObjectComplementOf(C_j)) for each
+   * subset {C_i,C_j} with i != j
+   */
+  @Override
+  public void visit(final OWLDisjointClassesAxiom axiom) {
+    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
 
-	@Override
-	public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
-	}
+    for (int i = 0; i < classExpressions.size(); i++) {
+      for (int j = i + 1; j < classExpressions.size(); j++) {
+        final OWLSubClassOfAxiom subClassAxiom = df.getOWLSubClassOfAxiom(classExpressions.get(i),
+            df.getOWLObjectComplementOf(classExpressions.get(j)));
+        subClassAxiom.accept(this);
+      }
+    }
+  }
 
-	@Override
-	public void visit(OWLAnnotationPropertyDomainAxiom axiom) {
-	}
+  @Override
+  public void visit(final OWLDisjointUnionAxiom axiom) {}
 
-	@Override
-	public void visit(OWLAnnotationPropertyRangeAxiom axiom) {
-	}
+  // #########################################################
+  // ################# object property axioms ################
+  // #########################################################
 
-	@Override
-	public void visit(OWLDeclarationAxiom axiom) {
-	}
-	
-	public static void main(String[] args) throws Exception {
-		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
-		ontologyURL = "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
-		ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
-		//ontologyURL = "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
-		
-		OWLAxiomConverter converter = new OWLAxiomConverter();
-		for (OWLAxiom axiom : ontology.getAxioms()) {
-			converter.convert(axiom);
-		}
-	}
+  @Override
+  public void visit(final OWLSubObjectPropertyOfAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLEquivalentObjectPropertiesAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDisjointObjectPropertiesAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLObjectPropertyDomainAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLObjectPropertyRangeAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLInverseObjectPropertiesAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLAsymmetricObjectPropertyAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLReflexiveObjectPropertyAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLTransitiveObjectPropertyAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLIrreflexiveObjectPropertyAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLInverseFunctionalObjectPropertyAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  // #########################################################
+  // ################# data property axioms ##################
+  // #########################################################
+
+  @Override
+  public void visit(final OWLSubDataPropertyOfAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLEquivalentDataPropertiesAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDisjointDataPropertiesAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDataPropertyDomainAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLDataPropertyRangeAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  @Override
+  public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
+    axiom.asOWLSubClassOfAxiom().accept(this);
+  }
+
+  // #########################################################
+  // ################# individual axioms #####################
+  // #########################################################
+
+  @Override
+  public void visit(final OWLClassAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLObjectPropertyAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDataPropertyAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLNegativeObjectPropertyAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLNegativeDataPropertyAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDifferentIndividualsAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLSameIndividualAxiom axiom) {}
+
+  // #########################################################
+  // ################# other logical axioms ##################
+  // #########################################################
+
+  @Override
+  public void visit(final OWLSubPropertyChainOfAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLHasKeyAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDatatypeDefinitionAxiom axiom) {}
+
+  @Override
+  public void visit(final SWRLRule axiom) {}
+
+  // #########################################################
+  // ################# non-logical axioms ####################
+  // #########################################################
+
+  @Override
+  public void visit(final OWLAnnotationAssertionAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLAnnotationPropertyDomainAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {}
+
+  @Override
+  public void visit(final OWLDeclarationAxiom axiom) {}
+
+  public static void main(final String[] args) throws Exception {
+    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+    String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
+    ontologyURL =
+        "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
+    ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
+    // ontologyURL =
+    // "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
+    final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+    final OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+
+    final OWLAxiomConverter converter = new OWLAxiomConverter();
+    for (final OWLAxiom axiom : ontology.getAxioms()) {
+      converter.convert(axiom);
+    }
+  }
 
 }
