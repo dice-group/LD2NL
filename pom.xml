@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.dice-research</groupId>
 	<artifactId>LD2NL</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>${ld2nl.version}</version>
 	<packaging>pom</packaging>
 	<name>Linked Data 2 Natural Language</name>
 
@@ -74,6 +74,7 @@
 	</licenses>
 
 	<properties>
+		<ld2nl.version>0.2.0-SNAPSHOT</ld2nl.version>
 		<compiler.version>1.8</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<assess.warFile.name>assess</assess.warFile.name>

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.dice-research</groupId>
 		<artifactId>LD2NL</artifactId>
-		<version>0.2.0-SNAPSHOT</version>
+		<version>${ld2nl.version}</version>
 	</parent>
 	<artifactId>owl2nl</artifactId>
 	<name>OWL2NL</name>
@@ -13,8 +13,7 @@
 		<dependency>
 			<groupId>org.dice-research</groupId>
 			<artifactId>triple2nl</artifactId>
-			<!--<version>0.2.0-SNAPSHOT</version>-->
-			<version>${project.version}</version>
+			<version>${ld2nl.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.gnu.glpk</groupId>
