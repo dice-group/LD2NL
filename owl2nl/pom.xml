@@ -1,24 +1,47 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.dice-research</groupId>
 		<artifactId>LD2NL</artifactId>
-		<version>${ld2nl.version}</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>owl2nl</artifactId>
 	<name>OWL2NL</name>
 	<description>OWL class expressions and axioms to Natural Language Converter</description>
-
 	<dependencies>
+		<!-- adds log -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.13.3</version>
+		</dependency>
 		<dependency>
 			<groupId>org.dice-research</groupId>
 			<artifactId>triple2nl</artifactId>
-			<version>${ld2nl.version}</version>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-		    <groupId>org.gnu.glpk</groupId>
-		    <artifactId>glpk-java</artifactId>
-		    <version>1.7.0</version>
+			<groupId>org.gnu.glpk</groupId>
+			<artifactId>glpk-java</artifactId>
+			<version>1.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>gr.aub.cs</groupId>
@@ -37,11 +60,11 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-        <repository>
-            <id>XypronRelease</id>
-            <name>Xypron Release</name>
-            <url>http://rsync.xypron.de/repository</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-</project>
+		<repository>
+			<id>XypronRelease</id>
+			<name>Xypron Release</name>
+			<url>http://rsync.xypron.de/repository</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+</project> 
