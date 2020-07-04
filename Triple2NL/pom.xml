@@ -6,14 +6,9 @@
 		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>triple2nl</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
 	<name>Triple2NL</name>
 	<description>RDF Triple to Natural Language Converter</description>
-
-
-
 	<dependencies>
-
 		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
@@ -44,7 +39,6 @@
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>
-			<version>3.11.0-1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>xml-apis</artifactId>
