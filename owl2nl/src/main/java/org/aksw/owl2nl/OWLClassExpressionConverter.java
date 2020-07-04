@@ -540,7 +540,7 @@ public class OWLClassExpressionConverter implements OWLClassExpressionVisitorEx<
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     final OWLObjectPropertyExpression property = ce.getProperty();
-    final OWLIndividual value = ce.getValue();
+    final OWLIndividual value = ce.getFiller();
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization =
@@ -824,7 +824,7 @@ public class OWLClassExpressionConverter implements OWLClassExpressionVisitorEx<
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     final OWLDataPropertyExpression property = ce.getProperty();
-    final OWLLiteral value = ce.getValue();
+    final OWLLiteral value = ce.getFiller();
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization =
