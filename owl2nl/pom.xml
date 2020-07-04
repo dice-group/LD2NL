@@ -11,6 +11,7 @@
 	<name>OWL2NL</name>
 	<description>OWL class expressions and axioms to Natural Language Converter</description>
 	<dependencies>
+
 		<!-- adds log -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -36,7 +37,11 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
-			</exclusions>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+		</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gnu.glpk</groupId>
