@@ -1,6 +1,9 @@
 package org.aksw.owl2nl;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -41,8 +44,6 @@ import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
@@ -65,14 +66,14 @@ import simplenlg.realiser.english.Realiser;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
- * Converts OWL axioms into natural language.
+ * Converts OWL logical axioms into natural language.
  *
  * @author Lorenz Buehmann
- *
+ * @author Rene Speck
  */
 public class OWLAxiomConverter implements OWLAxiomVisitor {
 
-  private static final Logger logger = LoggerFactory.getLogger(OWLAxiomConverter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OWLAxiomConverter.class);
 
   private final NLGFactory nlgFactory;
   private final Realiser realiser;
@@ -83,6 +84,11 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
   private String nl;
 
+  /**
+   * OWLAxiomConverter class constructor.
+   *
+   * @param lexicon
+   */
   public OWLAxiomConverter(final Lexicon lexicon) {
     nlgFactory = new NLGFactory(lexicon);
     realiser = new Realiser(lexicon);
@@ -90,6 +96,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
     ceConverter = new OWLClassExpressionConverter(lexicon);
   }
 
+  /**
+   * OWLAxiomConverter class constructor.
+   */
   public OWLAxiomConverter() {
     this(Lexicon.getDefaultLexicon());
   }
@@ -106,7 +115,6 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
     reset();
 
     if (axiom.isLogicalAxiom()) {
-      logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
       try {
         axiom.accept(this);
         return nl;
@@ -114,8 +122,6 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
         throw new OWLAxiomConversionException(axiom, e);
       }
     }
-
-    logger.warn("Conversion of non-logical axioms not supported yet!");
     return null;
   }
 
@@ -131,23 +137,24 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLSubClassOfAxiom axiom) {
-    logger.debug("Converting SubClassOf axiom {}", axiom);
+
+    LOG.debug("visit: Converting SubClassOf axiom {}", axiom);
     // convert the subclass
     final OWLClassExpression subClass = axiom.getSubClass();
     final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
-    logger.debug("SubClass: " + realiser.realise(subClassElement));
+    LOG.debug("SubClass: " + realiser.realise(subClassElement));
     // ((PhraseElement)subClassElement).setPreModifier("every");
 
     // convert the superclass
     final OWLClassExpression superClass = axiom.getSuperClass();
     final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
-    logger.debug("SuperClass: " + realiser.realise(superClassElement));
+    LOG.debug("SuperClass: " + realiser.realise(superClassElement));
 
     final SPhraseSpec clause = nlgFactory.createClause(subClassElement, "be", superClassElement);
     superClassElement.setFeature(Feature.COMPLEMENTISER, null);
 
     nl = realiser.realise(clause).toString();
-    logger.debug(axiom + " = " + nl);
+    LOG.debug(axiom + " = " + nl);
   }
 
   @Override
@@ -328,19 +335,25 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
   public static void main(final String[] args) throws Exception {
     ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-    String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
-    ontologyURL =
-        "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
-    ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
-    // ontologyURL =
+    // "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
+    // "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
+    // "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
     // "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
-    final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-    final OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+
+    final String filename = "Process.owl";
+    final String base = "/home/rspeck/Desktop/Usecases" + "/";
+
+    final File ontologyURL = Paths.get(base, filename).toFile();
 
     final OWLAxiomConverter converter = new OWLAxiomConverter();
-    for (final OWLAxiom axiom : ontology.getAxioms()) {
-      converter.convert(axiom);
+    final Set<OWLAxiom> axioms =
+        OWLManager.createOWLOntologyManager().loadOntology(IRI.create(ontologyURL)).getAxioms();
+
+    for (final OWLAxiom axiom : axioms) {
+      final String s = converter.convert(axiom);
+      if (s != null) {
+        LOG.info(axiom.toString().concat(" -> ").concat(s));
+      }
     }
   }
-
 }
