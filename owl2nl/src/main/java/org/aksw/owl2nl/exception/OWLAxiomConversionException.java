@@ -9,6 +9,8 @@ import org.semanticweb.owlapi.model.OWLAxiom;
  */
 public class OWLAxiomConversionException extends Exception {
 
+  private static final long serialVersionUID = 8212402057380138127L;
+
   private final OWLAxiom axiom;
 
   public OWLAxiomConversionException(final OWLAxiom axiom, final Exception e) {
