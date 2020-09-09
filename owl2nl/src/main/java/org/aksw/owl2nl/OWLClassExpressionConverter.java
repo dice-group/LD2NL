@@ -5,8 +5,6 @@ import java.util.Set;
 import org.aksw.owl2nl.raki.converter.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLDataRangeToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLIndividualToNLGElement;
-import org.aksw.triple2nl.converter.IRIConverter;
-import org.aksw.triple2nl.converter.SimpleIRIConverter;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -49,21 +47,15 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  * @author Lorenz Buehmann
- *
+ * @author Rene Speck
  */
 public class OWLClassExpressionConverter implements //
     OWLClassExpressionVisitorEx<NLGElement>, //
     OWLIndividualVisitorEx<NLGElement>, //
     OWLDataRangeVisitorEx<NLGElement> {
 
-  NLGFactory nlgFactory;
   Realiser realiser;
-
-  IRIConverter iriConverter = new SimpleIRIConverter();
-
-  // PropertyVerbalizer propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
-
-  OWLDataFactory df = new OWLDataFactoryImpl();
+  OWLDataFactory df;
 
   OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
   OWLClassExpressionVisitorEx<NLGElement> converterOWLClassExpression;
@@ -74,13 +66,16 @@ public class OWLClassExpressionConverter implements //
    * @param lexicon
    */
   public OWLClassExpressionConverter(final Lexicon lexicon) {
-    nlgFactory = new NLGFactory(lexicon);
-    realiser = new Realiser(lexicon);
 
-    converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, iriConverter);
-    converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, iriConverter);
+    realiser = new Realiser(lexicon);
+    df = new OWLDataFactoryImpl();
+
+    final NLGFactory nlgFactory = new NLGFactory(lexicon);
+
+    converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory);
+    converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory);
     converterOWLClassExpression = new OWLClassExpressionToNLGElement(nlgFactory, realiser,
-        iriConverter, converterOWLIndividual, converterOWLDataRange);
+        converterOWLIndividual, converterOWLDataRange);
   }
 
   /**

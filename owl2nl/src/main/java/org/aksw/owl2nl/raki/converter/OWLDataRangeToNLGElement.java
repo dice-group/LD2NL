@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.triple2nl.converter.IRIConverter;
 import org.semanticweb.owlapi.model.OWLDataComplementOf;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataOneOf;
@@ -36,8 +35,8 @@ public class OWLDataRangeToNLGElement extends AConverter
    * @param nlgFactory
    * @param iriConverter
    */
-  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final IRIConverter iriConverter) {
-    super(nlgFactory, iriConverter);
+  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory) {
+    super(nlgFactory);
 
   }
 
