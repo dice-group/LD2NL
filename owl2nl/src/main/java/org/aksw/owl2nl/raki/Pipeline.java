@@ -9,9 +9,6 @@ import org.aksw.owl2nl.raki.data.Input;
 import org.aksw.owl2nl.raki.planner.DocumentPlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
-import org.semanticweb.owlapi.io.OWLObjectRenderer;
-import org.semanticweb.owlapi.model.OWLAxiom;
 
 /*
  * Prototype pipeline.
@@ -22,7 +19,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 public class Pipeline {
 
   protected static final Logger LOG = LogManager.getLogger(Pipeline.class);
-  final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
 
   /**
    * Test pipeline. Reads input and verbalizes
@@ -51,10 +47,6 @@ public class Pipeline {
     }
   }
 
-  protected String renderAxioms(final OWLAxiom axiom) {
-    return renderer.render(axiom);
-  }
-
   /**
    */
   public static boolean writeResults(final Path path, final byte[] bytes) {
@@ -78,13 +70,14 @@ public class Pipeline {
 
     {
       final String baseFolder = "privateData/";
-      final String input = "smallTest.owl";
+      final String input = "Process.owl";
 
       axiomsFile = baseFolder.concat(input);
       output = baseFolder.concat(input).concat(".txt");
     }
     String ontologyFile =
         "/media/store/Data/private/raki-data/Siemens-Usecase/Ontologies/PPP_Ontologies/Process.owl";
+
     ontologyFile = axiomsFile;
     try {
       Pipeline.run(axiomsFile, ontologyFile, output);
