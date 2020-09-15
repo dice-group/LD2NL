@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.owl2nl.raki.data.Input;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.aksw.triple2nl.property.PropertyVerbalizer;
@@ -92,9 +93,9 @@ public class OWLClassExpressionToNLGElement extends AConverter
    */
   public OWLClassExpressionToNLGElement(final NLGFactory nlgFactory, final Realiser realiser,
       final OWLIndividualVisitorEx<NLGElement> converterOWLIndividual,
-      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange) {
+      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange, final Input in) {
 
-    super(nlgFactory);
+    super(nlgFactory, in);
 
     this.realiser = realiser;
     this.converterOWLIndividual = converterOWLIndividual;
@@ -213,7 +214,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
       phrase.setComplement(clause);
     }
 
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -230,7 +231,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
       cc.addCoordinate(el);
     }
 
-    logger.debug(ce + " = " + realiser.realise(cc));
+    LOG.debug(ce + " = " + realiser.realise(cc));
 
     return cc;
   }
@@ -248,7 +249,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
 
     parameter.noun = false;
 
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -338,7 +339,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
@@ -421,7 +422,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
 
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
@@ -460,7 +461,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -590,7 +591,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
 
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -651,7 +652,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
@@ -706,7 +707,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
@@ -717,6 +718,8 @@ public class OWLClassExpressionToNLGElement extends AConverter
 
     final OWLDataPropertyExpression property = ce.getProperty();
     final OWLLiteral value = ce.getFiller();
+
+    LOG.info("value: {}", value.toString());
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization =
@@ -757,7 +760,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -842,7 +845,7 @@ public class OWLClassExpressionToNLGElement extends AConverter
     } else {
       // TODO handle inverse properties
     }
-    logger.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }

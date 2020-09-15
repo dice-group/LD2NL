@@ -1,52 +1,45 @@
 package org.aksw.owl2nl.raki.planner;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
+import org.aksw.owl2nl.raki.data.Input;
 import org.aksw.owl2nl.raki.verbalization.IRakiVerbalization;
 import org.aksw.owl2nl.raki.verbalization.RakiVerbalization;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
+
+import simplenlg.lexicon.Lexicon;
 
 /**
  * This class is responsible for the sentence generation. It chooses, for instance, words and
  * phrases to express information. It decides whenever a Pronoun or the name of the object will be
  * used.
- * 
+ *
  * @author Rene Speck
  */
 public class SentencePlanner implements IPlanner<String> {
 
   protected static final Logger LOG = LogManager.getLogger(SentencePlanner.class);
 
-  protected IRakiVerbalization rakiVerbalization = new RakiVerbalization();
+  protected IRakiVerbalization rakiVerbalization;
 
   /*
    * Axioms to verbalize.
    */
   private List<OWLAxiom> axioms = null;
 
-  /*
-   * Ontology.
-   */
-  @Deprecated
-  private OWLOntology ontology = null;
-
   private String result = null;
 
   /**
    *
-   * @param rakiVerbalization
+   * @param input
    */
-  public SentencePlanner(final List<OWLAxiom> axioms, final OWLOntology ontology) {
-    this.axioms = axioms;
-    this.ontology = ontology;
-
-    LOG.debug("axioms size: {}", this.axioms.size());
-    LOG.debug("ontology size: {}", this.ontology.getAxiomCount());
+  public SentencePlanner(final Input input) {
+    axioms = input.getAxioms();
+    rakiVerbalization = new RakiVerbalization(Lexicon.getDefaultLexicon(), input);
+    LOG.debug("axioms size: {}", axioms.size());
   }
 
   /*
@@ -62,13 +55,13 @@ public class SentencePlanner implements IPlanner<String> {
     try {
       results = rakiVerbalization.verbalize(axioms);
 
-      // remove null, for axioms without verbalization
-      results.removeAll(Collections.singletonList(null));
+      // removes null, for axioms without verbalization
+      // results.removeAll(Collections.singletonList(null));
 
-      // sort results
-      Collections.sort(results);
+      // sorts results
+      // Collections.sort(results);
 
-      // join results
+      // joins results
       result = String.join(System.lineSeparator(), results);
 
     } catch (final OWLAxiomConversionException e) {

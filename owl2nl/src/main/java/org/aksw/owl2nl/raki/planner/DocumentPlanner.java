@@ -1,18 +1,14 @@
 package org.aksw.owl2nl.raki.planner;
 
-import java.util.List;
-
 import org.aksw.owl2nl.raki.data.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * This class defines the template of a document and provides all information for the
  * SentencePlanner {@link sentencePlanner}. This class decides about the information and the order
  * of the information to be verbalized.
- * 
+ *
  * @author Rene Speck
  *
  */
@@ -27,10 +23,10 @@ public class DocumentPlanner implements IPlanner<String> {
    */
   public DocumentPlanner(final Input input) {
     // axioms to verbalize
-    final List<OWLAxiom> axioms = input.axioms;
-    final OWLOntology ontology = input.ontology;
+    // final List<OWLAxiom> axioms = input.axioms;
+    // final OWLOntology ontology = input.ontology;
 
-    sentencePlanner = new SentencePlanner(axioms, ontology);
+    sentencePlanner = new SentencePlanner(input);
   }
 
   /*
@@ -41,7 +37,6 @@ public class DocumentPlanner implements IPlanner<String> {
   @Override
   public IPlanner<String> build() {
     sentencePlanner.build();
-
     return this;
   }
 

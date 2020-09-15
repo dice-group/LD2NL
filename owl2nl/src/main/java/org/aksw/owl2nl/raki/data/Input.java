@@ -4,9 +4,14 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -16,35 +21,47 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
- * Holds the given input file in {@link aximos} and {@link ontology}.
+ * Holds the given input file in {@link axioms} and {@link ontology}.
  */
 public class Input {
 
   protected static final Logger LOG = LogManager.getLogger(Input.class);
 
-  public List<OWLAxiom> axioms;
-  public OWLOntology ontology;
+  protected List<OWLAxiom> axioms;
 
-  public Input(final String axiomsFile) {
+  public List<OWLAxiom> getAxioms() {
+    return axioms;
+  }
+
+  protected Model model;
+
+  /**
+   *
+   * @param axiomsFile
+   * @param ontologyFile could be null
+   */
+  public Input(final String axiomsFile, final String ontologyFile) {
     axioms = new ArrayList<>();
 
+    // reads given ontology
+    if (ontologyFile != null) {
+      readRDFXML(ontologyFile);
+    } else {
+      model = null;
+    }
+
+    // reads given axioms
     try {
-      ontology = loadOntology(axiomsFile);
+      axioms.addAll(loadOntology(axiomsFile).getAxioms());
     } catch (final OWLOntologyCreationException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+  }
 
-    axioms.addAll(ontology.getAxioms());
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("axioms to verbalize: {}", axioms.size());
-      LOG.debug("ontology axioms: {} ", ontology.getAxiomCount());
-
-      LOG.debug("Given axioms to verbalize: ");
-      axioms.forEach(LOG::debug);
-      LOG.info("Given ontology: ");
-      LOG.debug(ontology.getAxioms());
-    }
+  protected Model readRDFXML(final String file) {
+    model = ModelFactory.createDefaultModel();
+    model.read(file, Lang.RDFXML.getName());
+    return model;
   }
 
   /**
@@ -54,7 +71,7 @@ public class Input {
    * @return
    * @throws OWLOntologyCreationException
    */
-  protected static OWLOntology loadOntology(final String ontologyFile)
+  protected OWLOntology loadOntology(final String ontologyFile)
       throws OWLOntologyCreationException {
 
     final File file = Paths.get(ontologyFile).toFile();
@@ -63,19 +80,39 @@ public class Input {
     final OWLOntology ontology = OWLManager//
         .createOWLOntologyManager()//
         .loadOntology(IRI.create(file));
+
     return ontology;
   }
 
-  public void print() {
+  /**
+   * Gets the English label from the given ontology.
+   *
+   * @param iri
+   * @return label or null
+   */
+  public String getEnglishLabel(final IRI iri) {
+    return getlabel(iri, "en");
+  }
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("ontology logical axioms: {}", ontology.getLogicalAxiomCount());
-
-      LOG.debug("ontology axiom types:");
-      final Set<String> types = ontology.getAxioms()//
-          .stream().map(p -> p.getAxiomType().getName())//
-          .collect(Collectors.toSet());
-      types.forEach(LOG::debug);
+  /**
+   * Gets the label from the given ontology.
+   *
+   * @param iri
+   * @return label or null
+   */
+  public String getlabel(final IRI iri, final String lang) {
+    String label = null;
+    final Resource resource = model.getResource(iri.toString());
+    if (resource != null && resource.hasProperty(RDFS.label)) {
+      final NodeIterator ni = model.listObjectsOfProperty(resource, RDFS.label);
+      while (ni.hasNext()) {
+        final RDFNode n = ni.next();
+        if (lang.equals(n.asLiteral().getLanguage())) {
+          label = n.asLiteral().getLexicalForm();
+          break;
+        }
+      }
     }
+    return label;
   }
 }

@@ -2,6 +2,7 @@ package org.aksw.owl2nl.raki;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.aksw.owl2nl.raki.data.Input;
@@ -14,23 +15,27 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 
 /*
  * Prototype pipeline.
- * 
+ *
  * @author Rene Speck
  *
  */
 public class Pipeline {
 
   protected static final Logger LOG = LogManager.getLogger(Pipeline.class);
+  final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
 
   /**
    * Test pipeline. Reads input and verbalizes
    *
+   * @throws Exception
+   *
    * @throws IOException
    */
-  protected static void run(final String axiomsFile, final String out) {
+  protected static void run(final String axiomsFile, final String ontology, final String out)
+      throws Exception {
 
     // reads input
-    final Input input = new Input(axiomsFile);
+    final Input input = new Input(axiomsFile, ontology);
 
     // verbalized axioms
     final DocumentPlanner documentPlanner;
@@ -39,21 +44,26 @@ public class Pipeline {
     // results
     final String results = documentPlanner.build().results();
 
-    // write verbalized axioms to file
-    writeResults(out, results);
+    // write verbalized axioms to file success
+    final boolean success = writeResults(Paths.get(out), results.getBytes());
+    if (!success) {
+      throw new Exception("Couldn't write results to file");
+    }
   }
 
-  protected String rederAxioms(final OWLAxiom axiom) {
-    final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
+  protected String renderAxioms(final OWLAxiom axiom) {
     return renderer.render(axiom);
   }
 
-  public static void writeResults(final String out, final String restuls) {
-
+  /**
+   */
+  public static boolean writeResults(final Path path, final byte[] bytes) {
     try {
-      Files.write(Paths.get(out), restuls.getBytes());
+      Files.write(path, bytes);
+      return true;
     } catch (final IOException e) {
       LOG.error(e.getLocalizedMessage(), e);
+      return false;
     }
   }
 
@@ -65,6 +75,7 @@ public class Pipeline {
 
     final String output;
     final String axiomsFile;
+
     {
       final String baseFolder = "privateData/";
       final String input = "smallTest.owl";
@@ -72,9 +83,11 @@ public class Pipeline {
       axiomsFile = baseFolder.concat(input);
       output = baseFolder.concat(input).concat(".txt");
     }
-
+    String ontologyFile =
+        "/media/store/Data/private/raki-data/Siemens-Usecase/Ontologies/PPP_Ontologies/Process.owl";
+    ontologyFile = axiomsFile;
     try {
-      Pipeline.run(axiomsFile, output);
+      Pipeline.run(axiomsFile, ontologyFile, output);
     } catch (final Exception e) {
       LOG.error(e.getLocalizedMessage(), e);
     }

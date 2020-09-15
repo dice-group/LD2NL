@@ -5,6 +5,7 @@ import java.util.Set;
 import org.aksw.owl2nl.raki.converter.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLDataRangeToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLIndividualToNLGElement;
+import org.aksw.owl2nl.raki.data.Input;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -65,24 +66,17 @@ public class OWLClassExpressionConverter implements //
    *
    * @param lexicon
    */
-  public OWLClassExpressionConverter(final Lexicon lexicon) {
+  public OWLClassExpressionConverter(final Lexicon lexicon, final Input in) {
 
     realiser = new Realiser(lexicon);
     df = new OWLDataFactoryImpl();
 
     final NLGFactory nlgFactory = new NLGFactory(lexicon);
 
-    converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory);
-    converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory);
+    converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
+    converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
     converterOWLClassExpression = new OWLClassExpressionToNLGElement(nlgFactory, realiser,
-        converterOWLIndividual, converterOWLDataRange);
-  }
-
-  /**
-   *
-   */
-  public OWLClassExpressionConverter() {
-    this(Lexicon.getDefaultLexicon());
+        converterOWLIndividual, converterOWLDataRange, in);
   }
 
   /**

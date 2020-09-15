@@ -1,5 +1,6 @@
 package org.aksw.owl2nl.raki.converter;
 
+import org.aksw.owl2nl.raki.data.Input;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualVisitorEx;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -19,8 +20,8 @@ public class OWLIndividualToNLGElement extends AConverter
    * @param nlgFactory
    * @param iriConverter
    */
-  public OWLIndividualToNLGElement(final NLGFactory nlgFactory) {
-    super(nlgFactory);
+  public OWLIndividualToNLGElement(final NLGFactory nlgFactory, final Input in) {
+    super(nlgFactory, in);
   }
 
   /*

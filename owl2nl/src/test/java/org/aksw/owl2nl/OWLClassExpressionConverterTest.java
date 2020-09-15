@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import simplenlg.lexicon.Lexicon;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
@@ -39,7 +40,8 @@ public class OWLClassExpressionConverterTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(OWLClassExpressionConverterTest.class);
 
-  private static OWLClassExpressionConverter converter = new OWLClassExpressionConverter();
+  private static OWLClassExpressionConverter converter =
+      new OWLClassExpressionConverter(Lexicon.getDefaultLexicon(), null);
 
   private static OWLObjectProperty birthPlace;
   private static OWLObjectProperty worksFor;
