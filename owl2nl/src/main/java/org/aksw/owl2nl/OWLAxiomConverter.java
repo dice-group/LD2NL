@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.aksw.owl2nl.raki.data.Input;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -54,8 +56,6 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import simplenlg.features.Feature;
 import simplenlg.framework.NLGElement;
@@ -73,7 +73,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  */
 public class OWLAxiomConverter implements OWLAxiomVisitor {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OWLAxiomConverter.class);
+  private static final Logger LOG = LogManager.getLogger(OWLAxiomConverter.class);
 
   private final NLGFactory nlgFactory;
   private final Realiser realiser;

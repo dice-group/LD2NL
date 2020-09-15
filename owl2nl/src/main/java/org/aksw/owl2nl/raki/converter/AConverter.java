@@ -4,10 +4,10 @@ import org.aksw.owl2nl.raki.data.Input;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import simplenlg.framework.NLGFactory;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
@@ -18,7 +18,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  */
 abstract class AConverter {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(AConverter.class);
+  protected static final Logger LOG = LogManager.getLogger(AConverter.class);
 
   protected OWLDataFactory df = new OWLDataFactoryImpl();
 
