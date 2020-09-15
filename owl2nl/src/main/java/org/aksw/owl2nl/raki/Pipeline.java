@@ -65,22 +65,12 @@ public class Pipeline {
    */
   public static void main(final String[] args) {
 
-    final String output;
-    final String axiomsFile;
+    final String ontology = args[0];
+    final String axioms = args[1];
+    final String output = args[2];
 
-    {
-      final String baseFolder = "privateData/";
-      final String input = "Process.owl";
-
-      axiomsFile = baseFolder.concat(input);
-      output = baseFolder.concat(input).concat(".txt");
-    }
-    String ontologyFile =
-        "/media/store/Data/private/raki-data/Siemens-Usecase/Ontologies/PPP_Ontologies/Process.owl";
-
-    ontologyFile = axiomsFile;
     try {
-      Pipeline.run(axiomsFile, ontologyFile, output);
+      Pipeline.run(axioms, ontology, output);
     } catch (final Exception e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
