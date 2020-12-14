@@ -1,8 +1,8 @@
 package org.aksw.owl2nl.raki.planner;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.aksw.owl2nl.raki.data.Input;
 import org.aksw.owl2nl.raki.verbalization.IRakiVerbalization;
 import org.aksw.owl2nl.raki.verbalization.RakiVerbalization;
@@ -19,7 +19,7 @@ import simplenlg.lexicon.Lexicon;
  *
  * @author Rene Speck
  */
-public class SentencePlanner implements IPlanner<String> {
+public class SentencePlanner implements IPlanner<Map<OWLAxiom, String>> {
 
   protected static final Logger LOG = LogManager.getLogger(SentencePlanner.class);
 
@@ -28,18 +28,18 @@ public class SentencePlanner implements IPlanner<String> {
   /*
    * Axioms to verbalize.
    */
-  private List<OWLAxiom> axioms = null;
-
-  private String result = null;
+  private Map<OWLAxiom, String> results = new HashMap<>();
+  private Input input = null;
 
   /**
    *
    * @param input
    */
   public SentencePlanner(final Input input) {
-    axioms = input.getAxioms();
+    this.input = input;
     rakiVerbalization = new RakiVerbalization(Lexicon.getDefaultLexicon(), input);
-    LOG.debug("axioms size: {}", axioms.size());
+
+    LOG.debug("axioms size: {}", results.keySet().size());
   }
 
   /*
@@ -49,25 +49,19 @@ public class SentencePlanner implements IPlanner<String> {
    */
 
   @Override
-  public IPlanner<String> build() {
+  public IPlanner<Map<OWLAxiom, String>> build() {
 
-    List<String> results;
-    try {
-      results = rakiVerbalization.verbalize(axioms);
+    results = rakiVerbalization.verbalize(input.getAxioms());
 
-      // removes null, for axioms without verbalization
-      // results.removeAll(Collections.singletonList(null));
+    // removes null, for axioms without verbalization
+    // results.removeAll(Collections.singletonList(null));
 
-      // sorts results
-      // Collections.sort(results);
+    // sorts results
+    // Collections.sort(results);
 
-      // joins results
-      result = String.join(System.lineSeparator(), results);
-
-    } catch (final OWLAxiomConversionException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-    }
-
+    // joins results
+    // result = String.join(System.lineSeparator(), results);
+    // result = results.toString();
     return this;
   }
 
@@ -77,7 +71,7 @@ public class SentencePlanner implements IPlanner<String> {
    * @see org.aksw.owl2nl.raki.planner.IPlanner#results()
    */
   @Override
-  public String results() {
-    return result;
+  public Map<OWLAxiom, String> results() {
+    return results;
   }
 }

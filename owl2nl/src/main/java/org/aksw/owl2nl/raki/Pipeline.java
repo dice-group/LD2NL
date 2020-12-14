@@ -1,11 +1,10 @@
 package org.aksw.owl2nl.raki;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.aksw.owl2nl.raki.data.IOutput;
 import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.OutputJsonTrainingData;
 import org.aksw.owl2nl.raki.planner.DocumentPlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,43 +19,47 @@ public class Pipeline {
 
   protected static final Logger LOG = LogManager.getLogger(Pipeline.class);
 
-  /**
-   * Test pipeline. Reads input and verbalizes
-   *
-   * @throws Exception
-   *
-   * @throws IOException
-   */
-  protected static void run(final String axiomsFile, final String ontology, final String out)
-      throws Exception {
+  protected DocumentPlanner documentPlanner = null;
+  protected IOutput output = null;
 
-    // reads input
-    final Input input = new Input(axiomsFile, ontology);
+  private static Pipeline instance;
 
-    // verbalized axioms
-    final DocumentPlanner documentPlanner;
-    documentPlanner = new DocumentPlanner(input);
+  private Pipeline() {}
 
-    // results
-    final String results = documentPlanner.build().results();
-
-    // write verbalized axioms to file success
-    final boolean success = writeResults(Paths.get(out), results.getBytes());
-    if (!success) {
-      throw new Exception("Couldn't write results to file");
+  public static synchronized Pipeline getInstance() {
+    if (instance == null) {
+      instance = new Pipeline();
     }
+    return instance;
   }
 
   /**
+   * Test pipeline. Reads input and verbalizes
+   *
    */
-  public static boolean writeResults(final Path path, final byte[] bytes) {
-    try {
-      Files.write(path, bytes);
-      return true;
-    } catch (final IOException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-      return false;
+  public void run(final String axiomsFile) {
+    if (output == null) {
+      throw new UnsupportedOperationException("Output not set.");
     }
+
+    _run(axiomsFile);
+  }
+
+  private void _run(final String axiomsFile) {
+
+    // reads input
+    final Input input = new Input(axiomsFile);
+
+    // verbalized axioms
+    documentPlanner = new DocumentPlanner(input, output);
+    documentPlanner.build();
+    documentPlanner.results();
+  }
+
+  // settings
+  public Pipeline setOutput(final IOutput output) {
+    this.output = output;
+    return this;
   }
 
   /**
@@ -65,14 +68,24 @@ public class Pipeline {
    */
   public static void main(final String[] args) {
 
-    final String ontology = args[0];
-    final String axioms = args[1];
-    final String output = args[2];
+    final int parameterSize = 2;
 
-    try {
-      Pipeline.run(axioms, ontology, output);
-    } catch (final Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
+    if (args.length == parameterSize) {
+      final String axioms = args[0];
+      final String output = args[1];
+
+      try {
+        Pipeline//
+            .getInstance()//
+            .setOutput(new OutputJsonTrainingData(Paths.get(output)))//
+            // .setOutput(new OutputTerminal())//
+            .run(axioms);
+      } catch (final Exception e) {
+        LOG.error(e.getLocalizedMessage(), e);
+      }
+
+    } else {
+      LOG.error("Wrong amount of parameters({}/{}).", args.length, parameterSize);
     }
   }
 }

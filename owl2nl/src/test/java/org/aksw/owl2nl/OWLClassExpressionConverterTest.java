@@ -3,7 +3,6 @@ package org.aksw.owl2nl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-// import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLClass;

@@ -1,18 +1,11 @@
 package org.aksw.owl2nl;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Set;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.aksw.owl2nl.raki.data.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
@@ -112,6 +105,8 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
         axiom.accept(this);
         return nl;
       } catch (final Exception e) {
+        LOG.debug("axion: " + axiom);
+        LOG.debug("this: " + this);
         throw new OWLAxiomConversionException(axiom, e);
       }
     }
@@ -316,7 +311,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   // #########################################################
 
   @Override
-  public void visit(final OWLAnnotationAssertionAxiom axiom) {}
+  public void visit(final OWLAnnotationAssertionAxiom axiom) {
+    LOG.debug("OWLAnnotationAssertionAxiom: {}", axiom.toString());
+  }
 
   @Override
   public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {}
@@ -328,30 +325,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {}
 
   @Override
-  public void visit(final OWLDeclarationAxiom axiom) {}
-
-  public static void main(final String[] args) throws Exception {
-    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-    // "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
-    // "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
-    // "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
-    // "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
-
-    final String filename = "Process.owl";
-    final String base = "/home/rspeck/Desktop/Usecases" + "/";
-
-    final File ontologyURL = Paths.get(base, filename).toFile();
-
-    final Input in = new Input(ontologyURL.getAbsolutePath(), ontologyURL.getAbsolutePath());
-    final OWLAxiomConverter converter = new OWLAxiomConverter(Lexicon.getDefaultLexicon(), in);
-    final Set<OWLAxiom> axioms =
-        OWLManager.createOWLOntologyManager().loadOntology(IRI.create(ontologyURL)).getAxioms();
-
-    for (final OWLAxiom axiom : axioms) {
-      final String s = converter.convert(axiom);
-      if (s != null) {
-        LOG.info(axiom.toString().concat(" -> ").concat(s));
-      }
-    }
+  public void visit(final OWLDeclarationAxiom axiom) {
+    LOG.debug("OWLDeclarationAxiom: {}", axiom.toString());
   }
 }

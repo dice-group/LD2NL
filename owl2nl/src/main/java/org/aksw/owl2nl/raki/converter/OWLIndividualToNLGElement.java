@@ -12,7 +12,7 @@ import simplenlg.framework.NLGFactory;
  * @author Rene Speck
  *
  */
-public class OWLIndividualToNLGElement extends AConverter
+public class OWLIndividualToNLGElement extends AOWLConverter
     implements OWLIndividualVisitorEx<NLGElement> {
 
   /**

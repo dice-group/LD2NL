@@ -6,30 +6,18 @@ import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
-import org.semanticweb.owlapi.io.OWLObjectRenderer;
-import org.semanticweb.owlapi.model.OWLAxiom;
 
 /**
  * Creates a documents handed out to domain experts to give feedback. The document might contain
  * answers. it uses the RDF stored in {@link output}.
+ *
+ * @author Rene Speck
  */
 public class RakiDocument {
 
   protected static final Logger LOG = LogManager.getLogger(RakiDocument.class);
 
-  protected Output output;
-  protected OWLObjectRenderer renderer;
-
-  /**
-   * Calls constructor {@link #RakiDocument.RakiDocument(OWLObjectRenderer renderer, Output output)}
-   * with a ManchesterOWLSyntaxOWLObjectRendererImplExt instance as OWLObjectRenderer.
-   *
-   * @param output
-   */
-  public RakiDocument(final Output output) {
-    this(new ManchesterOWLSyntaxOWLObjectRendererImplExt(), output);
-  }
+  protected IOutput output;
 
   /**
    * Initializes parameters.
@@ -37,19 +25,8 @@ public class RakiDocument {
    * @param renderer
    * @param output
    */
-  public RakiDocument(final OWLObjectRenderer renderer, final Output output) {
+  public RakiDocument(final IOutput output) {
     this.output = output;
-    this.renderer = renderer;
-  }
-
-  /**
-   * Renders a given axiom with {@link #renderer}.
-   *
-   * @param axiom
-   * @return rendered axiom
-   */
-  protected String rederAxioms(final OWLAxiom axiom) {
-    return renderer.render(axiom);
   }
 
   /**

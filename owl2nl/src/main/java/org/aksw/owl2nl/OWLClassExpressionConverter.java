@@ -75,8 +75,8 @@ public class OWLClassExpressionConverter implements //
 
     converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
     converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
-    converterOWLClassExpression = new OWLClassExpressionToNLGElement(nlgFactory, realiser,
-        converterOWLIndividual, converterOWLDataRange, in);
+    converterOWLClassExpression = new OWLClassExpressionToNLGElement(//
+        nlgFactory, realiser, converterOWLIndividual, converterOWLDataRange, in);
   }
 
   /**

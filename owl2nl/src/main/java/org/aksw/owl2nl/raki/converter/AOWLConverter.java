@@ -16,14 +16,14 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  *
  * @author Rene Speck
  */
-abstract class AConverter {
+abstract class AOWLConverter {
 
-  protected static final Logger LOG = LogManager.getLogger(AConverter.class);
+  protected static final Logger LOG = LogManager.getLogger(AOWLConverter.class);
 
   protected OWLDataFactory df = new OWLDataFactoryImpl();
 
   protected NLGFactory nlgFactory;
-  protected final IRIConverter iriConverter;
+  protected IRIConverter iriConverter;
   protected LiteralConverter literalConverter;
   protected Input input;
 
@@ -33,7 +33,8 @@ abstract class AConverter {
    * @param nlgFactory
    * @param input
    */
-  public AConverter(final NLGFactory nlgFactory, final Input input) {
+  public AOWLConverter(final NLGFactory nlgFactory, final Input input) {
+
     this.input = input;
     this.nlgFactory = nlgFactory;
 
@@ -45,29 +46,29 @@ abstract class AConverter {
    * Convert the IRI of the given OWLEntity into natural language. Uses given labels if exist.
    *
    * @param entity
-   * @return natural language
+   * @return natural language or null
    */
 
   protected String getLexicalForm(final OWLEntity entity) {
 
-    final String label = _getLexicalForm(entity);
+    String label = null;
 
-    LOG.debug("getLexicalForm from input ontology: {}, label: {}", entity.toStringID(), label);
-
+    label = getLexicalFormFromOntology(entity);
+    if (label == null) {
+      LOG.trace("Could not find label in ontology: {}", entity.toStringID());
+      label = getLexicalFormFromIRIConverter(entity);
+      if (label == null) {
+        LOG.trace("Could not find label with the IRI converter: {}", entity.toStringID());
+      }
+    }
     return label;
   }
 
-  protected String _getLexicalForm(final OWLEntity entity) {
-    if (input != null) {
-      LOG.debug("getLexicalForm from input ontology: {}", entity.toStringID());
-      final String label = input.getEnglishLabel(entity.getIRI());
-      if (label != null) {
-        return label;
-      } else {
-        LOG.debug("Could not find label in ontology");
-      }
-    }
-    LOG.debug("getLexicalForm from iriConverter: {}", entity.toStringID());
+  private String getLexicalFormFromIRIConverter(final OWLEntity entity) {
     return iriConverter.convert(entity.toStringID());
+  }
+
+  private String getLexicalFormFromOntology(final OWLEntity entity) {
+    return input.getEnglishLabel(entity.getIRI());
   }
 }

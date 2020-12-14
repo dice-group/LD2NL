@@ -58,7 +58,7 @@ import simplenlg.realiser.english.Realiser;
  * @author Rene Speck
  *
  */
-public class OWLClassExpressionToNLGElement extends AConverter
+public class OWLClassExpressionToNLGElement extends AOWLConverter
     implements OWLClassExpressionVisitorEx<NLGElement> {
 
   /**

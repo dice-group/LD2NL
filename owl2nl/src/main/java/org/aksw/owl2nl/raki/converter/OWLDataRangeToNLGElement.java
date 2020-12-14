@@ -28,7 +28,7 @@ import simplenlg.phrasespec.NPPhraseSpec;
  * @author Rene Speck
  *
  */
-public class OWLDataRangeToNLGElement extends AConverter
+public class OWLDataRangeToNLGElement extends AOWLConverter
     implements OWLDataRangeVisitorEx<NLGElement> {
 
   /**

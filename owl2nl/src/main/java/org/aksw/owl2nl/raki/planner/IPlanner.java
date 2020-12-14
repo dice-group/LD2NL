@@ -5,17 +5,18 @@ package org.aksw.owl2nl.raki.planner;
  *
  * @author Rene Speck
  *
- * 
+ *
  */
 public interface IPlanner<T> {
 
   /**
-   * Initializes the planner and creates the results.
+   * Executes the planner.
    */
   IPlanner<T> build();
 
+  // TODO: remove return, we use Output interface
   /**
-   * Gets the results of this planner.
+   * Creates the results and gets the results of this planner.
    *
    * @return
    */
