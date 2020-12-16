@@ -77,11 +77,15 @@ public class InputPreprocess {
   protected Path ontologyFile(final URI ontologyURI) {
     Path path = null;
     final String scheme = ontologyURI.getScheme();
-
-    if (scheme.equals("file")) {
+    if (scheme == null) {
+      // relative path to a file
+      final String workingDir = System.getProperty("user.dir");
+      path = Paths.get(workingDir, ontologyURI.getPath());
+    } else if (scheme.equals("file")) {
+      // absolute path to a file
       path = Paths.get(ontologyURI);
     } else if (scheme.startsWith("http")) {
-
+      // http or https
       URL url = null;
       try {
         url = ontologyURI.toURL();
@@ -92,6 +96,7 @@ public class InputPreprocess {
     } else {
       LOG.error("Could not find the  ontology.");
     }
+    LOG.info("Imported Ontology:" + path.toAbsolutePath().toString());
     return path;
   }
 
