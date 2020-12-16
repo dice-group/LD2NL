@@ -67,6 +67,7 @@ public class Pipeline {
    *
    */
   public static void main(final String[] args) {
+    LOG.info("\n==============================\nRunning Pipeline ...");
 
     final int parameterSize = 2;
 
@@ -87,5 +88,6 @@ public class Pipeline {
     } else {
       LOG.error("Wrong amount of parameters({}/{}).", args.length, parameterSize);
     }
+    LOG.info("\n==============================\nPipeline exit.");
   }
 }

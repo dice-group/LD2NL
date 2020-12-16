@@ -57,6 +57,9 @@ public class Input {
     LOG.info("loading ontology: {} ", ontologyFile);
     if (ontologyFile != null) {
       tboxModel = RakiIO.readRDFXML(ontologyFile.toFile().getPath());
+      if (tboxModel == null) {
+        LOG.error("Could not read tbox.");
+      }
     }
 
     LOG.info("loading axioms: {} ", axiomsFile);
