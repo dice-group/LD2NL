@@ -1,42 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE rdf:RDF [
-    <!ENTITY owl 'http://www.w3.org/2002/07/owl#'>
-]>
-
 <rdf:RDF
     xml:base="http://localhost/foo"
-    xmlns:a="http://localhost/foo#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 >
 
 <owl:Ontology rdf:about="">
-  <owl:imports rdf:resource="examples/uncle.owl"/>
+  <owl:imports rdf:resource="https://protege.stanford.edu/junitOntologies/testset/travel.owl"/>
 </owl:Ontology>
 
-<owl:Class rdf:about="&owl;Nothing">
-    <owl:equivalentClass>
-        <owl:Class>
-            <owl:intersectionOf rdf:parseType="Collection">
-                <owl:Class rdf:about="#male"/>
-                <owl:Class rdf:about="#female"/>
-                <owl:Class rdf:about="#diverse"/>
-						</owl:intersectionOf>
-        </owl:Class>
-    </owl:equivalentClass>
+
+<owl:Class rdf:ID="NationalPark">
+	<rdfs:subClassOf rdf:resource="#RuralArea"/>
+	<rdfs:subClassOf>
+		<owl:Restriction>
+			<owl:someValuesFrom rdf:resource="#Campground"/>
+			<owl:onProperty>
+				<owl:ObjectProperty rdf:about="#hasAccommodation"/>
+			</owl:onProperty>
+		</owl:Restriction>
+	</rdfs:subClassOf>
+	<rdfs:subClassOf>
+		<owl:Restriction>
+			<owl:someValuesFrom rdf:resource="#Hiking"/>
+			<owl:onProperty>
+				<owl:ObjectProperty rdf:about="#hasActivity"/>
+			</owl:onProperty>
+		</owl:Restriction>
+	</rdfs:subClassOf>
 </owl:Class>
 
-<owl:Class rdf:ID="diverse">
-	<rdfs:label>diverse</rdfs:label>
-</owl:Class>
-
-<owl:Class rdf:ID="female">
-	<rdfs:label>woman</rdfs:label>
-</owl:Class>
-
-<owl:Class rdf:ID="male">
-	<rdfs:label>man</rdfs:label>
-</owl:Class>
-
-</rdf:RDF> 
+</rdf:RDF>  

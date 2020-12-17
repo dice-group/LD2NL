@@ -2,9 +2,10 @@
 
 export MAVEN_OPTS="-Xmx8G"
 
+axioms="examples/exampleB.owl"
+
 mainClass="org.aksw.owl2nl.raki.Pipeline"
-axioms="examples/exampleA.owl"
-output="examples/exampleA.json"
-log="example.log"
+output="$axioms.json"
+log="$axioms.log"
 
 nohup mvn exec:java  -Dexec.mainClass=$mainClass -Dexec.args="$axioms $output" > $log &

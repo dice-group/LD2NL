@@ -11,8 +11,9 @@
 >
 
 <owl:Ontology rdf:about="">
-  <owl:imports rdf:resource="examples/uncle.owl"/>
+  <owl:imports rdf:resource="https://raw.githubusercontent.com/SmartDataAnalytics/DL-Learner/develop/examples/family/uncle.owl"/>
 </owl:Ontology>
+
 
 <owl:Class rdf:about="&owl;Nothing">
     <owl:equivalentClass>
@@ -26,16 +27,4 @@
     </owl:equivalentClass>
 </owl:Class>
 
-<owl:Class rdf:ID="diverse">
-	<rdfs:label>diverse</rdfs:label>
-</owl:Class>
-
-<owl:Class rdf:ID="female">
-	<rdfs:label>woman</rdfs:label>
-</owl:Class>
-
-<owl:Class rdf:ID="male">
-	<rdfs:label>man</rdfs:label>
-</owl:Class>
-
-</rdf:RDF> 
+</rdf:RDF>  
