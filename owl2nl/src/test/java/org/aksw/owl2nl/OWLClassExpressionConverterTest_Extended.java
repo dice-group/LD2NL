@@ -64,6 +64,8 @@ public class OWLClassExpressionConverterTest_Extended {
 
 
 		place = df.getOWLClass("Place", pm);
+		worksFor = df.getOWLObjectProperty("worksFor", pm);
+		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 
