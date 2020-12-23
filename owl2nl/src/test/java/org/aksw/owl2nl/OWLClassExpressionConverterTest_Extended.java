@@ -44,6 +44,8 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLClass person;
 	private static OWLDataFactoryImpl df;
 	private static OWLNamedIndividual paderborn;
+	private static OWLObjectProperty worksFor;
+	private static OWLObjectProperty ledBy;
 
 	private static OWLObjectProperty workPlace;
 
@@ -65,6 +67,7 @@ public class OWLClassExpressionConverterTest_Extended {
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 
+
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
 
@@ -77,6 +80,23 @@ public class OWLClassExpressionConverterTest_Extended {
 		ce = df.getOWLObjectHasValue(workPlace, paderborn);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+	}
+	@Test
+	public void testNested1() {
+
+		ce = df.getOWLObjectMinCardinality(5, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		ce = df.getOWLObjectMinCardinality(1, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
+		//text = converter.convert(ce);
+		//System.out.println(ce + " = " + text);
 	}
 
 }
