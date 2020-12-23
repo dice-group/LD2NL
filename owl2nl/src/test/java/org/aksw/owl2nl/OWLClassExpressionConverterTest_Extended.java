@@ -106,6 +106,23 @@ public class OWLClassExpressionConverterTest_Extended {
 		//text = converter.convert(ce);
 		//System.out.println(ce + " = " + text);
 	}
+	@Test
+	public void testNested2() {
+
+		ce = df.getOWLObjectMinCardinality(5, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		ce = df.getOWLObjectMinCardinality(1, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
+		//text = converter.convert(ce);
+		//System.out.println(ce + " = " + text);
+	}
 
 	@Test
 	public void testNested1WithNegation() {
