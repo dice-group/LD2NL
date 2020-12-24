@@ -90,6 +90,8 @@ public class OWLClassExpressionConverterTest_Extended {
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		String expected = "something that works in a place called Paderborn";
+		Assert.assertEquals(expected, text);
 
 		ce = df.getOWLObjectMinCardinality(1, worksFor,
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
