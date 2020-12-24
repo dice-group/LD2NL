@@ -55,7 +55,7 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLDataProperty amountOfSalary;
 
 	private static OWLObjectProperty workPlace;
-	private static OWLDataRange salary;
+	private static OWLLiteral salary;
 
 	OWLClassExpression ce;
 	String text;
@@ -77,7 +77,8 @@ public class OWLClassExpressionConverterTest_Extended {
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
-		salary=df.getOWLDatatypeMinInclusiveRestriction(40000);
+		salary=df.getOWLLiteral(40000);
+		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
@@ -142,6 +143,14 @@ public class OWLClassExpressionConverterTest_Extended {
 		System.out.println("Expected: someone who works for at least one company which is not a software company and led by a company or a person");
 
 
+	}
+	@Test
+	public void testDataHasValueAndObjectHasValue() {
+		// works for a company
+		/*someone whose work place is paderborn and whose amount of salary is 40000*/
+		ce = df.getOWLObjectIntersectionOf(df.getOWLDataHasValue(amountOfSalary, salary),df.getOWLObjectHasValue(workPlace, paderborn));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
 	}
 
 	@Test
