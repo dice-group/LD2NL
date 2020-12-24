@@ -22,6 +22,7 @@
  */
 package org.aksw.owl2nl;
 
+import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.jena.base.Sys;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -31,6 +32,8 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
+import javax.xml.soap.SOAPPart;
 
 
 /**
@@ -105,6 +108,15 @@ public class OWLClassExpressionConverterTest_Extended {
 
 	}
 	@Test
+	public void simpleNegation(){
+		/*someone who does not work for a person or a company*/
+		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected : someone who does not work for a person or a company");
+
+	}
+	@Test
 	public void testNested1WithNegation() {
 
 		/*someone who works for at least 5 companies which are not software companies and are ledby a company or a person*/
@@ -122,6 +134,7 @@ public class OWLClassExpressionConverterTest_Extended {
 		System.out.println("Expected: someone who works for at least one company which is not a software company and led by a company or a person");
 
 	}
+
 	@Test
 	public void NestedtesthasValue() {
 		// work place is a place and is named paderborn
