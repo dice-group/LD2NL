@@ -22,6 +22,7 @@
  */
 package org.aksw.owl2nl;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
@@ -100,5 +101,16 @@ public class OWLClassExpressionConverterTest_Extended {
 		//text = converter.convert(ce);
 		//System.out.println(ce + " = " + text);
 	}
+	@Test
+	public void NestedtesthasValue() {
+		// work place is a place and is named paderborn
+		ce = df.getOWLObjectSomeValuesFrom(workPlace,
+				df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(workPlace, paderborn)));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
 
+		String expected = "something that works place something that works place Paderborn";
+		Assert.assertEquals(expected, text);
+		//LOG.info(ce + " = " + text);
+	}
 }
