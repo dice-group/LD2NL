@@ -52,8 +52,10 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLNamedIndividual paderborn;
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
+	private static OWLDataProperty amountOfSalary;
 
 	private static OWLObjectProperty workPlace;
+	private static OWLDataRange salary;
 
 	OWLClassExpression ce;
 	String text;
@@ -75,10 +77,11 @@ public class OWLClassExpressionConverterTest_Extended {
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
-
+		salary=df.getOWLDatatypeMinInclusiveRestriction(40000);
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
+
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
@@ -106,6 +109,8 @@ public class OWLClassExpressionConverterTest_Extended {
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 
+
+
 	}
 	@Test
 	public void simpleNegation(){
@@ -115,6 +120,9 @@ public class OWLClassExpressionConverterTest_Extended {
 		System.out.println(ce + " = " + text);
 		System.out.println("Expected : someone who does not work for a person or a company");
 
+		//ce = df.getOWLObjectHasValue(df.getOWLObjectComplementOf(workPlace), paderborn);
+		//text = converter.convert(ce);
+		//System.out.println(ce + " = " + text);
 	}
 	@Test
 	public void testNested1WithNegation() {
@@ -132,6 +140,7 @@ public class OWLClassExpressionConverterTest_Extended {
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 		System.out.println("Expected: someone who works for at least one company which is not a software company and led by a company or a person");
+
 
 	}
 
