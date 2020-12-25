@@ -22,6 +22,8 @@
  */
 package org.aksw.owl2nl;
 
+import jdk.nashorn.internal.parser.JSONParser;
+import org.apache.jena.base.Sys;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +32,8 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
+import javax.xml.soap.SOAPPart;
 
 
 /**
@@ -43,12 +47,15 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLClass place;
 	private static OWLClass company;
 	private static OWLClass person;
+	private static OWLClass softwareCompany;
 	private static OWLDataFactoryImpl df;
 	private static OWLNamedIndividual paderborn;
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
+	private static OWLDataProperty amountOfSalary;
 
 	private static OWLObjectProperty workPlace;
+	private static OWLLiteral salary;
 
 	OWLClassExpression ce;
 	String text;
@@ -69,10 +76,13 @@ public class OWLClassExpressionConverterTest_Extended {
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
-
+		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
+		salary=df.getOWLLiteral(40000);
+		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
+
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
@@ -86,21 +96,63 @@ public class OWLClassExpressionConverterTest_Extended {
 	}
 	@Test
 	public void testNested1() {
-
+		/*someone who works for at least 5 companies that is ledby a company or a person*/
 		ce = df.getOWLObjectMinCardinality(5, worksFor,
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		//String expected = "someone who works for at least 5 companies that is ledby a company or a person";
+		//Assert.assertEquals(expected, text);
 
+		/*someone who works for at least one company which is led by a company or a person*/
 		ce = df.getOWLObjectMinCardinality(1, worksFor,
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 
-		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
+
+
+	}
+	@Test
+	public void simpleNegation(){
+		/*someone who does not work for a person or a company*/
+		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected : someone who does not work for a person or a company");
+
+		//ce = df.getOWLObjectHasValue(df.getOWLObjectComplementOf(workPlace), paderborn);
 		//text = converter.convert(ce);
 		//System.out.println(ce + " = " + text);
 	}
+	@Test
+	public void testNested1WithNegation() {
+
+		/*someone who works for at least 5 companies which are not software companies and are ledby a company or a person*/
+		ce = df.getOWLObjectMinCardinality(5, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person)),df.getOWLObjectComplementOf(softwareCompany)));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected: someone who works for at least 5 companies which are not software companies and are ledby a company or a person");
+
+		/*someone who works for at least one company which is not a software company and led by a company or a person*/
+		ce = df.getOWLObjectMinCardinality(1, worksFor,
+				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person)), df.getOWLObjectComplementOf(softwareCompany)));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected: someone who works for at least one company which is not a software company and led by a company or a person");
+
+
+	}
+	@Test
+	public void testDataHasValueAndObjectHasValue() {
+		// works for a company
+		/*someone whose work place is paderborn and whose amount of salary is 40000*/
+		ce = df.getOWLObjectIntersectionOf(df.getOWLDataHasValue(amountOfSalary, salary),df.getOWLObjectHasValue(workPlace, paderborn));
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+	}
+
 	@Test
 	public void NestedtesthasValue() {
 		// work place is a place and is named paderborn
