@@ -22,7 +22,7 @@
  */
 package org.aksw.owl2nl;
 
-import jdk.nashorn.internal.parser.JSONParser;
+
 import org.apache.jena.base.Sys;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,10 +50,17 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLClass softwareCompany;
 	private static OWLDataFactoryImpl df;
 	private static OWLNamedIndividual paderborn;
+	private static OWLNamedIndividual karaoke;
+	private static OWLNamedIndividual Jazz;
+	private static OWLNamedIndividual Cricket;
+	private static OWLNamedIndividual football;
+	private static OWLNamedIndividual hockey;
+
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
 	private static OWLDataProperty amountOfSalary;
-
+    private static OWLObjectProperty sings;
+	private static OWLObjectProperty plays;
 	private static OWLObjectProperty workPlace;
 	private static OWLLiteral salary;
 
@@ -74,6 +81,8 @@ public class OWLClassExpressionConverterTest_Extended {
 		place = df.getOWLClass("Place", pm);
 		worksFor = df.getOWLObjectProperty("worksFor", pm);
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
+		sings = df.getOWLObjectProperty("sing",pm);
+		plays = df.getOWLObjectProperty("play",pm);
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
@@ -82,7 +91,11 @@ public class OWLClassExpressionConverterTest_Extended {
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
-
+		karaoke=df.getOWLNamedIndividual("karaoke",pm);
+		Jazz=df.getOWLNamedIndividual("jazz",pm);
+        football=df.getOWLNamedIndividual("football",pm);
+        Cricket=df.getOWLNamedIndividual("cricket",pm);
+        hockey=df.getOWLNamedIndividual("hockey",pm);
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
@@ -165,4 +178,52 @@ public class OWLClassExpressionConverterTest_Extended {
 		Assert.assertEquals(expected, text);
 		//LOG.info(ce + " = " + text);
 	}
+	@Test
+	public void testComplex(){
+
+
+
+		// a person that sings karaoke
+		ce=df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person);
+		text= converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+
+
+        // a person that sings karaoke or a person that sings  jazz
+		ce=df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,Jazz),person));
+		text= converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+
+
+        // a person that sings karaoke and a person that sings jazz
+		ce=df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,Jazz),person));
+		text= converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+
+        // a person that plays Cricket or a person that plays football or a person that plays hockey.
+        ce=ce=df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,Cricket),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,football),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,hockey),person));
+		text= converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
