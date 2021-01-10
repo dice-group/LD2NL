@@ -50,7 +50,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 	private Realiser realiser;
 
 	private OWLClassExpressionConverter ceConverter;
-	private OWLObjectPropertyExpressionConverter peConverter;
+	private OWLPropertyExpressionConverter peConverter;
 	
 	private OWLDataFactory df = new OWLDataFactoryImpl();
 	
@@ -61,7 +61,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		realiser = new Realiser(lexicon);
 		
 		ceConverter = new OWLClassExpressionConverter(lexicon);
-		peConverter = new OWLObjectPropertyExpressionConverter(lexicon);
+		peConverter = new OWLPropertyExpressionConverter(lexicon);
 	}
 	
 	public OWLAxiomConverter() {
@@ -79,7 +79,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		reset();
 		
 		if (axiom.isLogicalAxiom()) {
-			logger.warn("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
+			logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
 			try {
 				axiom.accept(this);
 				return nl;
@@ -117,7 +117,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		superClassElement.setFeature(Feature.COMPLEMENTISER, null);
 
 		nl = realiser.realise(clause).toString();
-		logger.warn(axiom + " = " + nl);
+		logger.debug(axiom + " = " + nl);
 	}
 	
 	@Override
@@ -177,7 +177,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
 
 		nl = realiser.realise(clause).toString();
-		logger.warn(axiom + " = " + nl);
+		logger.debug(axiom + " = " + nl);
 	}
 	
 	@Override
@@ -343,11 +343,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		String ontologyURL = "http://www.cs.man.ac.uk/~stevensr/ontology/family.rdf.owl";
-//		ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
-//		ontologyURL = "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
-//		ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
-//		ontologyURL = "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
+		String ontologyURL = "http://www.cs.man.ac.uk/~stevensr/ontology/family.rdf.owl";// subproperties of the form 'isSomething'
+		ontologyURL = "https://protege.stanford.edu/ontologies/pizza/pizza.owl"; // subproperties of the form 'hasSomething'
+
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
 		
@@ -356,5 +354,4 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 			converter.convert(axiom);
 		}
 	}
-
 }
