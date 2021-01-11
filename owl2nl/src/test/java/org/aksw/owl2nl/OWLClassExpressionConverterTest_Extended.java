@@ -149,23 +149,28 @@ public class OWLClassExpressionConverterTest_Extended {
 	@Test
 	public void testComplex(){
 		// a person that sings karaoke
-		ce=df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person);
-		text= converter.convert(ce);
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person);
+		text = converter.convert(ce);
 		System.out.println(ce + "=" + text);
 
-        // a person that sings karaoke or a person that sings  jazz
-		ce=df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,Jazz),person));
-		text= converter.convert(ce);
+		// a person that sings karaoke or a person that sings  jazz
+		ce = df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+		text = converter.convert(ce);
 		System.out.println(ce + "=" + text);
 
-        // a person that sings karaoke and a person that sings jazz
-		ce=df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,karaoke),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings,Jazz),person));
-		text= converter.convert(ce);
+		// a person that sings karaoke or jazz
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), df.getOWLObjectHasValue(sings, Jazz)), person);
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		// a person that sings karaoke and a person that sings jazz
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+		text = converter.convert(ce);
 		System.out.println(ce + "=" + text);
 
-        // a person that plays Cricket or a person that plays football or a person that plays hockey.
-        ce=ce=df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,Cricket),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,football),person),df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays,hockey),person));
-		text= converter.convert(ce);
+		// a person that plays Cricket or a person that plays football or a person that plays hockey.
+		ce = ce = df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, Cricket), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, football), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, hockey), person));
+		text = converter.convert(ce);
 		System.out.println(ce + "=" + text);
 	}
 }
