@@ -162,6 +162,16 @@ public class OWLClassExpressionConverterTest_Extended {
 	}
 
 	@Test
+	public void complexNegationWithMaxCardinality(){
+		/*someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants */
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(birthPlace, paderborn), df.getOWLDataMaxCardinality(500000, nrOfInhabitants, dataRange));
+		ce = df.getOWLObjectIntersectionOf( df.getOWLObjectIntersectionOf (df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)))), ce);
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected : someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants");
+	}
+
+	@Test
 	public void testNested1WithNegation() {
 
 		/*someone who works for at least 5 companies which are not software companies and are ledby a company or a person*/
