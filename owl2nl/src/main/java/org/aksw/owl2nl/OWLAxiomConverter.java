@@ -24,52 +24,7 @@ import java.util.List;
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLAsymmetricObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLAxiomVisitor;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointDataPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointUnionAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentDataPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
-import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.SWRLRule;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +50,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 	private Realiser realiser;
 
 	private OWLClassExpressionConverter ceConverter;
+	private OWLPropertyExpressionConverter peConverter;
 	
 	private OWLDataFactory df = new OWLDataFactoryImpl();
 	
@@ -105,6 +61,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		realiser = new Realiser(lexicon);
 		
 		ceConverter = new OWLClassExpressionConverter(lexicon);
+		peConverter = new OWLPropertyExpressionConverter(lexicon);
 	}
 	
 	public OWLAxiomConverter() {
@@ -205,6 +162,22 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 
 	@Override
 	public void visit(OWLSubObjectPropertyOfAxiom axiom) {
+		logger.debug("Converting SubObjectPropertyOf axiom {}", axiom);
+		// convert the sub property
+		OWLObjectPropertyExpression subProperty = axiom.getSubProperty();
+		NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true);
+		logger.debug("subProperty: " + realiser.realise(subPropertyElement));
+
+		// convert the super property
+		OWLObjectPropertyExpression superProperty = axiom.getSuperProperty();
+		NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
+		logger.debug("SuperObjectProperty: " + realiser.realise(superPropertyElement));
+
+		SPhraseSpec clause = nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement);
+		superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
+
+		nl = realiser.realise(clause).toString();
+		logger.debug(axiom + " = " + nl);
 	}
 	
 	@Override
@@ -370,10 +343,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
-		ontologyURL = "http://rpc295.cs.man.ac.uk:8080/repository/download?ontology=http://reliant.teknowledge.com/DAML/Transportation.owl&format=RDF/XML";
-		ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
-		//ontologyURL = "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
+		String ontologyURL = "http://www.cs.man.ac.uk/~stevensr/ontology/family.rdf.owl";// subproperties of the form 'isSomething'
+		ontologyURL = "https://protege.stanford.edu/ontologies/pizza/pizza.owl"; // subproperties of the form 'hasSomething'
+
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
 		
@@ -382,5 +354,4 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 			converter.convert(axiom);
 		}
 	}
-
 }
