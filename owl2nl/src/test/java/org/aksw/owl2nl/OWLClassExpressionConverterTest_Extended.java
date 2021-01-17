@@ -1,29 +1,5 @@
-/*
- * #%L
- * OWL2NL
- * %%
- * Copyright (C) 2015 Agile Knowledge Engineering and Semantic Web (AKSW)
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-/**
- * 
- */
 package org.aksw.owl2nl;
 
-import jdk.nashorn.internal.parser.JSONParser;
-import org.apache.jena.base.Sys;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,27 +9,29 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
-import javax.xml.soap.SOAPPart;
-
-
 /**
- * @author Lorenz Buehmann
- *
+ * @author KG2NL_WS20 Team
  */
 public class OWLClassExpressionConverterTest_Extended {
 
 	private static OWLClassExpressionConverter converter;
 
-	private static OWLClass place;
 	private static OWLClass company;
 	private static OWLClass person;
 	private static OWLClass softwareCompany;
 	private static OWLDataFactoryImpl df;
 	private static OWLNamedIndividual paderborn;
+	private static OWLNamedIndividual karaoke;
+	private static OWLNamedIndividual Jazz;
+	private static OWLNamedIndividual Cricket;
+	private static OWLNamedIndividual football;
+	private static OWLNamedIndividual hockey;
+
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
 	private static OWLDataProperty amountOfSalary;
-
+    private static OWLObjectProperty sings;
+	private static OWLObjectProperty plays;
 	private static OWLObjectProperty workPlace;
 	private static OWLLiteral salary;
 
@@ -70,10 +48,10 @@ public class OWLClassExpressionConverterTest_Extended {
 		df = new OWLDataFactoryImpl();
 		PrefixManager pm = new DefaultPrefixManager("http://dbpedia.org/ontology/");
 
-
-		place = df.getOWLClass("Place", pm);
 		worksFor = df.getOWLObjectProperty("worksFor", pm);
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
+		sings = df.getOWLObjectProperty("sing",pm);
+		plays = df.getOWLObjectProperty("play",pm);
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
 		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
@@ -82,7 +60,11 @@ public class OWLClassExpressionConverterTest_Extended {
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
-
+		karaoke=df.getOWLNamedIndividual("karaoke",pm);
+		Jazz=df.getOWLNamedIndividual("jazz",pm);
+        football=df.getOWLNamedIndividual("football",pm);
+        Cricket=df.getOWLNamedIndividual("cricket",pm);
+        hockey=df.getOWLNamedIndividual("hockey",pm);
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
@@ -94,6 +76,7 @@ public class OWLClassExpressionConverterTest_Extended {
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 	}
+
 	@Test
 	public void testNested1() {
 		/*someone who works for at least 5 companies that is ledby a company or a person*/
@@ -109,10 +92,8 @@ public class OWLClassExpressionConverterTest_Extended {
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
-
-
-
 	}
+
 	@Test
 	public void simpleNegation(){
 		/*someone who does not work for a person or a company*/
@@ -125,6 +106,7 @@ public class OWLClassExpressionConverterTest_Extended {
 		//text = converter.convert(ce);
 		//System.out.println(ce + " = " + text);
 	}
+
 	@Test
 	public void testNested1WithNegation() {
 
@@ -141,9 +123,8 @@ public class OWLClassExpressionConverterTest_Extended {
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 		System.out.println("Expected: someone who works for at least one company which is not a software company and led by a company or a person");
-
-
 	}
+
 	@Test
 	public void testDataHasValueAndObjectHasValue() {
 		// works for a company
@@ -165,4 +146,35 @@ public class OWLClassExpressionConverterTest_Extended {
 		Assert.assertEquals(expected, text);
 		//LOG.info(ce + " = " + text);
 	}
+	@Test
+	public void testComplex(){
+		// a person that sings karaoke
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person);
+		text = converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+		// a person that sings karaoke or a person that sings  jazz
+		ce = df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+		text = converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+		// a person that sings karaoke or jazz
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), df.getOWLObjectHasValue(sings, Jazz)), person);
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+
+		// a person that sings karaoke and a person that sings jazz
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+		text = converter.convert(ce);
+		System.out.println(ce + "=" + text);
+
+		// a person that plays Cricket or a person that plays football or a person that plays hockey.
+		ce = ce = df.getOWLObjectUnionOf(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, Cricket), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, football), person), df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, hockey), person));
+		text = converter.convert(ce);
+		System.out.println(ce + "=" + text);
+	}
 }
+
+
+
+
