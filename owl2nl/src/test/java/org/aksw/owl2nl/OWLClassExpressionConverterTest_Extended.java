@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
+
 /**
  * @author KG2NL_WS20 Team
  */
@@ -34,6 +35,8 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLObjectProperty plays;
 	private static OWLObjectProperty workPlace;
 	private static OWLLiteral salary;
+	private static OWLDataProperty nrOfInhabitants;
+	private static OWLDataRange dataRange;
 
 	OWLClassExpression ce;
 	String text;
@@ -50,21 +53,28 @@ public class OWLClassExpressionConverterTest_Extended {
 
 		worksFor = df.getOWLObjectProperty("worksFor", pm);
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
-		sings = df.getOWLObjectProperty("sing",pm);
-		plays = df.getOWLObjectProperty("play",pm);
+		sings = df.getOWLObjectProperty("sing", pm);
+		plays = df.getOWLObjectProperty("play", pm);
 		company = df.getOWLClass("Company", pm);
 		person = df.getOWLClass("Person", pm);
-		softwareCompany=df.getOWLClass("SoftwareCompany",pm);
-		salary=df.getOWLLiteral(40000);
+		softwareCompany = df.getOWLClass("SoftwareCompany", pm);
+		salary = df.getOWLLiteral(40000);
 		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
+		birthPlace = df.getOWLObjectProperty("birthPlace", pm);
+		dortmund = df.getOWLClass("Dortmund", pm);
+		worksFor = df.getOWLObjectProperty("worksFor", pm);
+		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 
 		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
-		karaoke=df.getOWLNamedIndividual("karaoke",pm);
-		Jazz=df.getOWLNamedIndividual("jazz",pm);
-        football=df.getOWLNamedIndividual("football",pm);
-        Cricket=df.getOWLNamedIndividual("cricket",pm);
-        hockey=df.getOWLNamedIndividual("hockey",pm);
+		karaoke = df.getOWLNamedIndividual("karaoke", pm);
+		Jazz = df.getOWLNamedIndividual("jazz", pm);
+		football = df.getOWLNamedIndividual("football", pm);
+		Cricket = df.getOWLNamedIndividual("cricket", pm);
+		hockey = df.getOWLNamedIndividual("hockey", pm);
+
+		nrOfInhabitants = df.getOWLDataProperty("nrOfInhabitants", pm);
+		dataRange = df.getOWLDatatypeMinInclusiveRestriction(10000000);
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
@@ -122,6 +132,16 @@ public class OWLClassExpressionConverterTest_Extended {
 		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
 		//text = converter.convert(ce);
 		//System.out.println(ce + " = " + text);
+	}
+
+	@Test
+	public void complexNegationWithMaxCardinality(){
+		/*someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants */
+		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(birthPlace, paderborn), df.getOWLDataMaxCardinality(500000, nrOfInhabitants, dataRange));
+		ce = df.getOWLObjectIntersectionOf( df.getOWLObjectIntersectionOf (df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)))), ce);
+		text = converter.convert(ce);
+		System.out.println(ce + " = " + text);
+		System.out.println("Expected : someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants");
 	}
 
 	@Test
@@ -191,7 +211,3 @@ public class OWLClassExpressionConverterTest_Extended {
 		System.out.println(ce + "=" + text);
 	}
 }
-
-
-
-
