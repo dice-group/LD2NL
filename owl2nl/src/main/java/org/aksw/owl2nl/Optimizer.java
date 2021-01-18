@@ -14,7 +14,7 @@ public class Optimizer {
     public String Optimise(String text) {
         try {
             StanfordCoreNLP stanfordCoreNLP = Pipeline.getPipeline();
-            if (text == null || text == "") text = "something that plays jazz and something that plays karyoke";
+            if (text == null || text == "") return text;// = "something that plays jazz and something that plays karyoke";
 
             CoreDocument coreDocument = new CoreDocument(text);
 
@@ -24,16 +24,16 @@ public class Optimizer {
             List<Dict> list = new ArrayList<Dict>();
 
             for (CoreLabel coreLabel : coreLabelList) {
-                System.out.println(coreLabel.originalText());
+                //System.out.println(coreLabel.originalText());
                 String pos = coreLabel.get(CoreAnnotations.PartOfSpeechAnnotation.class);
                 //System.out.println(coreLabel.originalText() + "=" + pos);
                 posList.add(pos);
                 list.add(new Dict(pos, coreLabel.originalText()));
             }
 
-            System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHH");
+            System.out.println("**************************************************");
 
-            List<String> finalText = new ArrayList<String>();
+            List<String> finalText = new ArrayList();
             int firstVerbPosition = -1;
             int secondVerbPosition = -1;
             int connectorPosition = -1;
