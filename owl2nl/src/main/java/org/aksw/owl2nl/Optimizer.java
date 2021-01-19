@@ -32,36 +32,38 @@ public class Optimizer {
             }
 
             System.out.println("**************************************************");
+            System.out.println("Before optimize : " + text);
+
+            List<Integer> ccList = new ArrayList();
+            List<Dict> verbList = new ArrayList();
 
             List<String> finalText = new ArrayList();
-            int firstVerbPosition = -1;
-            int secondVerbPosition = -1;
-            int connectorPosition = -1;
+
             for (int i = 0; i < list.size(); i++) {
                 if ((list.get(i)).Key.equals("VBZ")) {
-                    if (firstVerbPosition < 0) {
-                        firstVerbPosition = i;
-                    } else {
-                        secondVerbPosition = i;
-                    }
+                    verbList.add(new Dict(i,list.get(i).Value));
                 }
-                if ((list.get(i)).Key.equals("CC")) {
-                    connectorPosition = i;
+                else if ((list.get(i)).Key.equals("CC")) {
+                    ccList.add(i);
                 }
             }
             boolean sameVerb = false;
-            if (list.get(firstVerbPosition).Value.equals(list.get(secondVerbPosition).Value)) {
-                sameVerb = true;
-            }
-            if (sameVerb) {
-                for (int i = 0; i <= connectorPosition; i++) {
+            if(ccList.size()!=1)
+                return text;
+            if(verbList.size()!=2) return text;
+
+            if (verbList.get(0).Value.equals(verbList.get(1).Value)) {
+
+                for (int i = 0; i <= ccList.get(0); i++) {
                     finalText.add(list.get(i).Value);
                 }
-                for (int i = secondVerbPosition + 1; i < list.size(); i++) {
+                for (int i = Integer.parseInt(verbList.get(1).Key) + 1; i < list.size(); i++) {
                     finalText.add(list.get(i).Value);
                 }
             }
-            return String.join(" ", finalText);
+            text = String.join(" ", finalText);
+            System.out.println("After Optimize : " + text);
+            return text;
         }
         catch (Exception ex){
             return text;
@@ -97,6 +99,10 @@ class Dict {
 
     public Dict(String key, String value) {
         Key = key;
+        Value = value;
+    }
+    public Dict(int index, String value) {
+        Key = String.valueOf(index);
         Value = value;
     }
 }
