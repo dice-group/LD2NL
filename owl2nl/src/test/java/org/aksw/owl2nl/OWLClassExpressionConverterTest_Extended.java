@@ -20,7 +20,6 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLClass company;
 	private static OWLClass person;
 	private static OWLClass softwareCompany;
-	private static OWLClass dortmund;
 	private static OWLDataFactoryImpl df;
 	private static OWLNamedIndividual paderborn;
 	private static OWLNamedIndividual karaoke;
@@ -31,12 +30,12 @@ public class OWLClassExpressionConverterTest_Extended {
 
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
-    private static OWLObjectProperty sings;
+	private static OWLDataProperty amountOfSalary;
+	private static OWLObjectProperty sings;
 	private static OWLObjectProperty plays;
 	private static OWLObjectProperty workPlace;
 	private static OWLObjectProperty birthPlace;
 	private static OWLLiteral salary;
-	private static OWLDataProperty amountOfSalary;
 	private static OWLDataProperty nrOfInhabitants;
 	private static OWLDataRange dataRange;
 
@@ -57,19 +56,16 @@ public class OWLClassExpressionConverterTest_Extended {
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 		sings = df.getOWLObjectProperty("sing", pm);
 		plays = df.getOWLObjectProperty("play", pm);
-		workPlace = df.getOWLObjectProperty("workPlace", pm);
+		company = df.getOWLClass("Company", pm);
+		person = df.getOWLClass("Person", pm);
+		softwareCompany = df.getOWLClass("SoftwareCompany", pm);
+		salary = df.getOWLLiteral(40000);
+		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
 		birthPlace = df.getOWLObjectProperty("birthPlace", pm);
 		worksFor = df.getOWLObjectProperty("worksFor", pm);
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 
-
-		company = df.getOWLClass("Company", pm);
-		person = df.getOWLClass("Person", pm);
-		softwareCompany = df.getOWLClass("SoftwareCompany", pm);
-		dortmund = df.getOWLClass("Dortmund", pm);
-
-		salary = df.getOWLLiteral(40000);
-
+		workPlace = df.getOWLObjectProperty("workPlace", pm);
 		paderborn = df.getOWLNamedIndividual("Paderborn", pm);
 		karaoke = df.getOWLNamedIndividual("karaoke", pm);
 		Jazz = df.getOWLNamedIndividual("jazz", pm);
@@ -77,16 +73,14 @@ public class OWLClassExpressionConverterTest_Extended {
 		Cricket = df.getOWLNamedIndividual("cricket", pm);
 		hockey = df.getOWLNamedIndividual("hockey", pm);
 
-		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
 		nrOfInhabitants = df.getOWLDataProperty("nrOfInhabitants", pm);
-
 		dataRange = df.getOWLDatatypeMinInclusiveRestriction(10000000);
 
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 	}
 
 	@Test
-	public void testHasValue() {
+	public void testhasValue() {
 		// work place is a place and is named paderborn
 		ce = df.getOWLObjectHasValue(workPlace, paderborn);
 		text = converter.convert(ce);
@@ -111,17 +105,14 @@ public class OWLClassExpressionConverterTest_Extended {
 	}
 
 	@Test
-	public void simpleNegation(){
+	public void simpleNegation() {
 		/*someone who does not work for a person or a company*/
-		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)));
+		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person, company)));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 		System.out.println("Expected : someone who does not work for a person or a company");
-
-		//ce = df.getOWLObjectHasValue(df.getOWLObjectComplementOf(workPlace), paderborn);
-		//text = converter.convert(ce);
-		//System.out.println(ce + " = " + text);
 	}
+
 	@Test
 	public void testNested2() {
 
@@ -134,10 +125,6 @@ public class OWLClassExpressionConverterTest_Extended {
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
-
-		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
-		//text = converter.convert(ce);
-		//System.out.println(ce + " = " + text);
 	}
 
 	@Test
@@ -178,7 +165,7 @@ public class OWLClassExpressionConverterTest_Extended {
 	}
 
 	@Test
-	public void nestedTestHasValue() {
+	public void NestedtesthasValue() {
 		// work place is a place and is named paderborn
 		ce = df.getOWLObjectSomeValuesFrom(workPlace,
 				df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(workPlace, paderborn)));
