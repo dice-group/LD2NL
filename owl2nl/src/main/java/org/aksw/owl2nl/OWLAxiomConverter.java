@@ -82,12 +82,14 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 			logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
 			try {
 				axiom.accept(this);
+				System.out.println(nl);
+				Optimizer opt = new Optimizer();
+				nl = opt.Optimise(nl);
 				return nl;
 			} catch (Exception e) {
 				throw new OWLAxiomConversionException(axiom, e);
 			}
 		}
-
 		logger.warn("Conversion of non-logical axioms not supported yet!");
 		return null;
 	}
@@ -344,7 +346,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 		String ontologyURL = "http://www.cs.man.ac.uk/~stevensr/ontology/family.rdf.owl";// subproperties of the form 'isSomething'
-		ontologyURL = "https://protege.stanford.edu/ontologies/pizza/pizza.owl"; // subproperties of the form 'hasSomething'
+		//ontologyURL = "https://protege.stanford.edu/ontologies/pizza/pizza.owl"; // subproperties of the form 'hasSomething'
 
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
