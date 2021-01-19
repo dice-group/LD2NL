@@ -79,7 +79,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 		reset();
 		
 		if (axiom.isLogicalAxiom()) {
-			logger.warn("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
+			logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
 			try {
 				axiom.accept(this);
 				System.out.println(nl);
@@ -90,7 +90,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 				throw new OWLAxiomConversionException(axiom, e);
 			}
 		}
-		//logger.warn("Conversion of non-logical axioms not supported yet!");
+		logger.warn("Conversion of non-logical axioms not supported yet!");
 		return null;
 	}
 	
