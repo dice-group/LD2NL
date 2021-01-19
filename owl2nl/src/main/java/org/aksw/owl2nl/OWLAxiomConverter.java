@@ -82,7 +82,6 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 			logger.debug("Converting " + axiom.getAxiomType().getName() + " axiom: " + axiom);
 			try {
 				axiom.accept(this);
-				System.out.println(nl);
 				Optimizer opt = new Optimizer();
 				nl = opt.Optimise(nl);
 				return nl;
