@@ -31,9 +31,10 @@ public class OWLClassExpressionConverterTest_Extended {
 	private static OWLObjectProperty worksFor;
 	private static OWLObjectProperty ledBy;
 	private static OWLDataProperty amountOfSalary;
-    private static OWLObjectProperty sings;
+	private static OWLObjectProperty sings;
 	private static OWLObjectProperty plays;
 	private static OWLObjectProperty workPlace;
+	private static OWLObjectProperty birthPlace;
 	private static OWLLiteral salary;
 	private static OWLDataProperty nrOfInhabitants;
 	private static OWLDataRange dataRange;
@@ -61,7 +62,6 @@ public class OWLClassExpressionConverterTest_Extended {
 		salary = df.getOWLLiteral(40000);
 		amountOfSalary = df.getOWLDataProperty("amountOfSalary", pm);
 		birthPlace = df.getOWLObjectProperty("birthPlace", pm);
-		dortmund = df.getOWLClass("Dortmund", pm);
 		worksFor = df.getOWLObjectProperty("worksFor", pm);
 		ledBy = df.getOWLObjectProperty("isLedBy", pm);
 
@@ -105,17 +105,14 @@ public class OWLClassExpressionConverterTest_Extended {
 	}
 
 	@Test
-	public void simpleNegation(){
+	public void simpleNegation() {
 		/*someone who does not work for a person or a company*/
-		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)));
+		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person, company)));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
 		System.out.println("Expected : someone who does not work for a person or a company");
-
-		//ce = df.getOWLObjectHasValue(df.getOWLObjectComplementOf(workPlace), paderborn);
-		//text = converter.convert(ce);
-		//System.out.println(ce + " = " + text);
 	}
+
 	@Test
 	public void testNested2() {
 
@@ -128,37 +125,6 @@ public class OWLClassExpressionConverterTest_Extended {
 				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
-
-		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
-		//text = converter.convert(ce);
-		//System.out.println(ce + " = " + text);
-	}
-	@Test
-	public void testNested2() {
-
-		ce = df.getOWLObjectMinCardinality(5, worksFor,
-				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
-		text = converter.convert(ce);
-		System.out.println(ce + " = " + text);
-
-		ce = df.getOWLObjectMinCardinality(1, worksFor,
-				df.getOWLObjectIntersectionOf(company, df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company,person))));
-		text = converter.convert(ce);
-		System.out.println(ce + " = " + text);
-
-		//ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
-		//text = converter.convert(ce);
-		//System.out.println(ce + " = " + text);
-	}
-
-	@Test
-	public void complexNegationWithMaxCardinality(){
-		/*someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants */
-		ce = df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(birthPlace, paderborn), df.getOWLDataMaxCardinality(500000, nrOfInhabitants, dataRange));
-		ce = df.getOWLObjectIntersectionOf( df.getOWLObjectIntersectionOf (df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person,company)))), ce);
-		text = converter.convert(ce);
-		System.out.println(ce + " = " + text);
-		System.out.println("Expected : someone who does not work for a person or a company and whose birthplace is paderborn that has not more than 50000 inhabitants");
 	}
 
 	@Test
