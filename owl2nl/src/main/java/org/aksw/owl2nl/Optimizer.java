@@ -171,14 +171,15 @@ public class Optimizer {
                 /*join*/
                 if (sameVerb && verbList.size()==(1+combinedCcCommaList.size())){
                     //int startAdding;
+                    //System.out.println("loopszie="+loopSize);
                     for (int i = 0; i <= combinedCcCommaList.get(0); i++) {
                         finalText.add(list.get(i).Value);
                     }
-                    for(int j=1;j<loopSize;j++){
+                    for(int j=1;j<loopSize+1;j++){
                        // if (j==0) {
 
                         //}
-                         if(j==loopSize-1){
+                         if(j==loopSize){
                             for (int i = Integer.parseInt(verbList.get(j).Key) + 1; i < list.size(); i++) {
                                 finalText.add(list.get(i).Value);
                             }
