@@ -32,7 +32,7 @@ public class Optimizer {
             }
 
             System.out.println("**************************************************");
-            System.out.println("Before optimize : " + text);
+            System.out.println("Text before our changes : " + text);
 
             List<Integer> ccList = new ArrayList();
             List<Integer> commaList = new ArrayList();
@@ -205,7 +205,7 @@ public class Optimizer {
                 text = String.join(" ", finalText);
                 sameVerb=false;
             //}
-            System.out.println("After Optimize : " + text);
+            System.out.println("Text after our changes : " + text);
             return text;
         }
         catch (Exception ex) {
