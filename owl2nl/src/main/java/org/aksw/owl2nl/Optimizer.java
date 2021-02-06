@@ -32,9 +32,11 @@ public class Optimizer {
             }
 
             System.out.println("**************************************************");
-            System.out.println("Before optimize : " + text);
+            System.out.println("Text before our changes : " + text);
 
             List<Integer> ccList = new ArrayList();
+            List<Integer> commaList = new ArrayList();
+            List<Integer> combinedCcCommaList = new ArrayList();
             List<Dict> verbList = new ArrayList();
 
             List<String> finalText = new ArrayList();
@@ -46,9 +48,13 @@ public class Optimizer {
                 else if ((list.get(i)).Key.equals("CC")) {
                     ccList.add(i);
                 }
+                else if ((list.get(i)).Value.equals(",")) {
+                    commaList.add(i);
+                    //System.out.println("comma is found");
+                }
             }
             boolean sameVerb = false;
-            if(ccList.size()!=1)
+            /*if(ccList.size()!=1)
                 return text;
             if(verbList.size()!=2) return text;
 
@@ -60,12 +66,149 @@ public class Optimizer {
                 for (int i = Integer.parseInt(verbList.get(1).Key) + 1; i < list.size(); i++) {
                     finalText.add(list.get(i).Value);
                 }
+            } */
+            //for one cc and two verb
+            if(ccList.size()==1 && verbList.size()==2) {
+
+                if (verbList.get(0).Value.equals(verbList.get(1).Value)) {
+                    sameVerb=true;
+                    for (int i = 0; i <= ccList.get(0); i++) {
+                        finalText.add(list.get(i).Value);
+                    }
+                    for (int i = Integer.parseInt(verbList.get(1).Key) + 1; i < list.size(); i++) {
+                        finalText.add(list.get(i).Value);
+                    }
+                }
             }
-            text = String.join(" ", finalText);
-            System.out.println("After Optimize : " + text);
+            /*for one cc one comma and  more verbs*/
+            else if (ccList.size()==1 && verbList.size()==3 && commaList.size()==1){
+               // System.out.println("entering the correct if else");
+                for(int j=1;j<verbList.size();j++){
+                    if(!(verbList.get(0).Value.equals(verbList.get(j).Value))){
+                        //not same verb
+                        sameVerb=false;
+                        return text;
+
+                    }
+                    sameVerb=true;
+
+                }
+                //System.out.println("same verb found");
+                if (sameVerb) {
+                   // sameVerb=true;
+                    if (commaList.get(0)<ccList.get(0)) {
+                        for (int i = 0; i <= commaList.get(0); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                        for (int i = Integer.parseInt(verbList.get(1).Key) + 1; i <= ccList.get(0); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                        for (int i = Integer.parseInt(verbList.get(2).Key) + 1; i < list.size(); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                    }
+                    else{
+                        /*implement when comma comes after cc*/
+                        for (int i = 0; i <= ccList.get(0); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                        for (int i = Integer.parseInt(verbList.get(1).Key) + 1; i <= commaList.get(0); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                        for (int i = Integer.parseInt(verbList.get(2).Key) + 1; i < list.size(); i++) {
+                            finalText.add(list.get(i).Value);
+                        }
+                    }
+                }
+
+            }
+            /*connecting comma and cc and trying to generalize*/
+            else if(ccList.size()>=1 && verbList.size()>=2 && commaList.size()>=1){
+                int loopSize=0;
+                int ccListPointer=0;
+                int commaListPointer=0;
+                loopSize=ccList.size()+commaList.size();
+                //determining loop size. this logic is not correct. correct it by summing both size.
+                //if(commaList.size()>0){
+                    //if (commaList.size()>ccList.size()){
+                    //    loopSize=commaList.size();
+                    //}
+                    //else{
+                     //   loopSize=ccList.size();
+                   // }
+
+                for (int i=0;i<loopSize;i++){
+                        if (ccListPointer<ccList.size() && commaListPointer<commaList.size()){
+                            if (commaList.get(commaListPointer)<ccList.get(ccListPointer)){
+                                combinedCcCommaList.add(commaList.get(commaListPointer));
+                                commaListPointer++;
+                            }
+                            else{
+                                combinedCcCommaList.add(ccList.get(ccListPointer));
+                                ccListPointer++;
+                            }
+                        }
+                        else if (ccListPointer>=ccList.size()){
+                            combinedCcCommaList.add(commaList.get(commaListPointer));
+                            commaListPointer++;
+                        }
+                        else if (commaListPointer>=commaList.size()){
+                            combinedCcCommaList.add(ccList.get(ccListPointer));
+                            ccListPointer++;
+                        }
+                }
+                    /*check whether the verbs are same or not*/
+                for(int j=1;j<verbList.size();j++){
+                    if(!(verbList.get(0).Value.equals(verbList.get(j).Value))){
+                        //not same verb
+                        sameVerb=false;
+                        return text;
+
+                    }
+                    sameVerb=true;
+
+                }
+                /*join*/
+                if (sameVerb && verbList.size()==(1+combinedCcCommaList.size())){
+                    //int startAdding;
+                    //System.out.println("loopszie="+loopSize);
+                    for (int i = 0; i <= combinedCcCommaList.get(0); i++) {
+                        finalText.add(list.get(i).Value);
+                    }
+                    for(int j=1;j<loopSize+1;j++){
+                       // if (j==0) {
+
+                        //}
+                         if(j==loopSize){
+                            for (int i = Integer.parseInt(verbList.get(j).Key) + 1; i < list.size(); i++) {
+                                finalText.add(list.get(i).Value);
+                            }
+                         }
+                        else{
+                            for (int i = Integer.parseInt(verbList.get(j).Key) + 1; i <= combinedCcCommaList.get(j); i++) {
+                                finalText.add(list.get(i).Value);
+                            }
+                        }
+
+                    }
+
+
+                }
+
+                //}
+
+            }
+            else{
+               // return text;
+            }
+           // if (sameVerb) {
+                text = String.join(" ", finalText);
+                sameVerb=false;
+            //}
+            System.out.println("Text after our changes : " + text);
             return text;
         }
-        catch (Exception ex){
+        catch (Exception ex) {
             return text;
         }
     }
@@ -101,6 +244,7 @@ class Dict {
         Key = key;
         Value = value;
     }
+
     public Dict(int index, String value) {
         Key = String.valueOf(index);
         Value = value;
