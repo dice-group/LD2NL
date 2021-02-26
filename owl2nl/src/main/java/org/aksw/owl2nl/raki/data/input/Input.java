@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.raki.data;
+package org.aksw.owl2nl.raki.data.input;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.owl2nl.raki.data.Statistic;
 import org.aksw.owl2nl.raki.io.RakiIO;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;

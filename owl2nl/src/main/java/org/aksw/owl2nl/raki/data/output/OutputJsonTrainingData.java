@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.raki.data;
+package org.aksw.owl2nl.raki.data.output;
 
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
@@ -26,14 +26,19 @@ public class OutputJsonTrainingData extends AOutput {
   private final OWLObjectRenderer dlRenderer = new DLSyntaxObjectRenderer();
 
   private Path file = null;
+  protected JSONArray data = null;
 
+  /**
+   *
+   * @param file
+   */
   public OutputJsonTrainingData(final Path file) {
     this.file = file;
   }
 
   @Override
-  public boolean write(final Map<OWLAxiom, SimpleEntry<String, String>> verb) {
-    final JSONArray ja = new JSONArray();
+  public Object write(final Map<OWLAxiom, SimpleEntry<String, String>> verb) {
+    data = new JSONArray();
 
     int id = 0;
     for (final Entry<OWLAxiom, SimpleEntry<String, String>> entry : verb.entrySet()) {
@@ -55,9 +60,13 @@ public class OutputJsonTrainingData extends AOutput {
       o.put("id", id++);
       o.put("dl", dlRenderer.render(axiom));
 
-      ja.put(o);
+      data.put(o);
     }
 
-    return RakiIO.write(file, ja.toString(2).getBytes());
+    return RakiIO.write(file, data.toString(2).getBytes());
+  }
+
+  public JSONArray getData() {
+    return data;
   }
 }

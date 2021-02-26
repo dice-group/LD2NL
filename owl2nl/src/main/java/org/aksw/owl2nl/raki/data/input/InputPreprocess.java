@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.raki.data;
+package org.aksw.owl2nl.raki.data.input;
 
 import java.io.File;
 import java.io.IOException;

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.aksw.owl2nl.OWLAxiomConverter;
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAxiom;
