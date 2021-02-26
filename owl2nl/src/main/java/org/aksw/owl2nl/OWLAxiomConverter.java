@@ -3,7 +3,7 @@ package org.aksw.owl2nl;
 import java.util.List;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;

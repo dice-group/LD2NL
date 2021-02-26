@@ -5,7 +5,7 @@ import java.util.Set;
 import org.aksw.owl2nl.raki.converter.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLDataRangeToNLGElement;
 import org.aksw.owl2nl.raki.converter.OWLIndividualToNLGElement;
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;

@@ -1,6 +1,6 @@
 package org.aksw.owl2nl.raki.converter;
 
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualVisitorEx;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;

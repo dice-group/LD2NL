@@ -1,6 +1,6 @@
 package org.aksw.owl2nl.raki.converter;
 
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
@@ -69,6 +69,10 @@ abstract class AOWLConverter {
   }
 
   private String getLexicalFormFromOntology(final OWLEntity entity) {
-    return input.getEnglishLabel(entity.getIRI());
+    if (input != null) {
+      return input.getEnglishLabel(entity.getIRI());
+    } else {
+      return null;
+    }
   }
 }

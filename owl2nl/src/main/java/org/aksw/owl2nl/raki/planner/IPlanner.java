@@ -20,5 +20,6 @@ public interface IPlanner<T> {
    *
    * @return
    */
+  @Deprecated
   T results();
 }

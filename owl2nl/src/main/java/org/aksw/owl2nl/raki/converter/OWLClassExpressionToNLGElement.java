@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.aksw.triple2nl.property.PropertyVerbalizer;
@@ -93,9 +93,9 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
    */
   public OWLClassExpressionToNLGElement(final NLGFactory nlgFactory, final Realiser realiser,
       final OWLIndividualVisitorEx<NLGElement> converterOWLIndividual,
-      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange, final Input in) {
+      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange, final Input input) {
 
-    super(nlgFactory, in);
+    super(nlgFactory, input);
 
     this.realiser = realiser;
     this.converterOWLIndividual = converterOWLIndividual;

@@ -3,7 +3,7 @@ package org.aksw.owl2nl.raki.planner;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
 import org.aksw.owl2nl.raki.verbalization.IRakiVerbalization;
 import org.aksw.owl2nl.raki.verbalization.RakiVerbalization;
 import org.apache.logging.log4j.LogManager;

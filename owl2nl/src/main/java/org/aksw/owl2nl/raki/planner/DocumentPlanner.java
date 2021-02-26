@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.owl2nl.raki.data.IOutput;
-import org.aksw.owl2nl.raki.data.Input;
+import org.aksw.owl2nl.raki.data.input.Input;
+import org.aksw.owl2nl.raki.data.output.IOutput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -66,8 +66,8 @@ public class DocumentPlanner implements IPlanner<String> {
     }
 
     // write verbalized axioms to file success
-    final boolean success = output.write(map);
-    if (!success) {
+    final Object success = output.write(map);
+    if (success == null) {
       LOG.error("Couldn't write results.");
     }
 

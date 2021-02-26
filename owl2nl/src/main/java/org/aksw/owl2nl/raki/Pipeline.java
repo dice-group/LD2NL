@@ -2,9 +2,9 @@ package org.aksw.owl2nl.raki;
 
 import java.nio.file.Paths;
 
-import org.aksw.owl2nl.raki.data.IOutput;
-import org.aksw.owl2nl.raki.data.Input;
-import org.aksw.owl2nl.raki.data.OutputJsonTrainingData;
+import org.aksw.owl2nl.raki.data.input.Input;
+import org.aksw.owl2nl.raki.data.output.IOutput;
+import org.aksw.owl2nl.raki.data.output.OutputJsonTrainingData;
 import org.aksw.owl2nl.raki.planner.DocumentPlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,15 +37,15 @@ public class Pipeline {
    * Test pipeline. Reads input and verbalizes
    *
    */
-  public void run(final String axiomsFile) {
+  public Pipeline run(final String axiomsFile) {
     if (output == null) {
       throw new UnsupportedOperationException("Output not set.");
     }
 
-    _run(axiomsFile);
+    return _run(axiomsFile);
   }
 
-  private void _run(final String axiomsFile) {
+  private Pipeline _run(final String axiomsFile) {
 
     // reads input
     final Input input = new Input(axiomsFile);
@@ -54,12 +54,17 @@ public class Pipeline {
     documentPlanner = new DocumentPlanner(input, output);
     documentPlanner.build();
     documentPlanner.results();
+    return this;
   }
 
   // settings
   public Pipeline setOutput(final IOutput output) {
     this.output = output;
     return this;
+  }
+
+  public IOutput getOutput() {
+    return output;
   }
 
   /**
