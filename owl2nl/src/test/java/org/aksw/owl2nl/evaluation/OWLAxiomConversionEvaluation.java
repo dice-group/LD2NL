@@ -5,7 +5,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.owl2nl.OWLAxiomConverter;
+import org.aksw.owl2nl.converter.OWLAxiomConverter;
+import org.aksw.owl2nl.data.OWL2NLInput;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
 import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -18,8 +19,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-
-import simplenlg.lexicon.Lexicon;
 
 /**
  * @author Lorenz Buehmann created on 11/4/15
@@ -47,7 +46,7 @@ public class OWLAxiomConversionEvaluation {
 
     final List<List<String>> data = new ArrayList<>();
 
-    final OWLAxiomConverter converter = new OWLAxiomConverter(Lexicon.getDefaultLexicon(), null);
+    final OWLAxiomConverter converter = new OWLAxiomConverter(new OWL2NLInput());
     int i = 1;
     for (final OWLAxiom axiom : ontology.getAxioms()) {
       final String s = converter.convert(axiom);

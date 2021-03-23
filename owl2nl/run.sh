@@ -2,10 +2,12 @@
 
 export MAVEN_OPTS="-Xmx8G"
 
-axioms="examples/exampleB.owl"
+ontology="http://www.ling.helsinki.fi/kit/2004k/ctl310semw/Protege/koala.owl"
+log="main.log"
 
-mainClass="org.aksw.owl2nl.raki.Pipeline"
-output="$axioms.json"
-log="$axioms.log"
+mainClass="org.aksw.owl2nl.ui.RAKICommandLineInterface"
 
-nohup mvn exec:java  -Dexec.mainClass=$mainClass -Dexec.args="$axioms $output" > $log &
+nohup mvn exec:java \
+	-Dexec.mainClass=$mainClass \
+	-Dexec.args="-o $ontology"\
+	> $log &

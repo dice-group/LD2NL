@@ -1,9 +1,10 @@
-package org.aksw.owl2nl;
+package org.aksw.owl2nl.converter;
 
 import java.util.List;
 
+import org.aksw.owl2nl.data.IInput;
+import org.aksw.owl2nl.data.OWL2NLInput;
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
-import org.aksw.owl2nl.raki.data.input.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -80,13 +81,30 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   /**
    * OWLAxiomConverter class constructor.
    *
+   * @param input
+   */
+  public OWLAxiomConverter(final IInput input) {
+    nlgFactory = new NLGFactory(input.getLexicon());
+    realiser = new Realiser(input.getLexicon());
+
+    ceConverter = new OWLClassExpressionConverter(input);
+  }
+
+  /**
+   * OWLAxiomConverter class constructor.
+   *
    * @param lexicon
    */
-  public OWLAxiomConverter(final Lexicon lexicon, final Input in) {
-    nlgFactory = new NLGFactory(lexicon);
-    realiser = new Realiser(lexicon);
+  public OWLAxiomConverter(final Lexicon lexicon) {
+    this(new OWL2NLInput().setLexicon(lexicon));
+  }
 
-    ceConverter = new OWLClassExpressionConverter(lexicon, in);
+  /**
+   * OWLAxiomConverter class constructor.
+   *
+   */
+  public OWLAxiomConverter() {
+    this(Lexicon.getDefaultLexicon());
   }
 
   /**

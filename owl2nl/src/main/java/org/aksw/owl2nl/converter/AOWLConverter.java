@@ -1,6 +1,6 @@
-package org.aksw.owl2nl.raki.converter;
+package org.aksw.owl2nl.converter;
 
-import org.aksw.owl2nl.raki.data.input.Input;
+import org.aksw.owl2nl.data.IInput;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
@@ -25,7 +25,7 @@ abstract class AOWLConverter {
   protected NLGFactory nlgFactory;
   protected IRIConverter iriConverter;
   protected LiteralConverter literalConverter;
-  protected Input input;
+  protected IInput input;
 
   /**
    * Abstract constructor.
@@ -33,7 +33,7 @@ abstract class AOWLConverter {
    * @param nlgFactory
    * @param input
    */
-  public AOWLConverter(final NLGFactory nlgFactory, final Input input) {
+  public AOWLConverter(final NLGFactory nlgFactory, final IInput input) {
 
     this.input = input;
     this.nlgFactory = nlgFactory;

@@ -1,11 +1,11 @@
-package org.aksw.owl2nl.raki.converter;
+package org.aksw.owl2nl.converter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.owl2nl.raki.data.input.Input;
+import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.OWLDataComplementOf;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataOneOf;
@@ -36,7 +36,7 @@ public class OWLDataRangeToNLGElement extends AOWLConverter
    * @param nlgFactory
    * @param iriConverter
    */
-  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final Input in) {
+  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final IInput in) {
     super(nlgFactory, in);
 
   }

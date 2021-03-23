@@ -1,11 +1,8 @@
-package org.aksw.owl2nl;
+package org.aksw.owl2nl.converter;
 
 import java.util.Set;
 
-import org.aksw.owl2nl.raki.converter.OWLClassExpressionToNLGElement;
-import org.aksw.owl2nl.raki.converter.OWLDataRangeToNLGElement;
-import org.aksw.owl2nl.raki.converter.OWLIndividualToNLGElement;
-import org.aksw.owl2nl.raki.data.input.Input;
+import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -42,7 +39,6 @@ import com.google.common.collect.Sets;
 
 import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
-import simplenlg.lexicon.Lexicon;
 import simplenlg.realiser.english.Realiser;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
@@ -66,12 +62,12 @@ public class OWLClassExpressionConverter implements //
    *
    * @param lexicon
    */
-  public OWLClassExpressionConverter(final Lexicon lexicon, final Input in) {
+  public OWLClassExpressionConverter(final IInput in) {
 
-    realiser = new Realiser(lexicon);
+    realiser = new Realiser(in.getLexicon());
     df = new OWLDataFactoryImpl();
 
-    final NLGFactory nlgFactory = new NLGFactory(lexicon);
+    final NLGFactory nlgFactory = new NLGFactory(in.getLexicon());
 
     converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
     converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
@@ -87,12 +83,8 @@ public class OWLClassExpressionConverter implements //
    * @return
    */
   public String convert(final OWLClassExpression ce) {
-    // process
     NLGElement nlgElement = asNLGElement(ce);
-
-    // realise
     nlgElement = realiser.realise(nlgElement);
-
     return nlgElement.getRealisation();
   }
 
@@ -193,19 +185,16 @@ public class OWLClassExpressionConverter implements //
 
   @Override
   public NLGElement visit(final OWLClass ce) {
-
     return converterOWLClassExpression.visit(ce);
   }
 
   @Override
   public NLGElement visit(final OWLObjectIntersectionOf ce) {
-
     return converterOWLClassExpression.visit(ce);
   }
 
   @Override
   public NLGElement visit(final OWLObjectUnionOf ce) {
-
     return converterOWLClassExpression.visit(ce);
   }
 
@@ -221,13 +210,11 @@ public class OWLClassExpressionConverter implements //
 
   @Override
   public NLGElement visit(final OWLObjectAllValuesFrom ce) {
-
     return converterOWLClassExpression.visit(ce);
   }
 
   @Override
   public NLGElement visit(final OWLObjectHasValue ce) {
-
     return converterOWLClassExpression.visit(ce);
   }
 
@@ -375,5 +362,4 @@ public class OWLClassExpressionConverter implements //
   public NLGElement visit(final OWLDatatypeRestriction node) {
     return converterOWLDataRange.visit(node);
   }
-
 }

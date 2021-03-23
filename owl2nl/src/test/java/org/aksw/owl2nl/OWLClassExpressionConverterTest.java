@@ -1,5 +1,7 @@
 package org.aksw.owl2nl;
 
+import org.aksw.owl2nl.converter.OWLClassExpressionConverter;
+import org.aksw.owl2nl.data.OWL2NLInput;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,7 +29,6 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import simplenlg.lexicon.Lexicon;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
@@ -40,7 +41,7 @@ public class OWLClassExpressionConverterTest {
   private static final Logger LOG = LoggerFactory.getLogger(OWLClassExpressionConverterTest.class);
 
   private static OWLClassExpressionConverter converter =
-      new OWLClassExpressionConverter(Lexicon.getDefaultLexicon(), null);
+      new OWLClassExpressionConverter(new OWL2NLInput());
 
   private static OWLObjectProperty birthPlace;
   private static OWLObjectProperty worksFor;
