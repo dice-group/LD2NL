@@ -8,6 +8,7 @@
 	<artifactId>triple2nl</artifactId>
 	<name>Triple2NL</name>
 	<description>RDF Triple to Natural Language Converter</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.dllearner</groupId>
@@ -21,7 +22,10 @@
 					<groupId>net.sourceforge.owlapi</groupId>
 					<artifactId>owlapi-distribution</artifactId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>edu.berkeley.compbio</groupId>
+					<artifactId>jlibsvm</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
