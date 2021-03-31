@@ -1,3 +1,3 @@
 moduleName=owl2nl
 
-mvn -T 4 clean compile -pl $moduleName -am 
+mvn -T 1C clean compile -pl $moduleName -am
