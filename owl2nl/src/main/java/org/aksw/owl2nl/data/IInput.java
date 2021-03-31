@@ -1,5 +1,6 @@
 package org.aksw.owl2nl.data;
 
+import java.nio.file.Path;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,11 +16,13 @@ public interface IInput {
 
   IInput setLexicon(Lexicon lexicon);
 
-  Lexicon getLexicon();
-
   IInput setOntologyIRI(IRI ontology);
 
+  IInput setOntologyPath(Path ontology);
+
   Set<OWLAxiom> getAxioms();
+
+  Lexicon getLexicon();
 
   // TODO
   String getEnglishLabel(final IRI iri);
