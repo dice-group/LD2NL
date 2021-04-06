@@ -1,3 +1,3 @@
 moduleName=owl2nl
 
-mvn install -pl $moduleName -am -DskipTests
+mvn -T 1C install -pl $moduleName -am -DskipTests
