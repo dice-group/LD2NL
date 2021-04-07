@@ -6,11 +6,18 @@
 		<groupId>org.dice-research</groupId>
 		<artifactId>LD2NL</artifactId>
 		<version>0.2.0-SNAPSHOT</version>
-	</parent>
+	</parent> 
 	<artifactId>owl2nl</artifactId>
 	<name>OWL2NL</name>
 	<description>OWL class expressions and axioms to Natural Language Converter</description>
 	<dependencies>
+	<!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlapi-impl -->
+<dependency>
+    <groupId>net.sourceforge.owlapi</groupId>
+    <artifactId>owlapi-impl</artifactId>
+    <version>4.1.0</version>
+</dependency>
+	
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
