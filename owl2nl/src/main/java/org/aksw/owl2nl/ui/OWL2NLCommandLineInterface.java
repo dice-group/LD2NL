@@ -56,7 +56,7 @@ public class OWL2NLCommandLineInterface {
         ontologyIRI = IRI.create(ontologyParameter);
       } catch (final Exception e) {
       }
-      if (ontologyIRI == null || !ontologyIRI.isIRI()) {
+      if (ontologyIRI == null) {
         throw new IllegalArgumentException("Wrong input parameter. Could not create IRI. ");
       }
     }
@@ -65,7 +65,7 @@ public class OWL2NLCommandLineInterface {
     {
       // create input
       LOG.info("\n==============================\nPerparing inputs...");
-      final IInput input = new OWL2NLInput().setOntologyIRI(ontologyIRI);
+      final IInput input = new OWL2NLInput().setOntology(ontologyIRI);
 
       // verbalize
       LOG.info("\n==============================\nStarting OWL axiom converter...");

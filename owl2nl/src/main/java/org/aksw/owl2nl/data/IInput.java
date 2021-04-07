@@ -16,14 +16,13 @@ public interface IInput {
 
   IInput setLexicon(Lexicon lexicon);
 
-  IInput setOntologyIRI(IRI ontology);
+  IInput setOntology(IRI ontology);
 
-  IInput setOntologyPath(Path ontology);
+  IInput setOntology(Path ontology);
 
   Set<OWLAxiom> getAxioms();
 
   Lexicon getLexicon();
 
-  // TODO
   String getEnglishLabel(final IRI iri);
 }

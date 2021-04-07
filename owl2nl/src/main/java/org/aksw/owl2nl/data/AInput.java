@@ -43,13 +43,13 @@ public abstract class AInput implements IInput {
   }
 
   @Override
-  public IInput setOntologyIRI(final IRI ontology) {
+  public IInput setOntology(final IRI ontology) {
     owlOntology = loadOntology(ontology);
     return this;
   }
 
   @Override
-  public IInput setOntologyPath(final Path ontology) {
+  public IInput setOntology(final Path ontology) {
     owlOntology = loadOntology(ontology);
     return this;
   }
