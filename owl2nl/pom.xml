@@ -11,13 +11,6 @@
 	<name>OWL2NL</name>
 	<description>OWL class expressions and axioms to Natural Language Converter</description>
 	<dependencies>
-	<!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlapi-impl -->
-<dependency>
-    <groupId>net.sourceforge.owlapi</groupId>
-    <artifactId>owlapi-impl</artifactId>
-    <version>4.1.0</version>
-</dependency>
-	
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
