@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.dice-research</groupId>
@@ -18,7 +20,7 @@
 					<artifactId>jena-arq</artifactId>
 					<groupId>org.apache.jena</groupId>
 				</exclusion>
- 				<exclusion>
+				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
 					<artifactId>owlapi-distribution</artifactId>
 				</exclusion>
@@ -33,13 +35,13 @@
 			<artifactId>SimpleNLG</artifactId>
 		</dependency>
 		<dependency>
-				<groupId>net.sf.extjwnl</groupId>
-				<artifactId>extjwnl</artifactId>
-			</dependency>
-			<dependency>
-				<groupId>net.sf.extjwnl</groupId>
-				<artifactId>extjwnl-data-wn31</artifactId>
-			</dependency>
+			<groupId>net.sf.extjwnl</groupId>
+			<artifactId>extjwnl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.extjwnl</groupId>
+			<artifactId>extjwnl-data-wn31</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>
@@ -112,5 +114,16 @@
 			<version>2.3.1</version>
 		</dependency>
 	</dependencies>
-
+	<repositories>
+		<repository>
+			<id>Apache Repo Central 1</id>
+			<name>Apache Repository 1</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>Apache Repo Central</id>
+			<name>Apache Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+	</repositories>
 </project>

@@ -86,11 +86,15 @@
 
 	<repositories>
 		<repository>
+			<id>Apache Repo Central 1</id>
+			<name>Apache Repository 1</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
 			<id>Apache Repo Central</id>
 			<name>Apache Repository</name>
 			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
-
 		<repository>
 			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
