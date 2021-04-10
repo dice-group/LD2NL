@@ -55,8 +55,8 @@ public class OWLClassExpressionConverter implements //
   OWLDataFactory df;
 
   OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
-  OWLClassExpressionVisitorEx<NLGElement> converterOWLClassExpression;
   OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
+  OWLClassExpressionVisitorEx<NLGElement> converterOWLClassExpression;
 
   /**
    *
@@ -71,6 +71,7 @@ public class OWLClassExpressionConverter implements //
 
     converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
     converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
+
     converterOWLClassExpression = new OWLClassExpressionToNLGElement(//
         nlgFactory, realiser, converterOWLIndividual, converterOWLDataRange, in);
   }
@@ -183,6 +184,9 @@ public class OWLClassExpressionConverter implements //
     return df.getOWLObjectIntersectionOf(operands);
   }
 
+  //
+  // OWLClassExpressionVisitorEx
+  //
   @Override
   public NLGElement visit(final OWLClass ce) {
     return converterOWLClassExpression.visit(ce);
@@ -274,92 +278,51 @@ public class OWLClassExpressionConverter implements //
     return converterOWLClassExpression.visit(ce);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLIndividualVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLNamedIndividual)
-   */
+  //
+  // OWLIndividualVisitorEx
+  //
   @Override
   public NLGElement visit(final OWLNamedIndividual individual) {
     return converterOWLIndividual.visit(individual);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLIndividualVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLAnonymousIndividual)
-   */
   @Override
   public NLGElement visit(final OWLAnonymousIndividual individual) {
     return converterOWLIndividual.visit(individual);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDatatype)
-   */
+  //
+  // OWLDataRangeVisitorEx
+  //
   @Override
   public NLGElement visit(final OWLDatatype node) {
     return converterOWLDataRange.visit(node);
 
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDataOneOf)
-   */
   @Override
   public NLGElement visit(final OWLDataOneOf node) {
     return converterOWLDataRange.visit(node);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDataComplementOf)
-   */
   @Override
   public NLGElement visit(final OWLDataComplementOf node) {
     return converterOWLDataRange.visit(node);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDataIntersectionOf)
-   */
   @Override
   public NLGElement visit(final OWLDataIntersectionOf node) {
     return converterOWLDataRange.visit(node);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDataUnionOf)
-   */
   @Override
   public NLGElement visit(final OWLDataUnionOf node) {
     return converterOWLDataRange.visit(node);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
-   * OWLDatatypeRestriction)
-   */
   @Override
   public NLGElement visit(final OWLDatatypeRestriction node) {
     return converterOWLDataRange.visit(node);
   }
+
 }
