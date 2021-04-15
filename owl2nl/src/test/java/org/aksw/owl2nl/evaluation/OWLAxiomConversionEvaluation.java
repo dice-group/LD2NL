@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +34,8 @@ public class OWLAxiomConversionEvaluation {
   static URL url = null;
   static {
     try {
-      url = Paths.get("travel.owl").toUri().toURL();
-      // url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
+      // url = Paths.get("travel.owl").toUri().toURL();
+      url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
     } catch (final MalformedURLException e) {
       e.printStackTrace();
     }
