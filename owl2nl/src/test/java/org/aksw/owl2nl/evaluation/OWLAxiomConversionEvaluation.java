@@ -1,6 +1,10 @@
 package org.aksw.owl2nl.evaluation;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +15,6 @@ import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
 import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLObjectRenderer;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -25,24 +28,35 @@ import com.google.common.io.Files;
  */
 public class OWLAxiomConversionEvaluation {
 
-  // static String ontologyURL =
-  // "https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl";
-  // static String ontologyURL = "http://protege.cim3.net/file/pub/ontologies/travel/travel.owl";
+  // https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl
+  // http://protege.cim3.net/file/pub/ontologies/travel/travel.owl
+  // https://protege.stanford.edu/ontologies/travel.owl
 
-  // static String ontologyURL = "https://protege.stanford.edu/ontologies/travel.owl";
+  static URL url = null;
+  static {
+    try {
+      url = Paths.get("travel.owl").toUri().toURL();
+      // url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
+    } catch (final MalformedURLException e) {
+      e.printStackTrace();
+    }
+  }
 
-  static File ontologyURL = Paths.get(//
-      // "/media/store/SVN/UPB/projects/2019/RAKI/Usecases/Siemens Usecase Skill
-      // Learning/Ontologies/IndustryOntologies/IndustrialDFOntology.owl"
-      "/home/rspeck/Desktop/Usecases/Siemens Usecase Skill Learning/Ontologies/PPP_Ontologies/Process.owl"
-  //
-  ).toFile();
+  protected static InputStream getInput() {
+    InputStream is = null;
+    try {
+      is = url.openStream();
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    return is;
+  }
 
   public static void main(final String[] args) throws Exception {
     final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
 
     final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-    final OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+    final OWLOntology ontology = man.loadOntologyFromOntologyDocument(getInput());
 
     final List<List<String>> data = new ArrayList<>();
 
