@@ -22,6 +22,7 @@
  */
 package org.aksw.owl2nl;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -95,6 +96,8 @@ public class OWLClassExpressionConverterTest {
 		ce = person;
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("Person", ce.toString());
+		Assert.assertEquals("a person", text);
 	}
 	
 	@Test
@@ -103,11 +106,15 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectSomeValuesFrom(birthPlace, place);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∃ birthPlace.Place", ce.toString());
+		Assert.assertEquals("something whose birth place is a place", text);
 				
 		// works for a company
 		ce = df.getOWLObjectSomeValuesFrom(worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∃ worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for a company", text);
 	}
 	
 	@Test
@@ -117,10 +124,14 @@ public class OWLClassExpressionConverterTest {
 				df.getOWLObjectIntersectionOf(place, df.getOWLObjectSomeValuesFrom(ledBy, person)));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≥ 3 birthPlace.(Place ⊓ (∃ isLedBy.Person))", ce.toString());
+		Assert.assertEquals("something that has at least 3 birth places that are a place that is led by a person", text);
 		
 		ce = df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectSomeValuesFrom(ledBy,person));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∃ worksFor.(∃ isLedBy.Person)", ce.toString());
+		Assert.assertEquals("something that works for something that is led by a person", text);
 	}
 	
 	@Test
@@ -129,16 +140,22 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectMinCardinality(3, birthPlace, place);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≥ 3 birthPlace.Place", ce.toString());
+		Assert.assertEquals("something that has at least 3 birth places that are a place", text);
 		
 		// works for at least 3 companies
 		ce = df.getOWLObjectMinCardinality(3, worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≥ 3 worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for at least 3 some companies", text);
 		
 		
 		ce = df.getOWLDataMinCardinality(3, nrOfInhabitants, dataRange);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≥ 3 nrOfInhabitants.()", ce.toString());
+		Assert.assertEquals("something that has at least 3 nr of inhabitants that are greater than or equals to 10000000", text);
 	}
 	
 	@Test
@@ -147,15 +164,21 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectMaxCardinality(3, birthPlace, place);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≤ 3 birthPlace.Place", ce.toString());
+		Assert.assertEquals("something that has at most 3 birth places that are a place", text);
 		
 		// works for at most 3 companies
 		ce = df.getOWLObjectMaxCardinality(3, worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≤ 3 worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for at most 3 some companies", text);
 		
 		ce = df.getOWLDataMaxCardinality(3, nrOfInhabitants, dataRange);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("≤ 3 nrOfInhabitants.()", ce.toString());
+		Assert.assertEquals("something that has at most 3 nr of inhabitants that are greater than or equals to 10000000", text);
 	}
 	
 	@Test
@@ -164,15 +187,21 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectExactCardinality(3, birthPlace, place);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("= 3 birthPlace.Place", ce.toString());
+		Assert.assertEquals("something that has exactly 3 birth places that are a place", text);
 		
 		// works for exactly 3 companies
 		ce = df.getOWLObjectExactCardinality(3, worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("= 3 worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for exactly 3 some companies", text);
 		
 		ce = df.getOWLDataExactCardinality(3, nrOfInhabitants, dataRange);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("= 3 nrOfInhabitants.()", ce.toString());
+		Assert.assertEquals("something that has exactly 3 nr of inhabitants that are greater than or equals to 10000000", text);
 	}
 	
 	@Test
@@ -181,10 +210,14 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectAllValuesFrom(worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∀ worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for only a company", text);
 		
 		ce = df.getOWLDataAllValuesFrom(nrOfInhabitants, dataRange);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∀ nrOfInhabitants.()", ce.toString());
+		Assert.assertEquals("something whose nr of inhabitant is greater than or equals to 10000000", text);
 	}
 	
 	@Test
@@ -193,11 +226,15 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectHasValue(birthPlace, leipzig);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∃ birthPlace.{Leipzig}", ce.toString());
+		Assert.assertEquals("something whose birth place is Leipzig", text);
 		
 		// nr of inhabitants is 1000000
 		ce = df.getOWLDataHasValue(nrOfInhabitants, literal);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∃ nrOfInhabitants.{1000000}", ce.toString());
+		Assert.assertEquals("something whose nr of inhabitants is 1000000", text);
 	}
 	
 	@Test
@@ -206,6 +243,8 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectAllValuesFrom(worksFor, company);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("∀ worksFor.Company", ce.toString());
+		Assert.assertEquals("something that works for only a company", text);
 	}
 	
 	@Test
@@ -216,12 +255,16 @@ public class OWLClassExpressionConverterTest {
 				person);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("Person ⊓ (∃ worksFor.Company)", ce.toString());
+		Assert.assertEquals("a person that works for a company", text);
 		
 		ce = df.getOWLObjectIntersectionOf(
 				place, 
 				df.getOWLObjectSomeValuesFrom(ledBy, person));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("Place ⊓ (∃ isLedBy.Person)", ce.toString());
+		Assert.assertEquals("a place that is led by a person", text);
 	}
 	
 	@Test
@@ -232,6 +275,8 @@ public class OWLClassExpressionConverterTest {
 				person);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("Person ⊔ (∃ worksFor.Company)", ce.toString());
+		Assert.assertEquals("a person or something that works for a company", text);
 	}
 	
 	@Test
@@ -240,10 +285,14 @@ public class OWLClassExpressionConverterTest {
 		ce = df.getOWLObjectComplementOf(person);
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("¬Person", ce.toString());
+		Assert.assertEquals("something that is not a person", text);
 		
 		// does not work for a company
 		ce = df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, company));
 		text = converter.convert(ce);
 		System.out.println(ce + " = " + text);
+		Assert.assertEquals("¬(∃ worksFor.Company)", ce.toString());
+		Assert.assertEquals("something that does not works not for a company", text);
 	}
 }
