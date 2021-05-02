@@ -83,7 +83,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor{
 			try {
 				axiom.accept(this);
 				Optimizer opt = new Optimizer();
+				System.out.println("Before Optimise :"+ nl);
 				nl = opt.Optimise(nl);
+				System.out.println("After Optimise :"+ nl);
 				return nl;
 			} catch (Exception e) {
 				throw new OWLAxiomConversionException(axiom, e);
