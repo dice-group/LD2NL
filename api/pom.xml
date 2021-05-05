@@ -27,6 +27,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.dice-research</groupId>
+			<artifactId>owl2nl</artifactId>
+			<version>0.2.0-SNAPSHOT</version>
+<!--			<version>${project.version}</version>-->
+		</dependency>
 	</dependencies>
 
 	<build>
