@@ -533,3 +533,4 @@
 /avatar/target/test-classes/org/aksw/avatar/VerbalizerTest.class
 /avatar/target/classes/org/aksw/avatar/clustering/WeightedGraph.class
 /Triple2NL/target/classes/wordnet/linux/wordnet_properties.xml
+/.idea/
