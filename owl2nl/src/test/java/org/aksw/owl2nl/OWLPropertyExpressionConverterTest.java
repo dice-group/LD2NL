@@ -1,5 +1,6 @@
 package org.aksw.owl2nl;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
@@ -41,6 +42,8 @@ public class OWLPropertyExpressionConverterTest {
         pe = hasWorkPlace;
         text = converter.convert(pe);
         System.out.println(pe + " = " + text);
+        Assert.assertEquals("hasWorkPlace", pe.toString());
+        Assert.assertEquals("X has work place Y", text);
     }
 
     @Test
@@ -49,6 +52,8 @@ public class OWLPropertyExpressionConverterTest {
         pe = owner;
         text = converter.convert(pe);
         System.out.println(pe + " = " + text);
+        Assert.assertEquals("owner", pe.toString());
+        Assert.assertEquals("X is owner", text);
     }
 
     @Test
@@ -57,5 +62,7 @@ public class OWLPropertyExpressionConverterTest {
         pe = plays;
         text = converter.convert(pe);
         System.out.println(pe + " = " + text);
+        Assert.assertEquals("play", pe.toString());
+        Assert.assertEquals("X plays Y", text);
     }
 }
