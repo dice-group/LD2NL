@@ -12,6 +12,7 @@
 		<module>SPARQL2NL</module>
 		<module>Triple2NL</module>
 		<module>owl2nl</module>
+		<module>api</module>
 		<module>evaluation</module>
         <module>controller</module>
     </modules>
