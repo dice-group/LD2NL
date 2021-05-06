@@ -1,6 +1,7 @@
 package org.aksw.owl2nl;
 
 import org.aksw.owl2nl.exception.OWLAxiomConversionException;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
@@ -22,7 +23,7 @@ public class OWLAxiomConverterTest {
     private static OWLObjectProperty hasMother;
 
     private static OWLDataProperty hasBirthYear;
-//    private static OWLDataRange dataRange;
+    private static OWLDataRange dataRange;
 
     private static OWLClass man;
     private static OWLClass woman;
@@ -67,9 +68,11 @@ public class OWLAxiomConverterTest {
 
     @Test
     public void test_sub_class() throws OWLAxiomConversionException {
-        axiom = df.getOWLSubClassOfAxiom(male, sex);
+        axiom = df.getOWLSubClassOfAxiom(man, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("man ⊑ person", axiom.toString());
+        Assert.assertEquals("every man is a person", text);
     }
 
     @Test
@@ -78,6 +81,8 @@ public class OWLAxiomConverterTest {
                 df.getOWLObjectIntersectionOf(person, df.getOWLObjectSomeValuesFrom(hasSex, male)));
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("man ≡ person ⊓ (∃ hasSex.male)", axiom.toString());
+        Assert.assertEquals("every man is a person that has as sex a male", text);
     }
 
     @Test
@@ -85,6 +90,8 @@ public class OWLAxiomConverterTest {
         axiom = df.getOWLDisjointClassesAxiom(male, female);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("female ⊑ ¬ male", axiom.toString());
+        Assert.assertEquals("every female is something that is not a male", text);
     }
 
     @Test
@@ -92,6 +99,8 @@ public class OWLAxiomConverterTest {
         axiom = df.getOWLSubObjectPropertyOfAxiom(isUncleInLawOf, isInLawOf);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("isUncleInLawOf ⊑ isInLawOf", axiom.toString());
+        Assert.assertEquals("X's being uncle in law of Y implies X is in law of Y", text);
     }
 
     @Test
@@ -99,6 +108,8 @@ public class OWLAxiomConverterTest {
         axiom = df.getOWLObjectPropertyDomainAxiom(hasMother, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("∃ hasMother.⊤ ⊑ person", axiom.toString());
+        Assert.assertEquals("everything that has a mother is a person", text);
     }
 
     @Test
@@ -106,6 +117,8 @@ public class OWLAxiomConverterTest {
         axiom = df.getOWLObjectPropertyRangeAxiom(hasMother, woman);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("⊤ ⊑ ∀ hasMother.woman", axiom.toString());
+        Assert.assertEquals("everything is something that has as mother only a woman", text);
     }
 
     @Test
@@ -113,6 +126,8 @@ public class OWLAxiomConverterTest {
         axiom = df.getOWLFunctionalObjectPropertyAxiom(hasMother);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("⊤ ⊑ ≤ 1 hasMother", axiom.toString());
+        Assert.assertEquals("everything is something that has at most 1 mother", text);
     }
 
 //    @Test
@@ -121,7 +136,7 @@ public class OWLAxiomConverterTest {
 //        text = converter.convert(axiom);
 //        System.out.println(axiom + " = " + text);
 //    }
-//
+
 //    @Test
 //    public void test_irreflexive_object_property() throws OWLAxiomConversionException {
 //        axiom = df.getOWLIrreflexiveObjectPropertyAxiom(isInLawOf);
@@ -129,31 +144,37 @@ public class OWLAxiomConverterTest {
 //        System.out.println(axiom + " = " + text);
 //    }
 
-    @Test
-    public void test_inverse_functional_object_property() throws OWLAxiomConversionException {
-        axiom = df.getOWLInverseFunctionalObjectPropertyAxiom(isFatherOf);
-        text = converter.convert(axiom);
-        System.out.println(axiom + " = " + text);
-    }
+//    @Test
+//    public void test_inverse_functional_object_property() throws OWLAxiomConversionException {
+//        axiom = df.getOWLInverseFunctionalObjectPropertyAxiom(isFatherOf);
+//        text = converter.convert(axiom);
+//        System.out.println(axiom + " = " + text);
+//        Assert.assertEquals("⊤ ⊑ ≤ 1 isFatherOf⁻", axiom.toString());
+//        Assert.assertEquals("everything is something whose", text);
+//    }
 
     @Test
     public void test_data_property_domain() throws OWLAxiomConversionException {
         axiom = df.getOWLDataPropertyDomainAxiom(hasBirthYear, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("∃ hasBirthYear.⊤ ⊑ person", axiom.toString());
+        Assert.assertEquals("everything that has birth year is a person", text);
     }
 
-    @Test
-    public void test_data_property_range() throws OWLAxiomConversionException {
-        axiom = df.getOWLDataPropertyRangeAxiom(hasBirthYear, dataRange);
-        text = converter.convert(axiom);
-        System.out.println(axiom + " = " + text);
-    }
+//    @Test
+//    public void test_data_property_range() throws OWLAxiomConversionException {
+//        axiom = df.getOWLDataPropertyRangeAxiom(hasBirthYear, dataRange);
+//        text = converter.convert(axiom);
+//        System.out.println(axiom + " = " + text);
+//    }
 
     @Test
     public void test_functional_data_property() throws OWLAxiomConversionException {
         axiom = df.getOWLFunctionalDataPropertyAxiom(hasBirthYear);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
+        Assert.assertEquals("⊤ ⊑ ≤ 1 hasBirthYear", axiom.toString());
+        Assert.assertEquals("everything is something that has birth year at most 1 Literals", text);
     }
 }
