@@ -67,7 +67,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_sub_class() throws OWLAxiomConversionException {
+    public void testSubClass() throws OWLAxiomConversionException {
         axiom = df.getOWLSubClassOfAxiom(man, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -76,7 +76,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_equivalent_classes() throws OWLAxiomConversionException {
+    public void testEquivalentClasses() throws OWLAxiomConversionException {
         axiom = df.getOWLEquivalentClassesAxiom(man,
                 df.getOWLObjectIntersectionOf(person, df.getOWLObjectSomeValuesFrom(hasSex, male)));
         text = converter.convert(axiom);
@@ -86,7 +86,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_disjoint_classes() throws OWLAxiomConversionException {
+    public void testDisjointClasses() throws OWLAxiomConversionException {
         axiom = df.getOWLDisjointClassesAxiom(male, female);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -95,7 +95,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_sub_object_property() throws OWLAxiomConversionException {
+    public void testSubObjectProperty() throws OWLAxiomConversionException {
         axiom = df.getOWLSubObjectPropertyOfAxiom(isUncleInLawOf, isInLawOf);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -104,7 +104,16 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_object_property_domain() throws OWLAxiomConversionException {
+    public void testSymmetricObjectProperty() throws OWLAxiomConversionException {
+        axiom = df.getOWLSymmetricObjectPropertyAxiom(isInLawOf);
+        text = converter.convert(axiom);
+        System.out.println(axiom + " = " + text);
+        Assert.assertEquals("isInLawOf ≡ isInLawOf⁻", axiom.toString());
+        Assert.assertEquals("X's being in law of Y implies Y is in law of X", text);
+    }
+
+    @Test
+    public void testObjectPropertyDomain() throws OWLAxiomConversionException {
         axiom = df.getOWLObjectPropertyDomainAxiom(hasMother, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -113,7 +122,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_object_property_range() throws OWLAxiomConversionException {
+    public void testObjectPropertyRange() throws OWLAxiomConversionException {
         axiom = df.getOWLObjectPropertyRangeAxiom(hasMother, woman);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -122,7 +131,7 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void test_functional_object_property() throws OWLAxiomConversionException {
+    public void testFunctionalObjectProperty() throws OWLAxiomConversionException {
         axiom = df.getOWLFunctionalObjectPropertyAxiom(hasMother);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -154,7 +163,7 @@ public class OWLAxiomConverterTest {
 //    }
 
     @Test
-    public void test_data_property_domain() throws OWLAxiomConversionException {
+    public void testDataPropertyDomain() throws OWLAxiomConversionException {
         axiom = df.getOWLDataPropertyDomainAxiom(hasBirthYear, person);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
@@ -170,7 +179,7 @@ public class OWLAxiomConverterTest {
 //    }
 
     @Test
-    public void test_functional_data_property() throws OWLAxiomConversionException {
+    public void testFunctionalDataProperty() throws OWLAxiomConversionException {
         axiom = df.getOWLFunctionalDataPropertyAxiom(hasBirthYear);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
