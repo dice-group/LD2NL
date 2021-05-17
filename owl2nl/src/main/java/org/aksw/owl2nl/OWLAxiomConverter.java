@@ -88,9 +88,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 			try {
 				axiom.accept(this);
 				if(nl != null) {
-					System.out.println("Before Optimise :" + nl);
+					System.out.println("Before Optimization :" + nl);
 					nl = optimiser.Optimise(nl);
-					System.out.println("After Optimise :" + nl);
+					System.out.println("After Optimization :" + nl);
 				}
 				return nl;
 			} catch (Exception e) {
@@ -227,6 +227,14 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
+		logger.debug("Converting SymmetricObjectProperty axiom {}", axiom);
+
+		OWLObjectPropertyExpression propertyExpression = axiom.getProperty();
+		OWLObjectPropertyExpression inversePropertyExpression = propertyExpression.getInverseProperty();
+
+		OWLSubObjectPropertyOfAxiom subObjPropAxiom = df.getOWLSubObjectPropertyOfAxiom(
+				propertyExpression, inversePropertyExpression);
+		subObjPropAxiom.accept(this);
 	}
 
 	@Override

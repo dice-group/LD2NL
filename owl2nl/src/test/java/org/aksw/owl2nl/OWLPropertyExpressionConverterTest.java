@@ -65,4 +65,16 @@ public class OWLPropertyExpressionConverterTest {
         Assert.assertEquals("play", pe.toString());
         Assert.assertEquals("X plays Y", text);
     }
+
+    @Test
+    public void testWithInverse() {
+        // Since verbalisation of hasWorkPlace is 'X has work place Y'
+        // and its inverse can be represented by X hasWorkPlace⁻ Y,
+        // the verbalization of the inverse property will be 'Y has work place X'
+        pe = hasWorkPlace.getInverseProperty();
+        text = converter.convert(pe);
+        System.out.println(pe + " = " + text);
+        Assert.assertEquals("hasWorkPlace⁻", pe.toString());
+        Assert.assertEquals("Y has work place X", text);
+    }
 }
