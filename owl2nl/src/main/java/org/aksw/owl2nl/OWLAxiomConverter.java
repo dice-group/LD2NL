@@ -57,7 +57,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 	private OWLDataFactory df = new OWLDataFactoryImpl();
 
 	private String nl;
-	private Optimizer optimiser;
+	private OptimizerDepParse optimiser;
 
 	public OWLAxiomConverter(Lexicon lexicon) {
 		nlgFactory = new NLGFactory(lexicon);
@@ -65,7 +65,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
 		ceConverter = new OWLClassExpressionConverter(lexicon);
 		peConverter = new OWLPropertyExpressionConverter(lexicon);
-		optimiser = new Optimizer();
+		optimiser = new OptimizerDepParse();
 	}
 
 	public OWLAxiomConverter() {
@@ -88,9 +88,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 			try {
 				axiom.accept(this);
 				if(nl != null) {
-					System.out.println("Before Optimization :" + nl);
-					nl = optimiser.Optimise(nl);
-					System.out.println("After Optimization :" + nl);
+					//System.out.println("Before Optimization :" + nl);
+					nl = optimiser.optimize(nl);
+					//System.out.println("After Optimization :" + nl);
 				}
 				return nl;
 			} catch (Exception e) {
