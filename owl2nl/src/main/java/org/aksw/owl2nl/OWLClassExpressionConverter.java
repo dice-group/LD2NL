@@ -142,8 +142,8 @@ public class OWLClassExpressionConverter implements OWLClassExpressionVisitorEx<
 		nlgElement = realiser.realise(nlgElement);
 		
 		String out = nlgElement.getRealisation();
-		Optimizer opt = new Optimizer();
-		out = opt.Optimise(out);
+		OptimizerDepParse opt = new OptimizerDepParse();
+		out = opt.optimize(out);
 		return out;
 	}
 	
