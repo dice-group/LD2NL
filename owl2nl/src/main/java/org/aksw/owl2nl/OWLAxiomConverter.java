@@ -190,7 +190,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 	@Override
 	public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
 		Set<OWLObjectPropertyExpression> ObjProperty = axiom.getProperties();
-		List<OWLObjectPropertyExpression> ObjProp = new LinkedList<>(ObjProperty);
+		List<OWLObjectPropertyExpression> ObjProp = new ArrayList<>(ObjProperty);
 		for (int i = 0; i < ObjProp.size(); i++) {
 			for (int j = i + 1; j < ObjProp.size(); j++) {
 				NLGElement EquiObjPropertyElement = peConverter.asNLGElement(ObjProp.get(i), false);
@@ -203,13 +203,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 				nl = realiser.realise(clause).toString();
 				logger.debug(axiom + " = " + nl);
 
-				/*	OWLSubObjectPropertyOfAxiom subObjPAxiom = df.getOWLSubObjectPropertyOfAxiom(
-						ObjProp.get(i),
-						ObjProp.get(j));
-				subObjPAxiom.accept(this);
 
-
-				 */
 			}
 
 		}

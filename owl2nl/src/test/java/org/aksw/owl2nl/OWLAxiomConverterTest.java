@@ -142,6 +142,7 @@ public class OWLAxiomConverterTest {
         Assert.assertEquals("⊤ ⊑ ≤ 1 hasMother", axiom.toString());
         Assert.assertEquals("everything is something that has at most 1 mother", text);
     }
+
     @Test
     public void testEquivalentObjectProperty() throws OWLAxiomConversionException {
         axiom = axiom = df.getOWLEquivalentObjectPropertiesAxiom(hasBrother,hasMaleSibling);
