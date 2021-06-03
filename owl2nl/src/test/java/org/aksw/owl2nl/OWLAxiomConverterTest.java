@@ -21,6 +21,8 @@ public class OWLAxiomConverterTest {
     private static OWLObjectProperty isUncleInLawOf;
     private static OWLObjectProperty hasSex;
     private static OWLObjectProperty hasMother;
+    private static OWLObjectProperty hasBrother;
+    private static OWLObjectProperty hasMaleSibling;
 
     private static OWLDataProperty hasBirthYear;
     private static OWLDataRange dataRange;
@@ -52,6 +54,8 @@ public class OWLAxiomConverterTest {
         isInLawOf = df.getOWLObjectProperty("isInLawOf", pm);
         hasSex = df.getOWLObjectProperty("hasSex", pm);
         hasMother = df.getOWLObjectProperty("hasMother", pm);
+        hasBrother = df.getOWLObjectProperty("hasBrother", pm);
+        hasMaleSibling = df.getOWLObjectProperty("hasMaleSibling", pm);
 
         hasBirthYear = df.getOWLDataProperty("hasBirthYear", pm);
 //        dataRange = df.getOWLDatatype("integer", pm);
@@ -137,6 +141,15 @@ public class OWLAxiomConverterTest {
         System.out.println(axiom + " = " + text);
         Assert.assertEquals("⊤ ⊑ ≤ 1 hasMother", axiom.toString());
         Assert.assertEquals("everything is something that has at most 1 mother", text);
+    }
+
+    @Test
+    public void testEquivalentObjectProperty() throws OWLAxiomConversionException {
+        axiom = axiom = df.getOWLEquivalentObjectPropertiesAxiom(hasBrother,hasMaleSibling);
+        text = converter.convert(axiom);
+        System.out.println(axiom + " = " + text);
+        Assert.assertEquals("hasBrother ≡ hasMaleSibling", axiom.toString());
+        Assert.assertEquals("X's having brother Y is equivalent to that X has male sibling Y", text);
     }
 
 //    @Test
