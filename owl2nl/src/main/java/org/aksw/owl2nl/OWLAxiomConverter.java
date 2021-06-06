@@ -222,9 +222,11 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 	@Override
 	public void visit(OWLInverseObjectPropertiesAxiom axiom) {
 		logger.debug("Converting InverseObjectProperties axiom {}", axiom);
-
+		// get the first property
 		OWLObjectPropertyExpression firstPropertyExpression = axiom.getFirstProperty();
+		//get the second property
 		OWLObjectPropertyExpression secondPropertyExpression = axiom.getSecondProperty();
+		// get inverse of second property
 		OWLObjectPropertyExpression inversePropertyExpression = secondPropertyExpression.getInverseProperty();
 
 		// Express the inverse object properties axiom as the first property
@@ -251,8 +253,9 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 	@Override
 	public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
 		logger.debug("Converting SymmetricObjectProperty axiom {}", axiom);
-
+		// read the property expression
 		OWLObjectPropertyExpression propertyExpression = axiom.getProperty();
+		// get the inverse of the property expression
 		OWLObjectPropertyExpression inversePropertyExpression = propertyExpression.getInverseProperty();
 
 		// Express the symmetric object property axiom as the property
