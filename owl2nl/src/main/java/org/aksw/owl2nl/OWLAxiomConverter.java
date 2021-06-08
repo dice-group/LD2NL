@@ -196,19 +196,14 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 				NLGElement EquiObjPropertyElement = peConverter.asNLGElement(ObjProp.get(i), false);
 				logger.debug("Equivalent Property 1: " + realiser.realise(EquiObjPropertyElement));
 
-
 				NLGElement Equi2ObjPropertyElement = peConverter.asNLGElement(ObjProp.get(j), false);
 				logger.debug("Equivalent Property 2: " + realiser.realise(Equi2ObjPropertyElement));
 				SPhraseSpec clause = nlgFactory.createClause(EquiObjPropertyElement, "be equivalent to", Equi2ObjPropertyElement);
 				nl = realiser.realise(clause).toString();
 				logger.debug(axiom + " = " + nl);
-
-
 			}
-
 		}
 	}
-
 
 	@Override
 	public void visit(OWLDisjointObjectPropertiesAxiom axiom) {
@@ -226,6 +221,19 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLInverseObjectPropertiesAxiom axiom) {
+		logger.debug("Converting InverseObjectProperties axiom {}", axiom);
+		// get the first property
+		OWLObjectPropertyExpression firstPropertyExpression = axiom.getFirstProperty();
+		//get the second property
+		OWLObjectPropertyExpression secondPropertyExpression = axiom.getSecondProperty();
+		// get inverse of second property
+		OWLObjectPropertyExpression inversePropertyExpression = secondPropertyExpression.getInverseProperty();
+
+		// Express the inverse object properties axiom as the first property
+		// being equivalent to the inverse of the second property.
+		OWLEquivalentObjectPropertiesAxiom eqObjectPropertiesAxiom = df.getOWLEquivalentObjectPropertiesAxiom(
+				firstPropertyExpression, inversePropertyExpression);
+		eqObjectPropertiesAxiom.accept(this);
 	}
 
 	@Override
@@ -245,10 +253,13 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 	@Override
 	public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
 		logger.debug("Converting SymmetricObjectProperty axiom {}", axiom);
-
+		// read the property expression
 		OWLObjectPropertyExpression propertyExpression = axiom.getProperty();
+		// get the inverse of the property expression
 		OWLObjectPropertyExpression inversePropertyExpression = propertyExpression.getInverseProperty();
 
+		// Express the symmetric object property axiom as the property
+		// being a sub object property of it's inverse.
 		OWLSubObjectPropertyOfAxiom subObjPropAxiom = df.getOWLSubObjectPropertyOfAxiom(
 				propertyExpression, inversePropertyExpression);
 		subObjPropAxiom.accept(this);

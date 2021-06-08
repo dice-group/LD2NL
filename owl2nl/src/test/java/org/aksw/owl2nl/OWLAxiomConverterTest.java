@@ -19,6 +19,7 @@ public class OWLAxiomConverterTest {
     private static OWLObjectProperty isFatherOf;
     private static OWLObjectProperty isInLawOf;
     private static OWLObjectProperty isUncleInLawOf;
+    private static OWLObjectProperty isMotherOf;
     private static OWLObjectProperty hasSex;
     private static OWLObjectProperty hasMother;
     private static OWLObjectProperty hasBrother;
@@ -52,6 +53,7 @@ public class OWLAxiomConverterTest {
         isFatherOf = df.getOWLObjectProperty("isFatherOf", pm);
         isUncleInLawOf = df.getOWLObjectProperty("isUncleInLawOf", pm);
         isInLawOf = df.getOWLObjectProperty("isInLawOf", pm);
+        isMotherOf = df.getOWLObjectProperty("isMotherOf", pm);
         hasSex = df.getOWLObjectProperty("hasSex", pm);
         hasMother = df.getOWLObjectProperty("hasMother", pm);
         hasBrother = df.getOWLObjectProperty("hasBrother", pm);
@@ -144,12 +146,21 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
-    public void testEquivalentObjectProperty() throws OWLAxiomConversionException {
-        axiom = axiom = df.getOWLEquivalentObjectPropertiesAxiom(hasBrother,hasMaleSibling);
+    public void testEquivalentObjectProperties() throws OWLAxiomConversionException {
+        axiom = df.getOWLEquivalentObjectPropertiesAxiom(hasBrother, hasMaleSibling);
         text = converter.convert(axiom);
         System.out.println(axiom + " = " + text);
         Assert.assertEquals("hasBrother ≡ hasMaleSibling", axiom.toString());
         Assert.assertEquals("X's having brother Y is equivalent to that X has male sibling Y", text);
+    }
+
+    @Test
+    public void testInverseObjectProperties() throws OWLAxiomConversionException {
+        axiom = df.getOWLInverseObjectPropertiesAxiom(hasMother, isMotherOf);
+        text = converter.convert(axiom);
+        System.out.println(axiom + " = " + text);
+        Assert.assertEquals("hasMother ≡ isMotherOf⁻", axiom.toString());
+        Assert.assertEquals("X's having mother Y is equivalent to that Y is mother of X", text);
     }
 
 //    @Test
