@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import simplenlg.features.Feature;
+import simplenlg.framework.CoordinatedPhraseElement;
 import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
 import simplenlg.lexicon.Lexicon;
@@ -172,7 +173,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 		logger.debug("Converting SubObjectPropertyOf axiom {}", axiom);
 		// convert the sub property
 		OWLObjectPropertyExpression subProperty = axiom.getSubProperty();
-		NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true);
+		NLGElement subPropertyElement = peConverter.asNLGElement(subProperty);
 		logger.debug("subProperty: " + realiser.realise(subPropertyElement));
 
 		// convert the super property
@@ -267,6 +268,25 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLTransitiveObjectPropertyAxiom axiom) {
+		OWLObjectPropertyExpression propertyExpression = axiom.getProperty();
+
+		//transiviteProperty1=X&Y, transiviteProperty2=Y&Z, transiviteProperty3=X&Z
+		NLGElement transiviteProperty1 = peConverter.asNLGElement(propertyExpression,true);
+		NLGElement transiviteProperty2 = peConverter.asNLGElement(propertyExpression,true);
+		NLGElement transiviteProperty3 = peConverter.asNLGElement(propertyExpression,true);
+
+		CoordinatedPhraseElement Phrase1 = nlgFactory.createCoordinatedPhrase();
+		CoordinatedPhraseElement Phrase2 = nlgFactory.createCoordinatedPhrase();
+
+		Phrase1.addCoordinate(transiviteProperty1);
+		Phrase1.addCoordinate(transiviteProperty2);
+
+		Phrase2.addCoordinate(transiviteProperty3);
+		Phrase2.setConjunction("if");
+		Phrase2.addCoordinate(Phrase1);
+
+		nl = realiser.realise(Phrase2).toString();
+		logger.debug(axiom + " = " + nl);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.aksw.owl2nl;
 
+import com.github.andrewoma.dexx.collection.internal.base.Break;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
 import org.aksw.triple2nl.property.PropertyVerbalization;
@@ -26,11 +27,18 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
 
     OWLObjectPropertyExpression root;
 
-    private boolean isSubObjectPropertyExpression;
+    //The flag is true if the transitive object property is getting called
+    private boolean isTransitiveObjectProperty;
+    //To count the iterations for transitive object property as
+    //it requires three different subject-object combinations
+    private int countTransitive;
 
     public OWLPropertyExpressionConverter(Lexicon lexicon) {
         nlgFactory = new NLGFactory(lexicon);
         realiser = new Realiser(lexicon);
+
+        isTransitiveObjectProperty = false;
+        countTransitive = 0;
     }
 
     public OWLPropertyExpressionConverter() {
@@ -54,9 +62,9 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
 
     public NLGElement asNLGElement(
             OWLObjectPropertyExpression pe,
-            boolean isSubObjectPropertyExpression) {
-        this.root = pe;
-        this.isSubObjectPropertyExpression = isSubObjectPropertyExpression;
+            boolean isTransitiveObjectProperty) {
+                this.root = pe;
+        this.isTransitiveObjectProperty = isTransitiveObjectProperty;
 
         NLGElement nlgElement = pe.accept(this);
 
@@ -71,7 +79,26 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
     @NotNull
     @Override
     public NLGElement visit(@NotNull OWLObjectProperty pe) {
-        SPhraseSpec phrase = getSentencePhraseFromProperty(pe, "X", "Y");
+        SPhraseSpec phrase = null;
+
+        if(isTransitiveObjectProperty==true) {
+            switch (countTransitive){
+                case 0: phrase = getSentencePhraseFromProperty(pe, "X", "Y");
+                    break;
+
+                case 1: phrase = getSentencePhraseFromProperty(pe, "Y", "Z");
+                    break;
+
+                case 2: phrase = getSentencePhraseFromProperty(pe, "X", "Z");
+                    isTransitiveObjectProperty = false;
+                    countTransitive = 0;
+                    break;
+            }
+            countTransitive++;
+        }
+        else {
+                phrase = getSentencePhraseFromProperty(pe, "X", "Y");
+        }
 
         return phrase;
     }
