@@ -119,6 +119,15 @@ public class OWLAxiomConverterTest {
     }
 
     @Test
+    public void testTransitiveObjectProperty() throws OWLAxiomConversionException {
+        axiom = df.getOWLTransitiveObjectPropertyAxiom(knows);
+        text = converter.convert(axiom);
+        System.out.println(axiom + " = " + text);
+        Assert.assertEquals("knows ∈ R⁺", axiom.toString());
+        Assert.assertEquals("X knows Z if X knows Y and Y knows Z", text);
+    }
+
+    @Test
     public void testObjectPropertyDomain() throws OWLAxiomConversionException {
         axiom = df.getOWLObjectPropertyDomainAxiom(hasMother, person);
         text = converter.convert(axiom);
