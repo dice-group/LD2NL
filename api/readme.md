@@ -9,8 +9,9 @@ Navigate to the api folder in terminal or console.
 _**Mac-**_
 `./mvnw spring-boot:run`
 
-**_Windows-_**
+**_Windows-_** and **_Linux_**
 `mvn spring-boot:run`
+
 
 Once the application is running, you can browse the webpage in any local browser on port 8080.
 
@@ -20,6 +21,9 @@ Once the application is running, you can browse the webpage in any local browser
 Endpoint hello has been defined to test the api is running.
 it should give a string response on the browser - "Hello from API".
 Check that you must get this response in your browser.
+
+Play with this endpoint: Just pass a parameter myName= and response shall return the name.
+eg- www.localhost:8080/hello?myName=Rockstar would respond with "Hello Rockstar"
 
 2) HTTP Get
 If so, hit the endpoint - `www.localhost:8080/getOntology`
