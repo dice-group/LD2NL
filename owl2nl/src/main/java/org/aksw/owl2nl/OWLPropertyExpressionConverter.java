@@ -1,6 +1,5 @@
 package org.aksw.owl2nl;
 
-import com.github.andrewoma.dexx.collection.internal.base.Break;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
 import org.aksw.triple2nl.property.PropertyVerbalization;
