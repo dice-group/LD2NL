@@ -24,7 +24,7 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
     IRIConverter iriConverter = new SimpleIRIConverter();
     PropertyVerbalizer propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
 
-    OWLObjectPropertyExpression root;
+    OWLPropertyExpression root;
 
     //The flag is true if the transitive object property is getting called
     private boolean isTransitiveObjectProperty;
@@ -45,7 +45,7 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
     }
 
 
-    public String convert(OWLObjectPropertyExpression pe) {
+    public String convert(OWLPropertyExpression pe) {
         // process
         NLGElement nlgElement = asNLGElement(pe);
         // realise
@@ -54,13 +54,13 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
         return nlgElement.getRealisation();
     }
 
-    public NLGElement asNLGElement(OWLObjectPropertyExpression pe) {
+    public NLGElement asNLGElement(OWLPropertyExpression pe) {
 
         return asNLGElement(pe, false);
     }
 
     public NLGElement asNLGElement(
-            OWLObjectPropertyExpression pe,
+            OWLPropertyExpression pe,
             boolean isTransitiveObjectProperty) {
                 this.root = pe;
         this.isTransitiveObjectProperty = isTransitiveObjectProperty;
@@ -110,12 +110,15 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
 
         return phrase;
     }
-
     @NotNull
     @Override
-    public NLGElement visit(@NotNull OWLDataProperty owlDataProperty) {
-        return null;
+    public NLGElement visit(OWLDataProperty pe) {
+        SPhraseSpec phrase = getSentencePhraseFromProperty(pe, "X", "Y");
+
+        return phrase;
     }
+
+
 
     @NotNull
     @Override
@@ -124,7 +127,7 @@ public class OWLPropertyExpressionConverter implements OWLPropertyExpressionVisi
     }
 
     private SPhraseSpec getSentencePhraseFromProperty(
-            OWLObjectProperty pe,
+            OWLProperty pe,
             String subject,
             String object) {
         SPhraseSpec phrase = nlgFactory.createClause();

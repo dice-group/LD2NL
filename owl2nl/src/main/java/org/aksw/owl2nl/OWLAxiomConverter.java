@@ -305,10 +305,44 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLSubDataPropertyOfAxiom axiom) {
+		logger.debug("Converting SubObjectPropertyOf axiom {}", axiom);
+		// convert the sub property
+		OWLDataPropertyExpression subProperty = axiom.getSubProperty();
+		NLGElement subPropertyElement = peConverter.asNLGElement(subProperty);
+		logger.debug("subProperty: " + realiser.realise(subPropertyElement));
+
+		// convert the super property
+		OWLDataPropertyExpression superProperty = axiom.getSuperProperty();
+		NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
+		logger.debug("SuperObjectProperty: " + realiser.realise(superPropertyElement));
+
+		SPhraseSpec clause = nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement);
+		superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
+
+		nl = realiser.realise(clause).toString();
+		logger.debug(axiom + " = " + nl);
 	}
 
 	@Override
 	public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
+		Set<OWLDataPropertyExpression> DataProperty = axiom.getProperties();
+		List<OWLDataPropertyExpression> DataProp = new ArrayList<>(DataProperty);
+		for (int i = 0; i < DataProp.size(); i++) {
+			for (int j = i + 1; j < DataProp.size(); j++) {
+				NLGElement EquiDataPropertyElement = peConverter.asNLGElement(DataProp.get(i));
+				logger.debug("Equivalent Property 1: " + realiser.realise(EquiDataPropertyElement));
+
+
+				NLGElement Equi2DataPropertyElement = peConverter.asNLGElement(DataProp.get(j));
+				logger.debug("Equivalent Property 2: " + realiser.realise(Equi2DataPropertyElement));
+				SPhraseSpec clause = nlgFactory.createClause(EquiDataPropertyElement, "be equivalent to", Equi2DataPropertyElement);
+				nl = realiser.realise(clause).toString();
+				logger.debug(axiom + " = " + nl);
+
+			}
+
+
+		}
 	}
 
 	@Override
