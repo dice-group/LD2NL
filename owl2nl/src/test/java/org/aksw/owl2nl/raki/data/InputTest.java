@@ -11,8 +11,6 @@ public class InputTest {
 
   @Test
   public void test() {
-    InputTest.class.getClassLoader().getResource("test.owl").getPath().toString();
-
     final IInput input = new OWL2NLInput().setOntology(//
         Paths.get(InputTest.class.getClassLoader().getResource("test.owl").getPath())//
     );
