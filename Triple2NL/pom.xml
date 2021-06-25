@@ -28,6 +28,10 @@
 					<groupId>edu.berkeley.compbio</groupId>
 					<artifactId>jlibsvm</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.martiansoftware</groupId>
+					<artifactId>JSAP</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

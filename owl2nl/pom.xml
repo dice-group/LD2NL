@@ -88,6 +88,7 @@
 			<id>Apache Repo Central 1</id>
 			<name>Apache Repository 1</name>
 			<url>https://repo1.maven.org/maven2</url>
+			<layout>default</layout>
 		</repository>
 		<repository>
 			<id>Apache Repo Central</id>
@@ -98,7 +99,6 @@
 			<id>XypronRelease</id>
 			<name>Xypron Release</name>
 			<url>http://rsync.xypron.de/repository</url>
-			<layout>default</layout>
 		</repository>
 	</repositories>
 </project> 
