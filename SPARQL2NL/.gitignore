@@ -1,9 +1,0 @@
-.classpath
-.project
-.settings/**/*
-target/**/*
-log/*
-.DS_Store
-.settings/*
-*.lsq
-/target/

@@ -1,5 +1,8 @@
-/target/
+target/
+repository/
 .settings/
+
 .classpath
 .project
-.gitignore
+*.log
+*.db
