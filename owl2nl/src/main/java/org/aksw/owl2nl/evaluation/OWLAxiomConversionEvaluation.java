@@ -5,18 +5,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.owl2nl.converter.OWLAxiomConverter;
 import org.aksw.owl2nl.data.OWL2NLInput;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
 import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -26,6 +28,7 @@ import com.google.common.io.Files;
  * @author Lorenz Buehmann created on 11/4/15
  */
 public class OWLAxiomConversionEvaluation {
+  private static final Logger LOG = LogManager.getLogger(OWLAxiomConversionEvaluation.class);
 
   // https://raw.githubusercontent.com/pezra/pretty-printer/master/Jenna-2.6.3/testing/ontology/bugs/koala.owl
   // http://protege.cim3.net/file/pub/ontologies/travel/travel.owl
@@ -34,8 +37,8 @@ public class OWLAxiomConversionEvaluation {
   static URL url = null;
   static {
     try {
-      // url = Paths.get("travel.owl").toUri().toURL();
-      url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
+      url = Paths.get("test.owl").toUri().toURL();
+      // url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
     } catch (final MalformedURLException e) {
       e.printStackTrace();
     }
@@ -54,8 +57,8 @@ public class OWLAxiomConversionEvaluation {
   public static void main(final String[] args) throws Exception {
     final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
 
-    final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-    final OWLOntology ontology = man.loadOntologyFromOntologyDocument(getInput());
+    final OWLOntology ontology = OWLManager.createOWLOntologyManager()//
+        .loadOntologyFromOntologyDocument(getInput());
 
     final List<List<String>> data = new ArrayList<>();
 
@@ -66,13 +69,12 @@ public class OWLAxiomConversionEvaluation {
 
       if (s != null) {
 
-        System.out.println(axiom);
-        System.out.println(s);
-        System.out.println("------");
+        LOG.info(axiom);
+        LOG.info(s);
+        LOG.info("------");
 
         final List<String> rowData = new ArrayList<>();
         rowData.add(String.valueOf(i++));
-
         String renderedAxiom = renderer.render(axiom);
         for (final ManchesterOWLSyntax keyword : ManchesterOWLSyntax.values()) {
           if (keyword.isAxiomKeyword() || keyword.isClassExpressionConnectiveKeyword()
@@ -91,7 +93,7 @@ public class OWLAxiomConversionEvaluation {
 
     final String htmlTable =
         HTMLTableGenerator.generateHTMLTable(Lists.newArrayList("ID", "Axiom", "NL"), data);
-    final File file = new File("/tmp/axiomConversionResults.html");
+    final File file = new File("axiomConversionResults.html");
     System.out.println(file.getPath());
     Files.write(htmlTable, file, Charsets.UTF_8);
   }
