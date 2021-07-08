@@ -76,7 +76,7 @@ public class OWLClassExpressionConverterTest {
     final PrefixManager pm = new DefaultPrefixManager();
     pm.setDefaultPrefix("http://dbpedia.org/ontology/");
     final PrefixManager resource = new DefaultPrefixManager();
-    pm.setDefaultPrefix(" http://dbpedia.org/resource/");
+    pm.setDefaultPrefix("http://dbpedia.org/resource/");
 
     birthPlace = df.getOWLObjectProperty("birthPlace", pm);
     worksFor = df.getOWLObjectProperty("worksFor", pm);
