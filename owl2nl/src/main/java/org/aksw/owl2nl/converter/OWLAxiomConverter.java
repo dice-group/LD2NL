@@ -1,6 +1,7 @@
 package org.aksw.owl2nl.converter;
 
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
@@ -76,7 +77,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
   private final OWLDataFactory df = new OWLDataFactoryImpl();
 
-  private String nl;
+  private String nl = null;
 
   /**
    * OWLAxiomConverter class constructor.
@@ -123,8 +124,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
         axiom.accept(this);
         return nl;
       } catch (final Exception e) {
-        LOG.debug("axion: " + axiom);
-        LOG.debug("this: " + this);
+        LOG.debug("axiom: {} this: {}", axiom, this);
         throw new OWLAxiomConversionException(axiom, e);
       }
     }
@@ -139,77 +139,151 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   // ################# OWLAxiomVisitor ################
   // #########################################################
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.semanticweb.owlapi.model.OWLAxiomVisitor#visit(org.semanticweb.owlapi.model.
-   * OWLSubClassOfAxiom)
+  /**
+   * A subclass axiom SubClassOf(CE1 CE2) states that the class expression CE1 is a subclass of the
+   * class expression CE2<br>
+   * <br>
+   * Example:<br>
+   * <br>
+   * class expression: SubClassOf(a:Child a:Person)<br>
+   * <br>
+   * converted: Each child is a person.
    */
   @Override
   public void visit(final OWLSubClassOfAxiom axiom) {
 
-    LOG.debug("Converting SubClassOf axiom {}, {}", axiom, axiom.getSubClass());
+    LOG.debug("Converting SubClassOf axiom: {}", axiom);
 
     final OWLClassExpression subClass = axiom.getSubClass();
-    final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
-
-    LOG.debug("SubClass: " + realiser.realise(subClassElement));
-    // ((PhraseElement)subClassElement).setPreModifier("every");
-
-    LOG.debug("Converting SuperClass axiom {}, {}", axiom, axiom.getSuperClass());
-
     final OWLClassExpression superClass = axiom.getSuperClass();
-    final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
 
-    LOG.debug("SuperClass: " + realiser.realise(superClassElement));
+    final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
+    final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
 
     final SPhraseSpec clause = nlgFactory.createClause(subClassElement, "be", superClassElement);
     superClassElement.setFeature(Feature.COMPLEMENTISER, null);
 
-    nl = realiser.realise(clause).toString();
+    if (nl == null) {
+      nl = realiser.realise(clause).toString();
+    } else {
+      nl = nl + "; " + realiser.realise(clause).toString();
+    }
+    LOG.debug("Converted to: {}", nl);
 
-    LOG.debug(axiom + " = " + nl);
+    // LOG.debug("SubClass: " + realiser.realise(subClassElement));
+    // ((PhraseElement)subClassElement).setPreModifier("every");
+    // LOG.debug("SuperClass: " + realiser.realise(superClassElement));
   }
 
+  /**
+   * An equivalent classes axiom EquivalentClasses(CE1 ... CEn) states that all of the class
+   * expressions CEi, 1 ≤ i ≤ n, are semantically equivalent to each other.<br>
+   * <br>
+   * Example:<br>
+   * <br>
+   * class expression: EquivalentClasses(a:Boy ObjectIntersectionOf(a:Child a:Man))<br>
+   * <br>
+   * converted: A boy is a male child.<br>
+   * <br>
+   * We rewrite EquivalentClasses(CE1 CE2) as SubClassOf(CE1 CE2) and SubClassOf(CE2 CE1)
+   */
   @Override
   public void visit(final OWLEquivalentClassesAxiom axiom) {
     final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
+    LOG.debug("Converting EquivalentClasses axiom: {}, {}", axiom, classExpressions);
 
     for (int i = 0; i < classExpressions.size(); i++) {
       for (int j = i + 1; j < classExpressions.size(); j++) {
-        final OWLSubClassOfAxiom subClassAxiom;
-        subClassAxiom = df.getOWLSubClassOfAxiom(classExpressions.get(i), classExpressions.get(j));
-        subClassAxiom.accept(this);
+        df.getOWLSubClassOfAxiom(//
+            classExpressions.get(i), classExpressions.get(j)//
+        ).accept(this);
       }
     }
   }
 
-  /*
-   * We rewrite DisjointClasses(C_1,...,C_n) as SubClassOf(C_i, ObjectComplementOf(C_j)) for each
-   * subset {C_i,C_j} with i != j
+  /**
+   * A disjoint classes axiom DisjointClasses(CE1 ... CEn) states that all of the class expressions
+   * CEi, 1 ≤ i ≤ n, are pairwise disjoint; that is, no individual can be at the same time an
+   * instance of both CEi and CEj for i ≠ j.<br>
+   * <br>
+   * Example:<br>
+   * <br>
+   * class expression: DisjointClasses(a:Boy a:Girl)<br>
+   * <br>
+   * converted: Nothing can be both a boy and a girl.<br>
+   * <br>
+   * We rewrite DisjointClasses(CE1 ... CEn) as SubClassOf(CEi, ObjectComplementOf(CEj)) for each
+   * subset {CEi,CEj} with i != j
    */
   @Override
   public void visit(final OWLDisjointClassesAxiom axiom) {
     final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
+    LOG.debug("Converting DisjointClasses axiom: {}, {}", axiom, classExpressions);
 
     for (int i = 0; i < classExpressions.size(); i++) {
       for (int j = i + 1; j < classExpressions.size(); j++) {
-        final OWLSubClassOfAxiom subClassAxiom = df.getOWLSubClassOfAxiom(classExpressions.get(i),
-            df.getOWLObjectComplementOf(classExpressions.get(j)));
-        subClassAxiom.accept(this);
+        df.getOWLSubClassOfAxiom(//
+            classExpressions.get(i), df.getOWLObjectComplementOf(classExpressions.get(j))//
+        ).accept(this);
       }
     }
   }
 
+  /**
+   * DisjointUnion class expression allows one to define a class as a disjoint union of several
+   * class expressions and thus to express covering constraints.<br>
+   * <br>
+   * Example:<br>
+   * <br>
+   * class expression: DisjointUnion(a:Child a:Boy a:Girl)<br>
+   * <br>
+   * converted: Each child is either a boy or a girl, each boy is a child, each girl is a child, and
+   * nothing can be both a boy and a girl.<br>
+   * <br>
+   * <br>
+   * We rewrite DisjointUnion(C , CE1 ... CEn) as EquivalentClasses(C ,ObjectUnionOf(CE1 ... CEn ))
+   * and DisjointClasses(CE1 ... CEn)
+   */
   @Override
-  public void visit(final OWLDisjointUnionAxiom axiom) {}
+  public void visit(final OWLDisjointUnionAxiom axiom) {
+    // verb.addFrontModifier("either");
+    final Set<OWLClassExpression> classExpressions = axiom.getClassExpressions();
+    LOG.debug("Converting DisjointUnion axiom: {}, {}", axiom, classExpressions);
+    df.getOWLEquivalentClassesAxiom(///
+        axiom.getOWLClass(), df.getOWLObjectUnionOf(classExpressions)//
+    ).accept(this);
+    df.getOWLDisjointClassesAxiom(classExpressions).accept(this);
+  }
 
   // #########################################################
   // ################# object property axioms ################
   // #########################################################
 
+  /**
+   * SubObjectPropertyOf( a:hasDog a:hasPet ) Having a dog implies having a pet.
+   */
   @Override
-  public void visit(final OWLSubObjectPropertyOfAxiom axiom) {}
+  public void visit(final OWLSubObjectPropertyOfAxiom axiom) {
+    /**
+     * <code>
+        final OWLObjectPropertyExpression superProperty = axiom.getSuperProperty();
+        final OWLObjectPropertyExpression subProperty = axiom.getSubProperty();
+
+        final NLGElement subPropertyElement = ceConverter.asNLGElement(subProperty, true);
+
+        peConverter.asNLGElement(subProperty, true);
+
+        // convert the super property
+        final NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
+
+        final SPhraseSpec clause =
+            nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement);
+        superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
+
+        nl = realiser.realise(clause).toString();
+    </code>
+     */
+  }
 
   @Override
   public void visit(final OWLEquivalentObjectPropertiesAxiom axiom) {}
@@ -228,7 +302,26 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   }
 
   @Override
-  public void visit(final OWLInverseObjectPropertiesAxiom axiom) {}
+  public void visit(final OWLInverseObjectPropertiesAxiom axiom) {
+    /**
+     * <code>
+     LOG.debug("Converting InverseObjectProperties axiom {}", axiom);
+     // get the first property
+     final OWLObjectPropertyExpression firstPropertyExpression = axiom.getFirstProperty();
+     // get the second property
+     final OWLObjectPropertyExpression secondPropertyExpression = axiom.getSecondProperty();
+     // get inverse of second property
+     final OWLObjectPropertyExpression inversePropertyExpression =
+         secondPropertyExpression.getInverseProperty();
+
+     // Express the inverse object properties axiom as the first property
+     // being equivalent to the inverse of the second property.
+     final OWLEquivalentObjectPropertiesAxiom eqObjectPropertiesAxiom = df
+         .getOWLEquivalentObjectPropertiesAxiom(firstPropertyExpression, inversePropertyExpression);
+     eqObjectPropertiesAxiom.accept(this);
+    </code>
+     */
+  }
 
   @Override
   public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
@@ -244,7 +337,19 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   }
 
   @Override
-  public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {}
+  public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {
+    /**
+     * <code>
+    final OWLObjectPropertyExpression propertyExpression = axiom.getProperty();
+    final OWLObjectPropertyExpression inversePropertyExpression =
+        propertyExpression.getInverseProperty();
+    
+    final OWLSubObjectPropertyOfAxiom subObjPropAxiom =
+        df.getOWLSubObjectPropertyOfAxiom(propertyExpression, inversePropertyExpression);
+    subObjPropAxiom.accept(this);
+        </code>
+     */
+  }
 
   @Override
   public void visit(final OWLTransitiveObjectPropertyAxiom axiom) {}
@@ -333,9 +438,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   // #########################################################
 
   @Override
-  public void visit(final OWLAnnotationAssertionAxiom axiom) {
-    LOG.debug("OWLAnnotationAssertionAxiom: {}", axiom.toString());
-  }
+  public void visit(final OWLAnnotationAssertionAxiom axiom) {}
 
   @Override
   public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {}
@@ -347,7 +450,5 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
   public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {}
 
   @Override
-  public void visit(final OWLDeclarationAxiom axiom) {
-    LOG.debug("OWLDeclarationAxiom: {}", axiom.toString());
-  }
+  public void visit(final OWLDeclarationAxiom axiom) {}
 }
