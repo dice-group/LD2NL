@@ -19,9 +19,9 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
-public class OWLAxiomTypeTest {
+public class OWLAxiomConverterTest {
 
-  private static final Logger LOG = LogManager.getLogger(OWLAxiomTypeTest.class);
+  private static final Logger LOG = LogManager.getLogger(OWLAxiomConverterTest.class);
 
   private final OWLAxiomConverter converter = new OWLAxiomConverter();
   private final OWLDataFactoryImpl df = new OWLDataFactoryImpl();
@@ -158,7 +158,7 @@ public class OWLAxiomTypeTest {
         df.getOWLObjectIntersectionOf(child, man)//
     );
     return Pair.of(//
-        "every boy is a child whose a man", //
+        "Every boy is a child whose a man. ", //
         converter.convert(axiom)//
     );
   }
@@ -169,7 +169,7 @@ public class OWLAxiomTypeTest {
         place, thing//
     );
     return Pair.of(//
-        "every place is a thing", //
+        "Every place is a thing. ", //
         converter.convert(axiom)//
     );
   }
@@ -180,7 +180,7 @@ public class OWLAxiomTypeTest {
         boy, girl);
 
     return Pair.of(//
-        "every boy is something that is not a girl", //
+        "Every boy is something that is not a girl. ", //
         converter.convert(axiom)//
     );
   }
@@ -198,11 +198,11 @@ public class OWLAxiomTypeTest {
         ));
 
     return Pair.of(//
-        "every football player is an american football player, "
-            + "a canadian football player or a german football player;"
-            + " every american football player is something that is not a canadian football player;"
-            + " every american football player is something that is not a german football player;"
-            + " every canadian football player is something that is not a german football player", //
+        "Every football player is an american football player, "
+            + "a canadian football player or a german football player."
+            + " Every american football player is something that is not a canadian football player."
+            + " Every american football player is something that is not a german football player."
+            + " Every canadian football player is something that is not a german football player. ", //
         converted//
     );
   }
@@ -220,7 +220,7 @@ public class OWLAxiomTypeTest {
         ));
 
     return Pair.of(//
-        "every child is a boy or a girl; every boy is something that is not a girl", //
+        "Every child is a boy or a girl. Every boy is something that is not a girl. ", //
         converted//
     );
   }
@@ -233,7 +233,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything that has a dog is a person", //
+        "Everything that has a dog is a person. ", //
         converted//
     );
   }
@@ -246,7 +246,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything is something that has as dog only a person", //
+        "Everything is something that has as dog only a person. ", //
         converted//
     );
   }
@@ -259,7 +259,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything that has name is a person", //
+        "Everything that has name is a person. ", //
         converted//
     );
   }
@@ -274,7 +274,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything is something that has name only string", //
+        "Everything is something that has name only string. ", //
         converted//
     );
   }
@@ -314,7 +314,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything is something that has at most 1 father", //
+        "Everything is something that has at most 1 father. ", //
         converted//
     );
   }
@@ -327,7 +327,7 @@ public class OWLAxiomTypeTest {
     );
 
     return Pair.of(//
-        "everything is something that has age at most 1 Literals", //
+        "Everything is something that has age at most 1 Literals. ", //
         converted//
     );
   }
@@ -337,7 +337,8 @@ public class OWLAxiomTypeTest {
 
     final String converted = converter.convert(//
         df.getOWLInverseFunctionalObjectPropertyAxiom(//
-            df.getOWLObjectProperty("fatherOf", pm))//
+            df.getOWLObjectProperty("fatherOf", pm)//
+        )//
     );
 
     return Pair.of(//

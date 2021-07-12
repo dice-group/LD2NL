@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.raki.data;
+package org.aksw.owl2nl.data;
 
 import java.nio.file.Paths;
 
