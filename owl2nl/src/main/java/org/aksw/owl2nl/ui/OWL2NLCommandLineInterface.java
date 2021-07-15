@@ -7,7 +7,6 @@ import java.util.Set;
 import org.aksw.owl2nl.converter.OWLAxiomConverter;
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
-import org.aksw.owl2nl.exception.OWLAxiomConversionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.IRI;
@@ -77,16 +76,11 @@ public class OWL2NLCommandLineInterface {
       } else {
         LOG.info("\n==============================\nStarting verbalizations...");
         for (final OWLAxiom axiom : axioms) {
-          try {
-            final String verbalization = converter.convert(axiom);
-            if (verbalization != null) {
-              verbalizations.put(axiom, verbalization);
-            } else {
-              LOG.trace("Could not verbalize axiom: " + axiom);
-            }
-          } catch (final OWLAxiomConversionException e) {
-            verbalizations.put(axiom, "");
-            LOG.error("Could not verbalize axiom: " + axiom);
+          final String verbalization = converter.convert(axiom);
+          if (verbalization != null) {
+            verbalizations.put(axiom, verbalization);
+          } else {
+            LOG.trace("Could not verbalize axiom: " + axiom);
           }
         }
       }
