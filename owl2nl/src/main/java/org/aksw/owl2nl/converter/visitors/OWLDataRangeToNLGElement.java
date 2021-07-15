@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.converter;
+package org.aksw.owl2nl.converter.visitors;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.OWLDataComplementOf;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataOneOf;
 import org.semanticweb.owlapi.model.OWLDataRange;
@@ -23,13 +24,17 @@ import simplenlg.framework.CoordinatedPhraseElement;
 import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
 import simplenlg.phrasespec.NPPhraseSpec;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
+ * @author Lorenz Buehmann
  * @author Rene Speck
  *
  */
-public class OWLDataRangeToNLGElement extends AOWLConverter
+public class OWLDataRangeToNLGElement extends AToNLGElement
     implements OWLDataRangeVisitorEx<NLGElement> {
+
+  protected OWLDataFactory df = new OWLDataFactoryImpl();
 
   /**
    *
@@ -38,7 +43,6 @@ public class OWLDataRangeToNLGElement extends AOWLConverter
    */
   public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final IInput in) {
     super(nlgFactory, in);
-
   }
 
   /*
@@ -158,5 +162,4 @@ public class OWLDataRangeToNLGElement extends AOWLConverter
 
     return phrases.get(0);
   }
-
 }
