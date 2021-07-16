@@ -1,16 +1,33 @@
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.dice-research</groupId>
 		<artifactId>LD2NL</artifactId>
-		<version>0.3.0-SNAPSHOT</version>
+		<version>0.4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>sparql2nl</artifactId>
 	<name>SPARQL2NL</name>
 	<description>SPARQL query to natural language converter</description>
 
 	<repositories>
+		<repository>
+			<id>Apache Repo Central 1</id>
+			<name>Apache Repository 1</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>Apache Repo Central</id>
+			<name>Apache Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>XypronRelease</id>
+			<name>Xypron Release</name>
+			<url>http://rsync.xypron.de/repository</url>
+		</repository>
 		<repository>
 			<id>clojars.org</id>
 			<url>https://repo.clojars.org</url>
@@ -34,12 +51,10 @@
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>
-<!-- 			<version>3.12.0-1</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-cache-h2</artifactId>
-<!-- 			<version>3.12.0-1</version> -->
 		</dependency>
 		<dependency>
 			<groupId>ifi.uzh</groupId>
@@ -48,7 +63,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-<!-- 			<version>3.9</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.solr</groupId>
@@ -76,21 +90,25 @@
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-core</artifactId>
 		</dependency>
-				<dependency>
+		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
 			<exclusions>
 				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>owlapi</artifactId>
+					<groupId>net.sourceforge.owlapi</groupId>
+				</exclusion>
+				<exclusion>
 					<artifactId>jena-arq</artifactId>
 					<groupId>org.apache.jena</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sourceforge.owlapi</groupId>
-					<artifactId>owlapi-distribution</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>edu.berkeley.compbio</groupId>
-					<artifactId>jlibsvm</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.martiansoftware</groupId>
@@ -105,7 +123,7 @@
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
@@ -152,14 +170,9 @@
 			<groupId>org.aksw</groupId>
 			<artifactId>sparqltools</artifactId>
 		</dependency>
-	<!-- 	<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-		</dependency> -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>28.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.tinyjee.jgraphx</groupId>
@@ -169,20 +182,16 @@
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-ext</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-            <version>3.12.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<version>3.12.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 			<version>3.12.0</version>
 			<exclusions>
-				<!--<exclusion>-->
-					<!--<artifactId>httpclient</artifactId>-->
-					<!--<groupId>org.apache.httpcomponents</groupId>-->
-				<!--</exclusion>-->
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
@@ -197,33 +206,22 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<version>2.5.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/gov.nih.nlm.nls.lexaccess/lexaccess-api -->
 		<dependency>
 			<groupId>gov.nih.nlm.nls.lexaccess</groupId>
 			<artifactId>lexaccess-api</artifactId>
 			<version>2013</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.18</version>
 		</dependency>
-
-<dependency>
-    <groupId>gov.nih.nlm.nls.lexaccess</groupId>
-    <artifactId>lexaccess-dist</artifactId>
-    <version>2013</version>
-</dependency>
-
-
 	</dependencies>
 </project>
 

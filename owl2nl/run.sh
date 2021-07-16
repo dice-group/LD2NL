@@ -1,0 +1,1 @@
+nohup mvn exec:java  -Dexec.mainClass="org.aksw.owl2nl.evaluation.OWLAxiomConversionEvaluation" > $0.log 2>&1 </dev/null &

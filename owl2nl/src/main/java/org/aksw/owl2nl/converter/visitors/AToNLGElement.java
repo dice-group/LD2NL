@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.converter;
+package org.aksw.owl2nl.converter.visitors;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.triple2nl.converter.IRIConverter;
@@ -6,21 +6,17 @@ import org.aksw.triple2nl.converter.LiteralConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import simplenlg.framework.NLGFactory;
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  *
  * @author Rene Speck
  */
-abstract class AOWLConverter {
+abstract class AToNLGElement {
 
-  protected static final Logger LOG = LogManager.getLogger(AOWLConverter.class);
-
-  protected OWLDataFactory df = new OWLDataFactoryImpl();
+  protected static final Logger LOG = LogManager.getLogger(AToNLGElement.class);
 
   protected NLGFactory nlgFactory;
   protected IRIConverter iriConverter;
@@ -33,7 +29,7 @@ abstract class AOWLConverter {
    * @param nlgFactory
    * @param input
    */
-  public AOWLConverter(final NLGFactory nlgFactory, final IInput input) {
+  public AToNLGElement(final NLGFactory nlgFactory, final IInput input) {
 
     this.input = input;
     this.nlgFactory = nlgFactory;

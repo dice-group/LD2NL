@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.converter;
+package org.aksw.owl2nl.converter.visitors;
 
 import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -9,10 +9,11 @@ import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
 
 /**
+ * @author Lorenz Buehmann
  * @author Rene Speck
  *
  */
-public class OWLIndividualToNLGElement extends AOWLConverter
+public class OWLIndividualToNLGElement extends AToNLGElement
     implements OWLIndividualVisitorEx<NLGElement> {
 
   /**

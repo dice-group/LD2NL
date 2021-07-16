@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.converter;
+package org.aksw.owl2nl.converter.visitors;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,12 +10,14 @@ import org.aksw.owl2nl.data.IInput;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.aksw.triple2nl.property.PropertyVerbalizer;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
 import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLDataCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLDataExactCardinality;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataHasValue;
 import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
 import org.semanticweb.owlapi.model.OWLDataMinCardinality;
@@ -40,6 +42,7 @@ import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
+import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import simplenlg.features.Feature;
@@ -53,19 +56,21 @@ import simplenlg.phrasespec.NPPhraseSpec;
 import simplenlg.phrasespec.SPhraseSpec;
 import simplenlg.phrasespec.VPPhraseSpec;
 import simplenlg.realiser.english.Realiser;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
+ * @author Lorenz Buehmann
  * @author Rene Speck
  *
  */
-public class OWLClassExpressionToNLGElement extends AOWLConverter
+public class OWLClassExpressionToNLGElement extends AToNLGElement
     implements OWLClassExpressionVisitorEx<NLGElement> {
 
+  // holds parameter
+  protected Parameter parameter;
+
   /**
-   * Class to hold parameters, variables and flags used in the OWLClassExpressionToNLGElement class.
-   *
-   * @author rspeck
-   *
+   * Holds parameters used in the OWLPropertyExpressiontoNLGElement class.
    */
   public class Parameter {
 
@@ -74,14 +79,18 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     public OWLClassExpression root;
   }
 
-  // hold parameter
-  protected Parameter parameter;
+  public void setParameter(final Parameter parameter) {
+    this.parameter = parameter;
+  }
 
-  private final Realiser realiser;
+  protected OWLDataFactory df = new OWLDataFactoryImpl();
 
-  private final PropertyVerbalizer propertyVerbalizer;
   protected OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
   protected OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
+  protected OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression;
+
+  private final PropertyVerbalizer propertyVerbalizer;
+  private final Realiser realiser;
 
   /**
    *
@@ -93,23 +102,17 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
    */
   public OWLClassExpressionToNLGElement(final NLGFactory nlgFactory, final Realiser realiser,
       final OWLIndividualVisitorEx<NLGElement> converterOWLIndividual,
-      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange, final IInput input) {
+      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange,
+      final OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression,
+      final IInput input) {
 
     super(nlgFactory, input);
 
     this.realiser = realiser;
     this.converterOWLIndividual = converterOWLIndividual;
     this.converterOWLDataRange = converterOWLDataRange;
-
+    this.converterOWLPropertyExpression = converterOWLPropertyExpression;
     propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
-  }
-
-  /**
-   *
-   * @param parameter
-   */
-  public void setParameter(final Parameter parameter) {
-    this.parameter = parameter;
   }
 
   @Override
@@ -214,7 +217,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
       phrase.setComplement(clause);
     }
 
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    // LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -249,7 +252,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
     parameter.noun = false;
 
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    // LOG.debug(ce + " = " + realiser.realise(phrase));
 
     return phrase;
   }
@@ -263,8 +266,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     final OWLClassExpression filler = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLObjectProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       String verbalizationText = propertyVerbalization.getVerbalizationText();
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase =
@@ -353,8 +355,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     final OWLClassExpression filler = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLObjectProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       String verbalizationText = propertyVerbalization.getVerbalizationText();
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory
@@ -435,8 +436,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     final OWLIndividual value = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLObjectProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
@@ -468,29 +468,23 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
   @Override
   public NLGElement visit(final OWLObjectMinCardinality ce) {
-    return processObjectCardinalityRestriction(ce);
+    return processObjectCardinalityRestriction(ce, "at least");
   }
 
   @Override
   public NLGElement visit(final OWLObjectMaxCardinality ce) {
-    return processObjectCardinalityRestriction(ce);
+    return processObjectCardinalityRestriction(ce, "at most");
   }
 
   @Override
   public NLGElement visit(final OWLObjectExactCardinality ce) {
-    return processObjectCardinalityRestriction(ce);
+    return processObjectCardinalityRestriction(ce, "exactly");
   }
 
-  private NLGElement processObjectCardinalityRestriction(final OWLObjectCardinalityRestriction ce) {
+  private NLGElement processObjectCardinalityRestriction(final OWLObjectCardinalityRestriction ce,
+      String modifier) {
+
     final SPhraseSpec phrase = nlgFactory.createClause();
-    String modifier;
-    if (ce instanceof OWLObjectMinCardinality) {
-      modifier = "at least";
-    } else if (ce instanceof OWLObjectMaxCardinality) {
-      modifier = "at most";
-    } else {
-      modifier = "exactly";
-    }
 
     final OWLObjectPropertyExpression property = ce.getProperty();
     final OWLClassExpression filler = ce.getFiller();
@@ -499,11 +493,10 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     modifier += " " + cardinality;
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLObjectProperty().getIRI().toString());
+
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
 
       if (propertyVerbalization.isNounType()) {
-        // if the verbalization of the property is a noun phrase
 
         final NLGElement word = nlgFactory.createWord(
             PlingStemmer.stem(propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
@@ -534,7 +527,6 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
         parameter.noun = false;
       } else if (propertyVerbalization.isVerbType()) {
-        // if the verbalization of the property is a verb phrase
 
         String verbalizationText = propertyVerbalization.getVerbalizationText();
 
@@ -586,10 +578,13 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
         }
         parameter.noun = false;
       } else {
-
+        LOG.debug("TODO: handle other types");
       }
     } else {
-
+      LOG.debug("property is anonymous and not handled yet.");
+      // final OWLObjectPropertyExpression e = property.getInverseProperty();
+      // LOG.info("{},{}", e.getInverseProperty(), property);
+      // e.accept(converterOWLPropertyExpression);
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -598,6 +593,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
   @Override
   public NLGElement visit(final OWLObjectHasSelf ce) {
+    LOG.debug("TODO: handle OWLObjectHasSelf");
     return null;
   }
 
@@ -632,8 +628,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
         phrase.setObject(fillerElement);
       }
 
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLDataProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
@@ -647,10 +642,10 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
         parameter.noun = false;
       } else {
-
+        LOG.debug("TODO: handle other types");
       }
     } else {
-      // TODO handle inverse properties
+      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
@@ -666,8 +661,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     final OWLDataRange filler = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLDataProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
@@ -701,11 +695,11 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
         parameter.noun = false;
       } else {
-
+        LOG.debug("TODO: handle other types");
       }
 
     } else {
-      // TODO handle inverse properties
+      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
@@ -722,8 +716,7 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
     LOG.info("value: {}", value.toString());
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLDataProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       final String verbalizationText = propertyVerbalization.getVerbalizationText();
       if (propertyVerbalization.isNounType()) {
         // verbalizationText = PlingStemmer.stem(verbalizationText);
@@ -754,11 +747,10 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
         parameter.noun = false;
       } else {
-
+        LOG.debug("TODO: handle other types");
       }
-
     } else {
-      // TODO handle inverse properties
+      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -767,37 +759,30 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
   @Override
   public NLGElement visit(final OWLDataMinCardinality ce) {
-    return processDataCardinalityRestriction(ce);
+    return processDataCardinalityRestriction(ce, "at least");
   }
 
   @Override
   public NLGElement visit(final OWLDataExactCardinality ce) {
-    return processDataCardinalityRestriction(ce);
+    return processDataCardinalityRestriction(ce, "exactly");
   }
 
   @Override
   public NLGElement visit(final OWLDataMaxCardinality ce) {
-    return processDataCardinalityRestriction(ce);
+    return processDataCardinalityRestriction(ce, "at most");
   }
 
-  private NLGElement processDataCardinalityRestriction(final OWLDataCardinalityRestriction ce) {
+  private NLGElement processDataCardinalityRestriction(final OWLDataCardinalityRestriction ce,
+      final String modifier) {
+
     final SPhraseSpec phrase = nlgFactory.createClause();
-    String modifier;
-    if (ce instanceof OWLDataMinCardinality) {
-      modifier = "at least";
-    } else if (ce instanceof OWLDataMaxCardinality) {
-      modifier = "at most";
-    } else {
-      modifier = "exactly";
-    }
 
     final OWLDataPropertyExpression property = ce.getProperty();
     final OWLDataRange filler = ce.getFiller();
     final int cardinality = ce.getCardinality();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization =
-          propertyVerbalizer.verbalize(property.asOWLDataProperty().getIRI().toString());
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
       if (propertyVerbalization.isNounType()) {
         final NLGElement word = nlgFactory.createWord(
             PlingStemmer.stem(propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
@@ -839,11 +824,10 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
 
         parameter.noun = false;
       } else {
-
+        LOG.debug("TODO: handle other types");
       }
-
     } else {
-      // TODO handle inverse properties
+      LOG.debug("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -859,5 +843,17 @@ public class OWLClassExpressionToNLGElement extends AOWLConverter
    */
   private List<OWLClassExpression> getOperandsByPriority(final OWLNaryBooleanClassExpression ce) {
     return ce.getOperandsAsList();
+  }
+
+  private PropertyVerbalization verbalize(final OWLObjectPropertyExpression p) {
+    return verbalize(p.asOWLObjectProperty().getIRI());
+  }
+
+  private PropertyVerbalization verbalize(final OWLDataPropertyExpression p) {
+    return verbalize(p.asOWLDataProperty().getIRI());
+  }
+
+  private PropertyVerbalization verbalize(final IRI p) {
+    return propertyVerbalizer.verbalize(p.toString());
   }
 }
