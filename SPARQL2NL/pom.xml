@@ -76,33 +76,26 @@
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-core</artifactId>
 		</dependency>
-		<dependency>
+				<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>owlapi</artifactId>
-					<groupId>net.sourceforge.owlapi</groupId>
-				</exclusion>
-				<exclusion>
 					<artifactId>jena-arq</artifactId>
 					<groupId>org.apache.jena</groupId>
 				</exclusion>
-
-				<!--<exclusion>-->
-					<!--<groupId>com.hp.hpl.jena</groupId>-->
-					<!--<artifactId>jena</artifactId>-->
-				<!--</exclusion>-->
-				<!-- <exclusion> <artifactId>stanford-corenlp</artifactId> <groupId>edu.stanford.nlp</groupId> 
-					</exclusion> -->
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-distribution</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>edu.berkeley.compbio</groupId>
+					<artifactId>jlibsvm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.martiansoftware</groupId>
+					<artifactId>JSAP</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

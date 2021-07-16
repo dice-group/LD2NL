@@ -27,19 +27,27 @@
             <artifactId>triple2nl</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.dllearner</groupId>
-            <artifactId>components-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jena-arq</artifactId>
-                    <groupId>org.apache.jena</groupId>
-                </exclusion>
-                <!--<exclusion>-->
-                    <!--<groupId>net.sourceforge.owlapi</groupId>-->
-                    <!--<artifactId>owlapi-distribution</artifactId>-->
-                <!--</exclusion>-->
-            </exclusions>
+		<dependency>
+			<groupId>org.dllearner</groupId>
+			<artifactId>components-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>jena-arq</artifactId>
+					<groupId>org.apache.jena</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-distribution</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>edu.berkeley.compbio</groupId>
+					<artifactId>jlibsvm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.martiansoftware</groupId>
+					<artifactId>JSAP</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
