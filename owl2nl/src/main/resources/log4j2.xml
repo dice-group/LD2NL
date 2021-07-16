@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>%c{12} %d{dd/MMM/yyyyHH:mm:ss} %5p [%t] (%F:%M:%L) - %m%n </pattern>
+			</PatternLayout>
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+		</Root>
+		<Logger name="org.aksw" level="INFO" />
+		<Logger name="org.aksw.owl2nl" level="DEBUG" />
+	</Loggers>
+</Configuration> 

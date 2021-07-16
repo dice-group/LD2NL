@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.dice-research</groupId>
 	<artifactId>LD2NL</artifactId>
@@ -13,8 +15,8 @@
 		<module>Triple2NL</module>
 		<module>owl2nl</module>
 		<module>evaluation</module>
-        <module>controller</module>
-    </modules>
+		<module>controller</module>
+	</modules>
 
 	<developers>
 		<developer>
@@ -84,6 +86,16 @@
 
 	<repositories>
 		<repository>
+			<id>Apache Repo Central 1</id>
+			<name>Apache Repository 1</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>Apache Repo Central</id>
+			<name>Apache Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
 			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>https://maven.aksw.org/archiva/repository/internal</url>
@@ -135,10 +147,10 @@
 						<artifactId>jena-arq</artifactId>
 						<groupId>org.apache.jena</groupId>
 					</exclusion>
-					<!--<exclusion>-->
-						<!--<groupId>net.sourceforge.owlapi</groupId>-->
-						<!--<artifactId>owlapi-distribution</artifactId>-->
-					<!--</exclusion>-->
+					<!--<exclusion> -->
+					<!--<groupId>net.sourceforge.owlapi</groupId> -->
+					<!--<artifactId>owlapi-distribution</artifactId> -->
+					<!--</exclusion> -->
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -176,11 +188,8 @@
 				<artifactId>core</artifactId>
 				<version>1.0</version>
 			</dependency>
-			<!-- <dependency>
-				<groupId>net.didion.jwnl</groupId>
-				<artifactId>jwnl</artifactId>
-				<version>1.4.1.RC2</version>
-			</dependency> -->
+			<!-- <dependency> <groupId>net.didion.jwnl</groupId> <artifactId>jwnl</artifactId> 
+				<version>1.4.1.RC2</version> </dependency> -->
 			<!-- WordNet ExtJWNL -->
 			<dependency>
 				<groupId>net.sf.extjwnl</groupId>
@@ -198,7 +207,7 @@
 				<artifactId>extjwnl-data-wn31</artifactId>
 				<version>1.2</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.apache.opennlp</groupId>
 				<artifactId>opennlp-tools</artifactId>
@@ -208,7 +217,7 @@
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
 				<version>5.1.11</version>
-				<!--<version>5.1.11</version>-->
+				<!--<version>5.1.11</version> -->
 			</dependency>
 			<dependency>
 				<groupId>com.aliasi</groupId>
@@ -359,21 +368,10 @@
 					</executions>
 				</plugin>
 
-				<!--<plugin>
-					<groupId>com.mycila</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>2.11</version>
-					<configuration>
-						<header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>-->
+				<!--<plugin> <groupId>com.mycila</groupId> <artifactId>license-maven-plugin</artifactId> 
+					<version>2.11</version> <configuration> <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header> 
+					</configuration> <executions> <execution> <goals> <goal>check</goal> </goals> 
+					</execution> </executions> </plugin> -->
 
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

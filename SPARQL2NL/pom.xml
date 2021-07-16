@@ -7,7 +7,6 @@
 		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>sparql2nl</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
 	<name>SPARQL2NL</name>
 	<description>SPARQL query to natural language converter</description>
 
@@ -27,7 +26,6 @@
 		<dependency>
 			<groupId>gov.nist.math</groupId>
 			<artifactId>jama</artifactId>
-			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -81,8 +79,6 @@
 		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
-			<version>1.3.1-SNAPSHOT</version>
-			<!--<artifactId>components-core</artifactId>-->
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
