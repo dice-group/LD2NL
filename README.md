@@ -1,5 +1,5 @@
 LD2NL
-=========
+========= 
 
 ### About
 This project aims at delivering a framework for converting Linked Data related concepts to Natural language.
