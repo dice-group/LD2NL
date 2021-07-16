@@ -26,7 +26,10 @@
 					<groupId>net.sourceforge.owlapi</groupId>
 					<artifactId>owlapi-distribution</artifactId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>com.martiansoftware</groupId>
+					<artifactId>JSAP</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
