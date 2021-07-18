@@ -217,6 +217,11 @@
 			<version>2013</version>
 		</dependency>
 		<dependency>
+			<groupId>gov.nih.nlm.nls.lexaccess</groupId>
+			<artifactId>lexaccess-dist</artifactId>
+			<version>2013</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.19</version>
