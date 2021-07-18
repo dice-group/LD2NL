@@ -2,8 +2,6 @@ package org.aksw.owl2nl.data;
 
 import java.nio.file.Paths;
 
-import org.aksw.owl2nl.data.IInput;
-import org.aksw.owl2nl.data.OWL2NLInput;
 import org.junit.Assert;
 import org.junit.Test;
 
