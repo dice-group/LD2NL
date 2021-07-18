@@ -89,11 +89,15 @@
 			<name>Apache Repository</name>
 			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
-<!--		<repository>
+		<repository>
 			<id>XypronRelease</id>
 			<name>Xypron Release</name>
-			<url>http://rsync.xypron.de/repository</url> 
+			<url>https://www.xypron.de/repository</url>
 		</repository>
- -->
+  <repository>
+            <id>XypronRelease</id>
+            <name>Xypron Release</name>
+            <url>https://www.xypron.de/repository</url>
+        </repository>
 	</repositories>
 </project> 
