@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.owl2nl.converter.OWLAxiomConverter;
 import org.aksw.owl2nl.data.OWL2NLInput;
+import org.aksw.owl2nl.evaluation.visual.HTMLTableGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
@@ -57,8 +57,8 @@ public class OWLAxiomConversionEvaluation {
   static URL url = null;
   static {
     try {
-      url = Paths.get("test.owl").toUri().toURL();
-      // url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
+      // url = Paths.get("test.owl").toUri().toURL();
+      url = new URL("https://protege.stanford.edu/ontologies/travel.owl");
     } catch (final MalformedURLException e) {
       e.printStackTrace();
     }
