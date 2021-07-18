@@ -94,10 +94,5 @@
 			<name>Xypron Release</name>
 			<url>https://www.xypron.de/repository</url>
 		</repository>
-  <repository>
-            <id>XypronRelease</id>
-            <name>Xypron Release</name>
-            <url>https://www.xypron.de/repository</url>
-        </repository>
 	</repositories>
 </project> 
