@@ -5,12 +5,12 @@ import java.nio.file.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class InputTest {
+public class OWL2NLInputTest {
 
   @Test
   public void test() {
     final IInput input = new OWL2NLInput().setOntology(//
-        Paths.get(InputTest.class.getClassLoader().getResource("test.owl").getPath())//
+        Paths.get(OWL2NLInputTest.class.getClassLoader().getResource("test.owl").getPath())//
     );
 
     Assert.assertNotNull(input);
