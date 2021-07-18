@@ -56,6 +56,7 @@ public class OWLClassExpressionConverterTest {
   private final OWLClass softwareCompany = df.getOWLClass("SoftwareCompany", ontology);
 
   private final OWLDataProperty amountOfSalary = df.getOWLDataProperty("amountOfSalary", ontology);
+  private final OWLDataProperty earns = df.getOWLDataProperty("earns", ontology);
   private final OWLDataProperty nrOfInhabitants =
       df.getOWLDataProperty("nrOfInhabitants", ontology);
 
@@ -121,28 +122,6 @@ public class OWLClassExpressionConverterTest {
   }
 
   @Test
-  public void testNestedD() {
-    final OWLObjectMinCardinality ce =
-        df.getOWLObjectMinCardinality(1, worksFor, df.getOWLObjectIntersectionOf(company,
-            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
-    final String text = converter.convert(ce);
-    Assert.assertEquals("something that works for at least 1 that a company that is"
-        + " led by a company or a person", text);
-
-  }
-
-  @Test
-  public void testNestedC() {
-    final OWLObjectMinCardinality ce =
-        df.getOWLObjectMinCardinality(5, worksFor, df.getOWLObjectIntersectionOf(company,
-            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
-    final String text = converter.convert(ce);
-    Assert.assertEquals("something that works for at least 5 that a company that is"
-        + " led by a company or a person", text);
-
-  }
-
-  @Test
   public void testNestedA() {
     final OWLObjectSomeValuesFrom ledByPerson = df.getOWLObjectSomeValuesFrom(ledBy, person);
     final OWLObjectIntersectionOf intersection = df.getOWLObjectIntersectionOf(place, ledByPerson);
@@ -163,6 +142,28 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
+  }
+
+  @Test
+  public void testNestedC() {
+    final OWLObjectMinCardinality ce =
+        df.getOWLObjectMinCardinality(5, worksFor, df.getOWLObjectIntersectionOf(company,
+            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
+    final String text = converter.convert(ce);
+    Assert.assertEquals("something that works for at least 5 that a company that is"
+        + " led by a company or a person", text);
+
+  }
+
+  @Test
+  public void testNestedD() {
+    final OWLObjectMinCardinality ce =
+        df.getOWLObjectMinCardinality(1, worksFor, df.getOWLObjectIntersectionOf(company,
+            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
+    final String text = converter.convert(ce);
+    Assert.assertEquals("something that works for at least 1 that a company that is"
+        + " led by a company or a person", text);
+
   }
 
   /**
@@ -188,6 +189,7 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something that works for at least 3 some companies";
+    // "something that works for at least 3 companies"
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
   }
@@ -224,6 +226,7 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something that works for at most 3 some companies";
+    // "something that works for at most 3 some companies";
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
   }
@@ -260,6 +263,7 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something that works for exactly 3 some companies";
+    // "something that works for exactly 3 companies";
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
   }
@@ -284,6 +288,7 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something that works for only a company";
+    // "everything that works for a company";
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
   }
@@ -297,7 +302,22 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something whose nr of inhabitant is greater than or equals to 10000000";
+    // final String expected = "everything whose nr of inhabitant is greater than or equal to
+    // 10000000";
     LOG.info(ce + " = " + text);
+    Assert.assertEquals(expected, text);
+  }
+
+  /**
+   * ∀ earns.()
+   */
+  @Test
+  public void testAllValuesFromC() {
+    final OWLDataAllValuesFrom ce = df.getOWLDataAllValuesFrom(earns, dataRange);
+    final String text = converter.convert(ce);
+    LOG.info(ce + " = " + text);
+    final String expected = "something that earns only greater than or equals to 10000000";
+    // final String expected = "everyone who earns greater than or equal to 10000000";
     Assert.assertEquals(expected, text);
   }
 
@@ -329,6 +349,7 @@ public class OWLClassExpressionConverterTest {
     Assert.assertEquals("something that works place Paderborn", text);
   }
 
+  // TODO: method is the same aa in testAllValuesFromA
   @Test
   public void testDataHasValue() {
     // works for a company
@@ -394,6 +415,7 @@ public class OWLClassExpressionConverterTest {
     final String text = converter.convert(ce);
     final String expected = //
         "something that does not works not for a company";
+    // "everything that does not work for a company";
     LOG.info(ce + " = " + text);
     Assert.assertEquals(expected, text);
   }
