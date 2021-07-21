@@ -2,6 +2,7 @@
 # input parameters
 i="https://protege.stanford.edu/ontologies/travel.owl"
 #i="http://www.ling.helsinki.fi/kit/2004k/ctl310semw/Protege/koala.owl"
+# i="/media/store/travel.owl"
 o="eval.html"
 u="true" # true for URL, false for File
 #
