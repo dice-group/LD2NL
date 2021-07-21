@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -26,8 +26,6 @@ import java.util.Set;
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
@@ -42,6 +40,7 @@ import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
@@ -90,9 +89,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  * @author Lorenz Buehmann
  * @author Rene Speck
  */
-public class OWLAxiomConverter implements OWLAxiomVisitor {
-
-  private static final Logger LOG = LogManager.getLogger(OWLAxiomConverter.class);
+public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   private final NLGFactory nlgFactory;
   private final Realiser realiser;
@@ -110,6 +107,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
    * @param input
    */
   public OWLAxiomConverter(final IInput input) {
+    super(input);
     nlgFactory = new NLGFactory(input.getLexicon());
     realiser = new Realiser(input.getLexicon());
 
@@ -477,16 +475,23 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
     LOG.info(axiom);
   }
 
-  // TODO: implement me
   @Override
   public void visit(final OWLDatatypeDefinitionAxiom axiom) {
 
-    // final OWLDatatype datatype = axiom.getDatatype();
+    final OWLDatatype datatype = axiom.getDatatype();
     final OWLDataRange datarange = axiom.getDataRange();
 
-    // final NLGElement e = ceConverter.visit(datatype);
+    String name = "";
+    if (datatype.isNamed()) {
+      name = datatype.getIRI().getShortForm();
+    } else if (datatype.isBuiltIn()) {
+      name = datatype.getBuiltInDatatype().getShortForm();
+    } else {
+      LOG.warn("Not implemented yet.");
+    }
+
     final SPhraseSpec clause = nlgFactory.createClause(//
-        "The datatype x", //
+        "The datatype ".concat(name), //
         "be", //
         datarange.accept(ceConverter)//
     );
@@ -530,6 +535,7 @@ public class OWLAxiomConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLSameIndividualAxiom axiom) {}
+
   // #########################################################
   // ################# non-logical axioms ####################
   // #########################################################
