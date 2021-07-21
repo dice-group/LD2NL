@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.aksw.owl2nl.evaluation.OWLAxiomConversionEvaluation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import gnu.getopt.Getopt;
@@ -44,25 +45,25 @@ public class OWLAxiomConversionEvaluationInterface {
     }
 
     LOG.info("\n==============================\nChecking arguments...");
-    URL url = null;
+    IRI iri = null;
     {
       if (inPath == null || inPath.trim().isEmpty() || //
           outPath == null || outPath.trim().isEmpty()) {
         throw new IllegalArgumentException("Missing parameter");
       } else {
         try {
+          IRI.create(Paths.get(outPath).toUri().toURL());
           if (!isURL) {
-            url = Paths.get(outPath).toUri().toURL();
-            url = null;
-            url = Paths.get(inPath).toUri().toURL();
+            iri = null;
+            iri = IRI.create(Paths.get(inPath).toUri().toURL());
           } else {
-            url = new URL(inPath);
+            iri = IRI.create(new URL(inPath));
           }
         } catch (final MalformedURLException e) {
           throw new IllegalArgumentException("Wrong parameter with malformed URL. ");
         }
       }
     }
-    OWLAxiomConversionEvaluation.evaluation(url.openStream(), Paths.get(outPath));
+    OWLAxiomConversionEvaluation.evaluation(iri, Paths.get(outPath));
   }
 }

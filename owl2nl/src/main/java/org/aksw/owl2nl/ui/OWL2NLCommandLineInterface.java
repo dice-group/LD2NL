@@ -20,12 +20,11 @@
  */
 package org.aksw.owl2nl.ui;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.aksw.owl2nl.converter.OWLAxiomConverter;
-import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,13 +55,13 @@ public class OWL2NLCommandLineInterface {
     }
 
     LOG.info("\n==============================\nChecking arguments...");
-    IRI ontologyIRI = null;
+    IRI iri = null;
     {
       if (ontologyParameter == null || ontologyParameter.trim().isEmpty()) {
         throw new IllegalArgumentException("Missing parameter");
       } else {
         try {
-          ontologyIRI = IRI.create(ontologyParameter);
+          iri = IRI.create(Paths.get(ontologyParameter).toUri().toURL());
         } catch (final Exception e) {
           throw new IllegalArgumentException(//
               "Wrong input parameter. Could not create IRI. ");
@@ -71,20 +70,12 @@ public class OWL2NLCommandLineInterface {
     }
     final Map<OWLAxiom, String> verbalizations = new HashMap<>();
     {
-      // create input
-      LOG.info("\n==============================\nPerparing inputs...");
-      final IInput input = new OWL2NLInput().setOntology(ontologyIRI);
-
-      // verbalize
-      LOG.info("\n==============================\nStarting OWL axiom converter...");
-      final OWLAxiomConverter converter = new OWLAxiomConverter(input);
-
-      final Set<OWLAxiom> axioms = input.getAxioms();
-      if (axioms == null) {
+      final OWLAxiomConverter converter = new OWLAxiomConverter(new OWL2NLInput().setOntology(iri));
+      if (converter.getInput().getAxioms() == null) {
         LOG.info("\n==============================\nNo input axioms ...");
       } else {
         LOG.info("\n==============================\nStarting verbalizations...");
-        for (final OWLAxiom axiom : axioms) {
+        for (final OWLAxiom axiom : converter.getInput().getAxioms()) {
           final String verbalization = converter.convert(axiom);
           if (verbalization != null) {
             verbalizations.put(axiom, verbalization);
@@ -95,8 +86,6 @@ public class OWL2NLCommandLineInterface {
       }
     }
 
-    // output
-    LOG.info("\n==============================\nPerparing output...");
     verbalizations.entrySet().forEach(LOG::info);
   }
 }
