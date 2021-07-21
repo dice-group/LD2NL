@@ -26,10 +26,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.aksw.owl2nl.converter.OWLAxiomConverter;
-import org.aksw.owl2nl.data.OWL2NLInput;
 import org.aksw.owl2nl.evaluation.visual.HTMLTableGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,21 +81,13 @@ public class OWLAxiomConversionEvaluation {
         .loadOntologyFromOntologyDocument(getInput());
 
     final List<List<String>> data = new ArrayList<>();
-
-    final OWLAxiomConverter converter = new OWLAxiomConverter(new OWL2NLInput());
+    final OWLAxiomConverter converter = new OWLAxiomConverter();
     int i = 1;
     for (final OWLAxiom axiom : ontology.getAxioms()) {
       final String s = converter.convert(axiom);
-
+      String renderedAxiom = renderer.render(axiom);
       if (s != null) {
 
-        LOG.info(axiom);
-        LOG.info(s);
-        LOG.info("------");
-
-        final List<String> rowData = new ArrayList<>();
-        rowData.add(String.valueOf(i++));
-        String renderedAxiom = renderer.render(axiom);
         for (final ManchesterOWLSyntax keyword : ManchesterOWLSyntax.values()) {
           if (keyword.isAxiomKeyword() || keyword.isClassExpressionConnectiveKeyword()
               || keyword.isClassExpressionQuantiferKeyword()) {
@@ -104,10 +96,10 @@ public class OWLAxiomConversionEvaluation {
             renderedAxiom = renderedAxiom.replaceAll(regex, " <b>" + keyword.keyword() + "</b> ");
           }
         }
-        rowData.add(renderedAxiom);
-        rowData.add(s);
 
-        data.add(rowData);
+        data.add(Arrays.asList(String.valueOf(i++), renderedAxiom, s));
+      } else {
+        LOG.warn("Could not convert {}", renderedAxiom);
       }
     }
 

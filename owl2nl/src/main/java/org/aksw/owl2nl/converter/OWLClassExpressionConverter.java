@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -110,30 +110,26 @@ public class OWLClassExpressionConverter implements //
    * @return verbalization
    */
   public String convert(final OWLClassExpression ce) {
-    NLGElement nlgElement = asNLGElement(ce);
-    nlgElement = realiser.realise(nlgElement);
-    return nlgElement.getRealisation();
+    return realiser.realise(asNLGElement(ce)).getRealisation();
+  }
+
+  public NLGElement asNLGElement(final OWLClassExpression ce) {
+    return asNLGElement(ce, false);
   }
 
   /**
    * Transforms a OWLClassExpression to a NLGElement
    *
    * @param ce
+   * @param isSubClassExpression
    * @return NLGElement
    */
-  public NLGElement asNLGElement(final OWLClassExpression ce) {
-    return asNLGElement(ce, false);
-  }
-
-  public NLGElement asNLGElement(OWLClassExpression ce, final boolean isSubClassExpression) {
+  public NLGElement asNLGElement(final OWLClassExpression ce, final boolean isSubClassExpression) {
 
     resetsOWLClassExpressionParameter(ce, isSubClassExpression);
 
-    // rewrite class expression
-    ce = rewrite(ce);
-
-    // process
-    return ce.accept(this);
+    // rewrite class expression and process
+    return rewrite(ce).accept(this);
   }
 
   private void resetsOWLClassExpressionParameter(final OWLClassExpression ce,

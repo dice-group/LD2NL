@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -90,7 +90,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
   protected Parameter parameter;
 
   /**
-   * Holds parameters used in the OWLPropertyExpressiontoNLGElement class.
+   * Holds parameters used in the OWLClassExpressionToNLGElement class.
    */
   public class Parameter {
 
@@ -113,6 +113,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
   private final Realiser realiser;
 
   /**
+   * OWLClassExpressionToNLGElement constructor.
    *
    * @param nlgFactory
    * @param realiser
@@ -237,8 +238,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       phrase.setComplement(clause);
     }
 
-    // LOG.debug(ce + " = " + realiser.realise(phrase));
-
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     return phrase;
   }
 
@@ -248,14 +248,11 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
     cc.setConjunction("or");
-
     for (final OWLClassExpression operand : operands) {
-      final NLGElement el = operand.accept(this);
-      cc.addCoordinate(el);
+      cc.addCoordinate(operand.accept(this));
     }
 
     LOG.debug(ce + " = " + realiser.realise(cc));
-
     return cc;
   }
 
@@ -272,8 +269,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     parameter.noun = false;
 
-    // LOG.debug(ce + " = " + realiser.realise(phrase));
-
+    LOG.debug(ce + " = " + realiser.realise(phrase));
     return phrase;
   }
 
@@ -607,7 +603,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       // e.accept(converterOWLPropertyExpression);
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
-
     return phrase;
   }
 
