@@ -25,7 +25,6 @@ import java.util.Set;
 import org.aksw.owl2nl.converter.visitors.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.converter.visitors.OWLDataRangeToNLGElement;
 import org.aksw.owl2nl.converter.visitors.OWLIndividualToNLGElement;
-import org.aksw.owl2nl.converter.visitors.OWLPropertyExpressiontoNLGElement;
 import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
@@ -36,7 +35,6 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 
 import com.google.common.collect.Sets;
 
@@ -51,7 +49,6 @@ public class OWLClassExpressionConverter extends AConverter {
   public OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
   public OWLIndividualVisitorEx<NLGElement> owlIndividual;
   public OWLDataRangeVisitorEx<NLGElement> owlDataRange;
-  public OWLPropertyExpressionVisitorEx<NLGElement> owlPropertyExpression;
 
   /**
    * Converts class expressions.
@@ -61,9 +58,8 @@ public class OWLClassExpressionConverter extends AConverter {
 
     owlIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
     owlDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
-    owlPropertyExpression = new OWLPropertyExpressiontoNLGElement(nlgFactory, in);
     owlClassExpression = new OWLClassExpressionToNLGElement(//
-        nlgFactory, realiser, owlIndividual, owlDataRange, owlPropertyExpression, in//
+        nlgFactory, realiser, owlIndividual, owlDataRange, in//
     );
   }
 

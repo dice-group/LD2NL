@@ -62,7 +62,6 @@ import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import simplenlg.features.Feature;
@@ -93,8 +92,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    * Holds parameters used in the OWLClassExpressionToNLGElement class.
    */
   public class Parameter {
-
-    public boolean noun, isSubClassExpression;
+    public boolean noun;
+    public boolean isSubClassExpression;
     public int modalDepth;
     public OWLClassExpression root;
   }
@@ -107,7 +106,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   protected OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
   protected OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
-  protected OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression;
 
   private final PropertyVerbalizer propertyVerbalizer;
   private final Realiser realiser;
@@ -123,16 +121,13 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    */
   public OWLClassExpressionToNLGElement(final NLGFactory nlgFactory, final Realiser realiser,
       final OWLIndividualVisitorEx<NLGElement> converterOWLIndividual,
-      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange,
-      final OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression,
-      final IInput input) {
+      final OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange, final IInput input) {
 
     super(nlgFactory, input);
 
     this.realiser = realiser;
     this.converterOWLIndividual = converterOWLIndividual;
     this.converterOWLDataRange = converterOWLDataRange;
-    this.converterOWLPropertyExpression = converterOWLPropertyExpression;
     propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
   }
 
