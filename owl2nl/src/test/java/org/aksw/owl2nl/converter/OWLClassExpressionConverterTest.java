@@ -60,7 +60,6 @@ public class OWLClassExpressionConverterTest {
   private final OWLClass company = df.getOWLClass("Company", ontology);
   private final OWLClass person = df.getOWLClass("Person", ontology);
   private final OWLClass animal = df.getOWLClass("Animal", ontology);
-
   private final OWLClass university = df.getOWLClass("University", ontology);
   private final OWLClass softwareCompany = df.getOWLClass("SoftwareCompany", ontology);
 
@@ -323,16 +322,6 @@ public class OWLClassExpressionConverterTest {
     );
   }
 
-  // TODO: method is the same aa in testAllValuesFromA
-  @Test
-  public void testDataHasValue() {
-    // works for a company
-    Assert.assertEquals(//
-        "something that works for only a company", //
-        converter.convert(df.getOWLObjectAllValuesFrom(worksFor, company))//
-    );
-  }
-
   @Test
   public void testIntersectionA() {
     Assert.assertEquals(//
@@ -387,30 +376,6 @@ public class OWLClassExpressionConverterTest {
     Assert.assertEquals("something that does not works not for a company or a person", //
         converter.convert(df.getOWLObjectComplementOf(
             df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person, company))))//
-    );
-  }
-
-  @Test
-  public void testNestedE() {
-    final OWLObjectMinCardinality ce =
-        df.getOWLObjectMinCardinality(5, worksFor, df.getOWLObjectIntersectionOf(company,
-            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
-
-    Assert.assertEquals(//
-        "something that works for at least 5 that a company that is led by a company or a person", //
-        converter.convert(ce)//
-    );
-  }
-
-  @Test
-  public void testNested2() {
-    final OWLObjectMinCardinality ce =
-        df.getOWLObjectMinCardinality(1, worksFor, df.getOWLObjectIntersectionOf(company,
-            df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
-
-    Assert.assertEquals(//
-        "something that works for at least 1 that a company that is led by a company or a person", //
-        converter.convert(ce)//
     );
   }
 

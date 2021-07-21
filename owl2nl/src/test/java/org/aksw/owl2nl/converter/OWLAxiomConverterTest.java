@@ -66,7 +66,6 @@ public class OWLAxiomConverterTest {
 
       // TBOX
       if (AxiomType.TBoxAxiomTypes.contains(a)) {
-        // LOG.info("{} isLogical {} isOWL2Axiom {} ", a.getName(), a.isLogical(), a.isOWL2Axiom());
         if (a.equals(AxiomType.EQUIVALENT_CLASSES)) {
           LOG.info("=== starts testOWLEquivalentClassesAxiom()");
           assertEquals(testOWLEquivalentClassesAxiom());
@@ -163,9 +162,8 @@ public class OWLAxiomConverterTest {
         } else if (a.equals(AxiomType.ANNOTATION_PROPERTY_RANGE)) {
         } else if (a.equals(AxiomType.ANNOTATION_PROPERTY_DOMAIN)) {
         } else if (a.equals(AxiomType.SUB_ANNOTATION_PROPERTY_OF)) {
-        } else {
           // should never be reached
-          LOG.info("Test not handles: {}", a);
+          LOG.info("Test not handles: {}", a.getName());
         }
       }
     }
@@ -177,8 +175,7 @@ public class OWLAxiomConverterTest {
         converter.convert(df.getOWLEquivalentClassesAxiom(//
             boy, //
             df.getOWLObjectIntersectionOf(child, man))//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLSubClassOfAxiomA() {
@@ -186,8 +183,7 @@ public class OWLAxiomConverterTest {
         "Every place is a thing. ", //
         converter.convert(df.getOWLSubClassOfAxiom(//
             place, thing)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLSubClassOfAxiomB() {
@@ -195,8 +191,7 @@ public class OWLAxiomConverterTest {
         "Every place is a place. ", //
         converter.convert(df.getOWLSubClassOfAxiom(//
             place, place)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDisjointClasses() {
@@ -206,8 +201,7 @@ public class OWLAxiomConverterTest {
         + "Every girl is something that is not a place. ",
         converter.convert(df.getOWLDisjointClassesAxiom(//
             boy, girl, place)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDisjointUnionA() {
@@ -225,8 +219,7 @@ public class OWLAxiomConverterTest {
                     df.getOWLClass("AmericanFootballPlayer", pm), //
                     df.getOWLClass("CanadianFootballPlayer", pm)))//
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDisjointUnionB() {
@@ -237,8 +230,7 @@ public class OWLAxiomConverterTest {
                 child, //
                 new HashSet<>(Arrays.asList(boy, girl)) //
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLObjectPropertyDomain() {
@@ -247,8 +239,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLObjectPropertyDomainAxiom(//
                 df.getOWLObjectProperty("hasDog", pm), person)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLObjectPropertyRange() {
@@ -257,8 +248,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLObjectPropertyRangeAxiom(//
                 df.getOWLObjectProperty("hasDog", pm), person)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDataPropertyDomain() {
@@ -267,8 +257,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLDataPropertyDomainAxiom(//
                 df.getOWLDataProperty("hasName", pm), person)//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDataPropertyRange() {
@@ -279,8 +268,7 @@ public class OWLAxiomConverterTest {
                 df.getOWLDataProperty("hasName", pm), //
                 df.getOWLDatatype(IRI.create("http://www.w3.org/2001/XMLSchema#string"))//
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDatatypeDefinitionA() {
@@ -291,8 +279,7 @@ public class OWLAxiomConverterTest {
                 temperature, //
                 df.getOWLDatatypeMaxInclusiveRestriction(0.2) //
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLDatatypeDefinitionB() {
@@ -303,8 +290,7 @@ public class OWLAxiomConverterTest {
                 df.getIntegerOWLDatatype(), //
                 df.getOWLDatatypeMinExclusiveRestriction(10000000) //
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLHasKey() {
@@ -313,8 +299,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLHasKeyAxiom(thing, df.getOWLDataProperty("hasName", pm)//
             )//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLFunctionalObjectProperty() {
@@ -323,8 +308,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLFunctionalObjectPropertyAxiom(//
                 df.getOWLObjectProperty("hasFather", pm))//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLFunctionalDataProperty() {
@@ -333,8 +317,7 @@ public class OWLAxiomConverterTest {
         converter.convert(//
             df.getOWLFunctionalDataPropertyAxiom(//
                 df.getOWLDataProperty("hasAge", pm))//
-        )//
-    );
+        ));
   }
 
   public Pair<String, String> testOWLInverseFunctionalObjectProperty() {
@@ -342,7 +325,6 @@ public class OWLAxiomConverterTest {
         "Everything is something whose. ", //
         converter.convert(df.getOWLInverseFunctionalObjectPropertyAxiom(//
             df.getOWLObjectProperty("mother", pm))//
-        )//
-    );
+        ));
   }
 }
