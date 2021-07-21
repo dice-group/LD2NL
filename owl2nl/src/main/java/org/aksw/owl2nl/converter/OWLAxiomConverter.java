@@ -482,7 +482,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final SPhraseSpec clause = nlgFactory.createClause(//
         "The datatype ".concat(name), //
         "be", //
-        datarange.accept(ceConverter)//
+        datarange.accept(ceConverter.owlDataRange)//
     );
 
     realise(clause);
@@ -503,7 +503,6 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   // #########################################################
   // ################# individual axioms #####################
   // #########################################################
-
   @Override
   public void visit(final OWLClassAssertionAxiom axiom) {}
 

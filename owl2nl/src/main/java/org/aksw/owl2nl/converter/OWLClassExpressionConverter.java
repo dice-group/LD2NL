@@ -27,33 +27,12 @@ import org.aksw.owl2nl.converter.visitors.OWLDataRangeToNLGElement;
 import org.aksw.owl2nl.converter.visitors.OWLIndividualToNLGElement;
 import org.aksw.owl2nl.converter.visitors.OWLPropertyExpressiontoNLGElement;
 import org.aksw.owl2nl.data.IInput;
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
-import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
-import org.semanticweb.owlapi.model.OWLDataComplementOf;
-import org.semanticweb.owlapi.model.OWLDataExactCardinality;
-import org.semanticweb.owlapi.model.OWLDataHasValue;
-import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
-import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
-import org.semanticweb.owlapi.model.OWLDataMinCardinality;
-import org.semanticweb.owlapi.model.OWLDataOneOf;
 import org.semanticweb.owlapi.model.OWLDataRangeVisitorEx;
-import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLDataUnionOf;
-import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
 import org.semanticweb.owlapi.model.OWLIndividualVisitorEx;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectComplementOf;
-import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
-import org.semanticweb.owlapi.model.OWLObjectHasSelf;
-import org.semanticweb.owlapi.model.OWLObjectHasValue;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
-import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
-import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
 import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
@@ -67,15 +46,12 @@ import simplenlg.framework.NLGElement;
  * @author Lorenz Buehmann
  * @author Rene Speck
  */
-public class OWLClassExpressionConverter extends AConverter implements //
-    OWLClassExpressionVisitorEx<NLGElement>, //
-    OWLIndividualVisitorEx<NLGElement>, //
-    OWLDataRangeVisitorEx<NLGElement> {
+public class OWLClassExpressionConverter extends AConverter {
 
-  protected OWLClassExpressionVisitorEx<NLGElement> converterOWLClassExpression;
-  protected OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
-  protected OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
-  protected OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression;
+  public OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
+  public OWLIndividualVisitorEx<NLGElement> owlIndividual;
+  public OWLDataRangeVisitorEx<NLGElement> owlDataRange;
+  public OWLPropertyExpressionVisitorEx<NLGElement> owlPropertyExpression;
 
   /**
    * Converts class expressions.
@@ -83,14 +59,12 @@ public class OWLClassExpressionConverter extends AConverter implements //
   public OWLClassExpressionConverter(final IInput in) {
     super(in);
 
-    converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
-    converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
-    converterOWLPropertyExpression = new OWLPropertyExpressiontoNLGElement(nlgFactory, in);
-    converterOWLClassExpression = new OWLClassExpressionToNLGElement(//
-        nlgFactory, realiser, converterOWLIndividual, converterOWLDataRange,
-        converterOWLPropertyExpression, in//
+    owlIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
+    owlDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
+    owlPropertyExpression = new OWLPropertyExpressiontoNLGElement(nlgFactory, in);
+    owlClassExpression = new OWLClassExpressionToNLGElement(//
+        nlgFactory, realiser, owlIndividual, owlDataRange, owlPropertyExpression, in//
     );
-
   }
 
   /**
@@ -120,17 +94,17 @@ public class OWLClassExpressionConverter extends AConverter implements //
     resetsOWLClassExpressionParameter(ce, isSubClassExpression);
 
     // rewrite class expression and process
-    return rewrite(ce).accept(this);
+    return rewrite(ce).accept(owlClassExpression);
   }
 
   private void resetsOWLClassExpressionParameter(final OWLClassExpression ce,
       final boolean isSubClassExpression) {
     final OWLClassExpressionToNLGElement.Parameter parameter;
-    parameter = ((OWLClassExpressionToNLGElement) converterOWLClassExpression).new Parameter();
+    parameter = ((OWLClassExpressionToNLGElement) owlClassExpression).new Parameter();
     parameter.isSubClassExpression = isSubClassExpression;
     parameter.root = ce;
     parameter.modalDepth = 1;
-    ((OWLClassExpressionToNLGElement) converterOWLClassExpression).setParameter(parameter);
+    ((OWLClassExpressionToNLGElement) owlClassExpression).setParameter(parameter);
   }
 
   private boolean containsNamedClass(final Set<OWLClassExpression> classExpressions) {
@@ -196,144 +170,5 @@ public class OWLClassExpressionConverter extends AConverter implements //
     final Set<OWLClassExpression> operands =
         Sets.<OWLClassExpression>newHashSet(ce, df.getOWLThing());
     return df.getOWLObjectIntersectionOf(operands);
-  }
-
-  //
-  // OWLClassExpressionVisitorEx
-  //
-  @Override
-  public NLGElement visit(final OWLClass ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectIntersectionOf ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectUnionOf ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectComplementOf ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectSomeValuesFrom ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectAllValuesFrom ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectHasValue ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectMinCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectMaxCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectExactCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectHasSelf ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLObjectOneOf ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataSomeValuesFrom ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataAllValuesFrom ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataHasValue ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataMaxCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataMinCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataExactCardinality ce) {
-    return converterOWLClassExpression.visit(ce);
-  }
-
-  //
-  // OWLIndividualVisitorEx
-  //
-  @Override
-  public NLGElement visit(final OWLNamedIndividual individual) {
-    return converterOWLIndividual.visit(individual);
-  }
-
-  @Override
-  public NLGElement visit(final OWLAnonymousIndividual individual) {
-    return converterOWLIndividual.visit(individual);
-  }
-
-  //
-  // OWLDataRangeVisitorEx
-  //
-  @Override
-  public NLGElement visit(final OWLDatatype node) {
-    return converterOWLDataRange.visit(node);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataOneOf node) {
-    return converterOWLDataRange.visit(node);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataComplementOf node) {
-    return converterOWLDataRange.visit(node);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataIntersectionOf node) {
-    return converterOWLDataRange.visit(node);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDataUnionOf node) {
-    return converterOWLDataRange.visit(node);
-  }
-
-  @Override
-  public NLGElement visit(final OWLDatatypeRestriction node) {
-    return converterOWLDataRange.visit(node);
   }
 }
