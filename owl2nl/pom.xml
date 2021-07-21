@@ -77,22 +77,4 @@
 			<version>7.0.3</version>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>Apache Repo Central 1</id>
-			<name>Apache Repository 1</name>
-			<url>https://repo1.maven.org/maven2</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>Apache Repo Central</id>
-			<name>Apache Repository</name>
-			<url>https://repo.maven.apache.org/maven2</url>
-		</repository>
-		<repository>
-			<id>XypronRelease</id>
-			<name>Xypron Release</name>
-			<url>https://www.xypron.de/repository</url>
-		</repository>
-	</repositories>
 </project> 

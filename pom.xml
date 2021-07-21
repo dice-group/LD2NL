@@ -91,6 +91,7 @@
 			<id>Apache Repo Central 1</id>
 			<name>Apache Repository 1</name>
 			<url>https://repo1.maven.org/maven2</url>
+			<layout>default</layout>
 		</repository>
 		<repository>
 			<id>Apache Repo Central</id>
@@ -109,6 +110,15 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>XypronRelease</id>
+			<name>Xypron Release</name>
+			<url>https://www.xypron.de/repository</url>
+		</repository>
+		<repository>
+			<id>clojars.org</id>
+			<url>https://repo.clojars.org</url>
 		</repository>
 	</repositories>
 	<issueManagement>
