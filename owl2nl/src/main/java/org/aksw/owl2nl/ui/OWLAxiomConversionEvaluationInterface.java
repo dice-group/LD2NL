@@ -1,0 +1,68 @@
+package org.aksw.owl2nl.ui;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
+
+import org.aksw.owl2nl.evaluation.OWLAxiomConversionEvaluation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
+import gnu.getopt.Getopt;
+
+public class OWLAxiomConversionEvaluationInterface {
+  protected static final Logger LOG =
+      LogManager.getLogger(OWLAxiomConversionEvaluationInterface.class);
+
+  public static void main(final String[] args)
+      throws IllegalArgumentException, OWLOntologyCreationException, IOException {
+
+    LOG.info("\n==============================\nParsing arguments...");
+    String inPath = null;
+    String outPath = null;
+    boolean isURL = false;
+    {
+      final Getopt g = new Getopt("OWL Axiom Evaluation", args, "i:x o:x u:x");
+      int c;
+      while ((c = g.getopt()) != -1) {
+        switch (c) {
+          case 'i':
+            inPath = String.valueOf(g.getOptarg());
+            break;
+          case 'o':
+            outPath = String.valueOf(g.getOptarg());
+            break;
+          case 'u':
+            isURL = Boolean.valueOf(g.getOptarg());
+            break;
+          default:
+            LOG.info("getopt() returned " + c + "\n");
+        }
+      }
+    }
+
+    LOG.info("\n==============================\nChecking arguments...");
+    URL url = null;
+    {
+      if (inPath == null || inPath.trim().isEmpty() || //
+          outPath == null || outPath.trim().isEmpty()) {
+        throw new IllegalArgumentException("Missing parameter");
+      } else {
+        try {
+          if (!isURL) {
+            url = Paths.get(outPath).toUri().toURL();
+            url = null;
+            url = Paths.get(inPath).toUri().toURL();
+          } else {
+            url = new URL(inPath);
+          }
+        } catch (final MalformedURLException e) {
+          throw new IllegalArgumentException("Wrong parameter with malformed URL. ");
+        }
+      }
+    }
+    OWLAxiomConversionEvaluation.evaluation(url.openStream(), Paths.get(outPath));
+  }
+}

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -36,12 +36,9 @@ import gnu.getopt.Getopt;
 
 public class OWL2NLCommandLineInterface {
   protected static final Logger LOG = LogManager.getLogger(OWL2NLCommandLineInterface.class);
+
   public static void main(final String[] args) throws IllegalArgumentException {
 
-    // "https://its-wiki.no/images/0/05/Travel.owl";
-    // "http://www.ling.helsinki.fi/kit/2004k/ctl310semw/Protege/koala.owl";
-
-    // reads args
     LOG.info("\n==============================\nParsing arguments...");
     String ontologyParameter = null;
     {
@@ -58,22 +55,20 @@ public class OWL2NLCommandLineInterface {
       }
     }
 
-    // checks args
     LOG.info("\n==============================\nChecking arguments...");
     IRI ontologyIRI = null;
-    if (ontologyParameter == null || ontologyParameter.trim().isEmpty()) {
-      LOG.warn("Missing parameter");
-      throw new IllegalArgumentException("Missing parameter");
-    } else {
-      try {
-        ontologyIRI = IRI.create(ontologyParameter);
-      } catch (final Exception e) {
-      }
-      if (ontologyIRI == null) {
-        throw new IllegalArgumentException("Wrong input parameter. Could not create IRI. ");
+    {
+      if (ontologyParameter == null || ontologyParameter.trim().isEmpty()) {
+        throw new IllegalArgumentException("Missing parameter");
+      } else {
+        try {
+          ontologyIRI = IRI.create(ontologyParameter);
+        } catch (final Exception e) {
+          throw new IllegalArgumentException(//
+              "Wrong input parameter. Could not create IRI. ");
+        }
       }
     }
-
     final Map<OWLAxiom, String> verbalizations = new HashMap<>();
     {
       // create input
