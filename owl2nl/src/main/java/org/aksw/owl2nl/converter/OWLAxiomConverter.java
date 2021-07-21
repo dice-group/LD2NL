@@ -34,7 +34,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
@@ -77,11 +76,8 @@ import org.semanticweb.owlapi.model.SWRLRule;
 
 import simplenlg.features.Feature;
 import simplenlg.framework.NLGElement;
-import simplenlg.framework.NLGFactory;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.phrasespec.SPhraseSpec;
-import simplenlg.realiser.english.Realiser;
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  * Converts OWL logical axioms into natural language.
@@ -91,13 +87,8 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  */
 public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
-  private final NLGFactory nlgFactory;
-  private final Realiser realiser;
-
   private final OWLClassExpressionConverter ceConverter;
   private final OWLPropertyExpressionConverter peConverter;
-
-  private final OWLDataFactory df = new OWLDataFactoryImpl();
 
   private String nl = null;
 
@@ -108,8 +99,6 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   public OWLAxiomConverter(final IInput input) {
     super(input);
-    nlgFactory = new NLGFactory(input.getLexicon());
-    realiser = new Realiser(input.getLexicon());
 
     ceConverter = new OWLClassExpressionConverter(input);
     peConverter = new OWLPropertyExpressionConverter(input);

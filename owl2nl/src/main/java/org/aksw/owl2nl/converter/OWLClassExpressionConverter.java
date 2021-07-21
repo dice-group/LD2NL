@@ -34,7 +34,6 @@ import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
 import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLDataComplementOf;
 import org.semanticweb.owlapi.model.OWLDataExactCardinality;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataHasValue;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
 import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
@@ -63,15 +62,12 @@ import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 import com.google.common.collect.Sets;
 
 import simplenlg.framework.NLGElement;
-import simplenlg.framework.NLGFactory;
-import simplenlg.realiser.english.Realiser;
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  * @author Lorenz Buehmann
  * @author Rene Speck
  */
-public class OWLClassExpressionConverter implements //
+public class OWLClassExpressionConverter extends AConverter implements //
     OWLClassExpressionVisitorEx<NLGElement>, //
     OWLIndividualVisitorEx<NLGElement>, //
     OWLDataRangeVisitorEx<NLGElement> {
@@ -81,16 +77,11 @@ public class OWLClassExpressionConverter implements //
   protected OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
   protected OWLPropertyExpressionVisitorEx<NLGElement> converterOWLPropertyExpression;
 
-  private final Realiser realiser;
-  private final OWLDataFactory df = new OWLDataFactoryImpl();
-
   /**
    * Converts class expressions.
    */
   public OWLClassExpressionConverter(final IInput in) {
-
-    realiser = new Realiser(in.getLexicon());
-    final NLGFactory nlgFactory = new NLGFactory(in.getLexicon());
+    super(in);
 
     converterOWLIndividual = new OWLIndividualToNLGElement(nlgFactory, in);
     converterOWLDataRange = new OWLDataRangeToNLGElement(nlgFactory, in);
