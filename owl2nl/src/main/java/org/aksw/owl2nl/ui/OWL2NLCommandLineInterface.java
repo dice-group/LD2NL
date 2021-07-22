@@ -38,7 +38,7 @@ public class OWL2NLCommandLineInterface {
 
   public static void main(final String[] args) throws IllegalArgumentException {
 
-    LOG.info("\n==============================\nParsing arguments...");
+    LOG.info("==============================Parsing arguments...");
     String ontologyParameter = null;
     {
       final Getopt g = new Getopt("OWL Axiom Converter", args, "o:x");
@@ -49,12 +49,12 @@ public class OWL2NLCommandLineInterface {
             ontologyParameter = String.valueOf(g.getOptarg());
             break;
           default:
-            LOG.info("getopt() returned " + c + "\n");
+            LOG.info("getopt() returned " + c + "");
         }
       }
     }
 
-    LOG.info("\n==============================\nChecking arguments...");
+    LOG.info("==============================Checking arguments...");
     IRI iri = null;
     {
       if (ontologyParameter == null || ontologyParameter.trim().isEmpty()) {
@@ -72,9 +72,9 @@ public class OWL2NLCommandLineInterface {
     {
       final OWLAxiomConverter converter = new OWLAxiomConverter(new OWL2NLInput().setOntology(iri));
       if (converter.getInput().getAxioms() == null) {
-        LOG.info("\n==============================\nNo input axioms ...");
+        LOG.info("==============================No input axioms ...");
       } else {
-        LOG.info("\n==============================\nStarting verbalizations...");
+        LOG.info("==============================Starting verbalizations...");
         for (final OWLAxiom axiom : converter.getInput().getAxioms()) {
           final String verbalization = converter.convert(axiom);
           if (verbalization != null) {
