@@ -52,15 +52,15 @@ public class OWLAxiomConversionEvaluation {
     final OWLAxiomConverter converter = new OWLAxiomConverter(new OWL2NLInput().setOntology(iri));
 
     if (converter.getInput().getAxioms() == null) {
-      LOG.info("\n==============================\nNo input axioms ...");
+      LOG.info("==============================No input axioms ...");
     } else {
-      LOG.info("\n==============================\nStarting verbalizations...");
+      LOG.info("==============================Starting verbalizations...");
       final List<List<String>> data = new ArrayList<>();
       int i = 1;
       for (final OWLAxiom axiom : converter.getInput().getAxioms()) {
         final String nl = converter.convert(axiom);
-        String renderedAxiom = renderer.render(axiom);
         if (nl != null) {
+          String renderedAxiom = renderer.render(axiom);
           for (final ManchesterOWLSyntax keyword : ManchesterOWLSyntax.values()) {
             if (keyword.isAxiomKeyword() || keyword.isClassExpressionConnectiveKeyword()
                 || keyword.isClassExpressionQuantiferKeyword()) {
@@ -69,16 +69,14 @@ public class OWLAxiomConversionEvaluation {
               renderedAxiom = renderedAxiom.replaceAll(regex, " <b>" + keyword.keyword() + "</b> ");
             }
           }
-          data.add(Arrays.asList(String.valueOf(i++), renderedAxiom, nl));
-        } else {
-          LOG.warn("Could not convert {}", renderedAxiom);
+          data.add(Arrays.asList(String.valueOf(i++), axiom.toString(), renderedAxiom, nl));
         }
       }
 
       Files.write(//
           out, //
           HTMLTableGenerator//
-              .generateHTMLTable(Arrays.asList("ID", "Axiom", "NL"), data).getBytes()//
+              .generateHTMLTable(Arrays.asList("ID", "Axiom", "Axiom", "NL"), data).getBytes()//
       );
     }
   }

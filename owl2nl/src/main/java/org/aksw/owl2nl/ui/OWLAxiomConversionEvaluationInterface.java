@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import org.aksw.owl2nl.evaluation.OWLAxiomConversionEvaluation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -17,10 +19,14 @@ public class OWLAxiomConversionEvaluationInterface {
   protected static final Logger LOG =
       LogManager.getLogger(OWLAxiomConversionEvaluationInterface.class);
 
+  static {
+    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+  }
+
   public static void main(final String[] args)
       throws IllegalArgumentException, OWLOntologyCreationException, IOException {
 
-    LOG.info("\n==============================\nParsing arguments...");
+    LOG.info("==============================Parsing arguments...");
     String inPath = null;
     String outPath = null;
     boolean isURL = false;
@@ -39,12 +45,12 @@ public class OWLAxiomConversionEvaluationInterface {
             isURL = Boolean.valueOf(g.getOptarg());
             break;
           default:
-            LOG.info("getopt() returned " + c + "\n");
+            LOG.info("getopt() returned " + c + "");
         }
       }
     }
 
-    LOG.info("\n==============================\nChecking arguments...");
+    LOG.info("==============================Checking arguments...");
     IRI iri = null;
     {
       if (inPath == null || inPath.trim().isEmpty() || //
