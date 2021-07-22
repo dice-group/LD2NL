@@ -1,0 +1,48 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://rawgit.com/twbs/bootstrap/master/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://rawgit.com/wenzhixin/bootstrap-table/1.8.0/dist/bootstrap-table.css">
+<style type="text/css">
+pre {
+	border: 0;
+	background-color: transparent;
+	font-family: monospace;
+}
+table {
+    border-collapse: separate;
+    border-spacing: 0 5px;
+}
+thead th {
+    background-color: #006DCC;
+    color: white;
+}
+tbody td {
+    background-color: #EEEEEE;
+}
+tr td:first-child,
+tr th:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+tr td:last-child,
+tr th:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+.fixed-table-container tbody td {
+    border: none;
+}
+.fixed-table-container thead th {
+    border: none;
+}
+.bootstrap-table .table {
+	border-collapse: inherit !important;
+}
+</style>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://rawgit.com/twbs/bootstrap/master/dist/js/bootstrap.min.js"></script>
+<script src="https://rawgit.com/wenzhixin/bootstrap-table/1.8.0/dist/bootstrap-table-all.min.js"></script>
+</head>
+<body>
+<table data-toggle="table" data-striped="true">
+<thead><tr>
