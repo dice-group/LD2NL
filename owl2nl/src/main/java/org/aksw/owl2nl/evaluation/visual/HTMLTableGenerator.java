@@ -51,27 +51,25 @@ public class HTMLTableGenerator {
    * @param data the data as a list of row entry values
    * @return an HTML table
    */
-  public static String generateHTMLTable(final List<String> columnNames,
+  public static String generateHTMLTable(final List<String> columns,
       final List<List<String>> data) {
     String html = getStyle();
-    for (final String columnName : columnNames) {
-      html += "<th data-align=\"left\" data-sortable=\"true\" data-valign='middle'>" + columnName
-          + "</th>";
+    for (final String name : columns) {
+      html = html//
+          .concat("<th data-align=\"left\" data-sortable=\"true\" data-valign='middle'>")
+          .concat(name)//
+          .concat("</th>");
     }
     // the data
-    html += "<tbody>\n";
+    html = html.concat("<tbody>\n");
     for (final List<String> row : data) {
-      html += "<tr>\n";
+      html = html.concat("<tr>\n");
       for (final String entry : row) {
-        html += "<td>" + entry + "</td>\n";
+        html = html.concat("<td>").concat(entry).concat("</td>\n");
         // class='number'
       }
-      html += "</tr>\n";
+      html = html.concat("</tr>\n");
     }
-    html += "</tbody>\n";
-    html += "</table>\n";
-    html += "</body>\n";
-    html += "</html>\n";
-    return html;
+    return html.concat("</tbody>\n").concat("</table>\n").concat("</body>\n").concat("</html>\n");
   }
 }
