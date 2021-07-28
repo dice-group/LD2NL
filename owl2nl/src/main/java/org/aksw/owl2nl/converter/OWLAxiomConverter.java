@@ -330,7 +330,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   public void visit(final OWLInverseObjectPropertiesAxiom axiom) {
     df.getOWLEquivalentObjectPropertiesAxiom(//
         axiom.getFirstProperty(), //
-        df.getOWLObjectInverseOf(axiom.getSecondProperty())//
+        axiom.getSecondProperty().getInverseProperty()//
     ).accept(this);
   }
 
@@ -362,7 +362,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   @Override
   public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {
     df.getOWLSubObjectPropertyOfAxiom(//
-        axiom.getProperty(), df.getOWLObjectInverseOf(axiom.getProperty())//
+        axiom.getProperty(), //
+        axiom.getProperty().getInverseProperty()//
     ).accept(this);
   }
 
