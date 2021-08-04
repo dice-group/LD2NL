@@ -146,7 +146,7 @@ public class OWLAxiomConverterTest {
         } else if (a.equals(AxiomType.SYMMETRIC_OBJECT_PROPERTY)) {
           final String text = converter.convert(
               df.getOWLSymmetricObjectPropertyAxiom(df.getOWLObjectProperty("isInLawOf", pm)));
-          Assert.assertEquals("X's being in law of Y implies Y is in law of X", text);
+          Assert.assertEquals("X's being in law of Y implies Y is in law of X. ", text);
         } else if (a.equals(AxiomType.ASYMMETRIC_OBJECT_PROPERTY)) {
         } else if (a.equals(AxiomType.TRANSITIVE_OBJECT_PROPERTY)) {
         } else if (a.equals(AxiomType.REFLEXIVE_OBJECT_PROPERTY)) {
