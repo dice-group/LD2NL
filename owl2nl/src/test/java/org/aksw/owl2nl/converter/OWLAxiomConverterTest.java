@@ -217,8 +217,7 @@ public class OWLAxiomConverterTest {
     final OWLClass narcisticPerson = df.getOWLClass("NarcisticPerson", pm);
 
     final Pair<String, String> pair = Pair.of(//
-        "Every narcistic person is a person that loves oneself. ",
-        // TODO: that is wrong, because the person check fails with: "person" is not Person
+        "Every narcistic person is a person whose loves oneself. ",
         converter.convert(df.getOWLEquivalentClassesAxiom(//
             narcisticPerson, //
             df.getOWLObjectIntersectionOf(person, df.getOWLObjectHasSelf(love)))//

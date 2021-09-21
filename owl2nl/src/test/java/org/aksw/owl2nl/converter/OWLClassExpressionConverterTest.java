@@ -112,8 +112,8 @@ public class OWLClassExpressionConverterTest {
   public void testQualifiedNumberRestrictions() {
     LOG.info("testQualifiedNumberRestrictions");
     Assert.assertEquals(//
-        "a person that has at least three children that a professor whose a woman", // TODOL
-                                                                                    // pluralize!
+        "a person that has at least three children that a professor whose a woman",
+        // TODO: pluralize!
         // a person who has at least three children who are professors and females
         converter.convert(//
             df.getOWLObjectIntersectionOf(person, df.getOWLObjectMinCardinality(3, hasChild,
