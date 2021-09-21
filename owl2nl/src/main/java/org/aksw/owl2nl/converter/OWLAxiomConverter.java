@@ -20,11 +20,13 @@
  */
 package org.aksw.owl2nl.converter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
+import org.aksw.owl2nl.util.grammar.Words;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
@@ -90,7 +92,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   private final OWLClassExpressionConverter ceConverter;
   private final OWLPropertyExpressionConverter peConverter;
 
-  private String nl = null;
+  private final List<NLGElement> clauses = new ArrayList<>();
 
   /**
    * OWLAxiomConverter class constructor.
@@ -121,6 +123,19 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     this(Lexicon.getDefaultLexicon());
   }
 
+  // TODO: Merge subjects and objects
+  protected void optimize(final List<NLGElement> clauses) {
+    for (final NLGElement clause : clauses) {
+      if (clause.getCategory().toString().equals("CLAUSE")) {
+        final NLGElement subject = ((SPhraseSpec) clause).getSubject();
+        final NLGElement object = ((SPhraseSpec) clause).getObject();
+
+        LOG.debug("s: {} ", realiser.realise(subject).toString());
+        LOG.debug("o: {} ", realiser.realise(object).toString());
+      }
+    }
+  }
+
   /**
    * Converts the OWL axiom into natural language. Only logical axioms are supported, i.e.
    * declaration axioms and annotation axioms are not converted and <code>null</code> will be
@@ -130,18 +145,24 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * @return the natural language expression
    */
   public String convert(final OWLAxiom axiom) {
+    LOG.info("============================================");
 
-    reset();
+    clauses.clear();
 
-    if (axiom.isLogicalAxiom()) {
+    if (!axiom.isLogicalAxiom()) {
+      return null;
+    } else {
+
       axiom.accept(this);
-      return nl;
+      optimize(clauses);
+      final StringBuilder sb = new StringBuilder();
+      for (final NLGElement clause : realiser.realise(clauses)) {
+        sb//
+            .append(StringUtils.capitalize(clause.toString()))//
+            .append(". ");
+      }
+      return sb.toString();
     }
-    return null;
-  }
-
-  private void reset() {
-    nl = null;
   }
 
   // #########################################################
@@ -165,31 +186,16 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final OWLClassExpression subClass = axiom.getSubClass();
     final OWLClassExpression superClass = axiom.getSuperClass();
 
+    LOG.info(subClass);
+    LOG.info(superClass);
     final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
     final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
 
-    final SPhraseSpec clause = nlgFactory.createClause(subClassElement, "be", superClassElement);
+    final SPhraseSpec clause;
+    clause = nlgFactory.createClause(subClassElement, Words.be, superClassElement);
     superClassElement.setFeature(Feature.COMPLEMENTISER, null);
 
-    realise(clause);
-  }
-
-  private void realise(final SPhraseSpec clause) {
-    if (nl == null) {
-      nl = sPhraseSpecToString(clause);
-    } else {
-      nl = nl.concat(sPhraseSpecToString(clause));
-    }
-  }
-
-  /**
-   * Capitalizes the first character and concats a point and space at the end of the clause.
-   *
-   * @param clause
-   * @return sentence
-   */
-  private String sPhraseSpecToString(final SPhraseSpec clause) {
-    return StringUtils.capitalize(realiser.realise(clause).toString()).concat(". ");
+    clauses.add(clause);
   }
 
   /**
@@ -287,12 +293,11 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true);
     final NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
-
-    final SPhraseSpec clause =
-        nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement);
     superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
 
-    nl = realiser.realise(clause).toString();
+    clauses.add(//
+        nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement)//
+    );
   }
 
   /**
@@ -466,9 +471,6 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   // TODO: implement me
   @Override
   public void visit(final OWLHasKeyAxiom axiom) {
-    // is uniquely identified by its
-    // is uniquely identified by their
-    nl = "";
     LOG.info(axiom);
   }
 
@@ -487,13 +489,12 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
       LOG.warn("Not implemented yet.");
     }
 
-    final SPhraseSpec clause = nlgFactory.createClause(//
-        "The datatype ".concat(name), //
-        "be", //
-        datarange.accept(ceConverter.owlDataRange)//
-    );
-
-    realise(clause);
+    clauses.add(//
+        nlgFactory.createClause(//
+            "The datatype ".concat(name), //
+            "be", //
+            datarange.accept(ceConverter.owlDataRange)//
+        ));
   }
 
   // TODO: implement me
