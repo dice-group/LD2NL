@@ -27,11 +27,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.PrefixManager;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
@@ -54,6 +58,11 @@ public class OWLAxiomConverterTest {
   private final OWLClass person = df.getOWLClass("Person", pm);
   private final OWLClass thing = df.getOWLClass("Thing", pm);
   private final OWLDatatype temperature = df.getOWLDatatype("temperature", pm);
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+  }
 
   private void assertEquals(final Pair<String, String> pair) {
     Assert.assertEquals(pair.getLeft(), pair.getRight());
@@ -167,6 +176,55 @@ public class OWLAxiomConverterTest {
         }
       }
     }
+  }
+
+  @Test
+  public void testNothing() {
+    final Pair<String, String> pair = Pair.of(//
+        "Every person without children is a person that has no child. ", //
+        converter.convert(df.getOWLEquivalentClassesAxiom(//
+            df.getOWLClass("personWithoutChildren", pm), //
+            df.getOWLObjectIntersectionOf(//
+                person, //
+                df.getOWLObjectAllValuesFrom(df.getOWLObjectProperty("hasChild", pm),
+                    df.getOWLNothing()//
+                )))//
+        ));
+
+    Assert.assertEquals(pair.getLeft(), pair.getRight());
+  }
+
+  @Test
+  public void testSelf() {
+    final OWLObjectProperty know = df.getOWLObjectProperty("know", pm);
+    final OWLClass animal = df.getOWLClass("animal", pm);
+
+    final Pair<String, String> pair = Pair.of(//
+        "Every person is an animal that knows oneself. ", //
+        // Every person is an animal that knows itself.
+        converter.convert(df.getOWLEquivalentClassesAxiom(//
+            person, //
+            df.getOWLObjectIntersectionOf(animal, df.getOWLObjectHasSelf(know)))//
+        ));
+
+    LOG.info(pair.getRight());
+    Assert.assertEquals(pair.getLeft(), pair.getRight());
+  }
+
+  @Test
+  public void testSelfB() {
+    final OWLObjectProperty love = df.getOWLObjectProperty("love", pm);
+    final OWLClass narcisticPerson = df.getOWLClass("NarcisticPerson", pm);
+
+    final Pair<String, String> pair = Pair.of(//
+        "Every narcistic person is a person that loves oneself. ",
+        // TODO: that is wrong, because the person check fails with: "person" is not Person
+        converter.convert(df.getOWLEquivalentClassesAxiom(//
+            narcisticPerson, //
+            df.getOWLObjectIntersectionOf(person, df.getOWLObjectHasSelf(love)))//
+        ));
+
+    Assert.assertEquals(pair.getLeft(), pair.getRight());
   }
 
   public Pair<String, String> testOWLEquivalentClassesAxiom() {
@@ -304,7 +362,7 @@ public class OWLAxiomConverterTest {
 
   public Pair<String, String> testOWLFunctionalObjectProperty() {
     return Pair.of(//
-        "Everything is something that has at most 1 father. ", //
+        "Everything is something that has at most one father. ", //
         converter.convert(//
             df.getOWLFunctionalObjectPropertyAxiom(//
                 df.getOWLObjectProperty("hasFather", pm))//
@@ -313,7 +371,7 @@ public class OWLAxiomConverterTest {
 
   public Pair<String, String> testOWLFunctionalDataProperty() {
     return Pair.of(//
-        "Everything is something that has age at most 1 Literals. ", //
+        "Everything is something that has age at most one Literals. ", //
         converter.convert(//
             df.getOWLFunctionalDataPropertyAxiom(//
                 df.getOWLDataProperty("hasAge", pm))//
