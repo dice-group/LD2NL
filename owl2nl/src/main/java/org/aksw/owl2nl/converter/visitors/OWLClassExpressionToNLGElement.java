@@ -27,9 +27,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
+import org.aksw.owl2nl.util.grammar.Grammar;
+import org.aksw.owl2nl.util.grammar.Words;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.aksw.triple2nl.property.PropertyVerbalizer;
+import org.semanticweb.owlapi.model.ClassExpressionType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -96,6 +99,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     public boolean isSubClassExpression;
     public int modalDepth;
     public OWLClassExpression root;
+    public boolean plural;
+
   }
 
   public void setParameter(final Parameter parameter) {
@@ -131,41 +136,48 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
   }
 
+  /**
+   *
+   * @param ce
+   */
   @Override
   public NLGElement visit(final OWLClass ce) {
+
+    // a class is always a noun
     parameter.noun = true;
 
-    // get the lexical form
-    String lexicalForm = getLexicalForm(ce).toLowerCase();
+    // we always start with the singular lexical form and if necessary pluralize later
+    final String lexicalForm = PlingStemmer.stem(getLexicalForm(ce).toLowerCase());
 
-    // we always start with the singular form and if necessary pluralize later
-    lexicalForm = PlingStemmer.stem(lexicalForm);
-
-    if (parameter.isSubClassExpression) {// subclass expression
+    final NPPhraseSpec nounPhrase;
+    if (parameter.isSubClassExpression) {
+      // subclass expression
       if (ce.isOWLThing()) {
-        if (parameter.modalDepth == 1) {
-          final NLGElement word = nlgFactory.createWord("everything", LexicalCategory.NOUN);
-          word.setFeature(InternalFeature.NON_MORPH, true);
-          return nlgFactory.createNounPhrase(word);
+        final NLGElement word = nlgFactory//
+            .createWord(//
+                parameter.modalDepth == 1 ? Words.everything : Words.something, LexicalCategory.NOUN//
+            );
+
+        word.setFeature(InternalFeature.NON_MORPH, true);
+        nounPhrase = nlgFactory.createNounPhrase(word);
+      } else {
+        // not OWL Thing
+        nounPhrase = nlgFactory.createNounPhrase(lexicalForm);
+        if (parameter.modalDepth > 1 && !ce.equals(parameter.root)) {
+          nounPhrase.setDeterminer(Words.a);
         } else {
-          final NLGElement word = nlgFactory.createWord("something", LexicalCategory.NOUN);
-          word.setFeature(InternalFeature.NON_MORPH, true);
-          return nlgFactory.createNounPhrase(word);
+          nounPhrase.setPreModifier(Words.every);
         }
       }
-      final NPPhraseSpec nounPhrase = nlgFactory.createNounPhrase(lexicalForm);
-      if (parameter.modalDepth > 1 && !ce.equals(parameter.root)) {
-        nounPhrase.setDeterminer("a");
-      } else {
-        nounPhrase.setPreModifier("every");
-      }
-      return nounPhrase;
-    } else {// superclass expression
+    } else {
+      // superclass expression
       if (ce.isOWLThing()) {
-        return nlgFactory.createNounPhrase("something");
+        nounPhrase = nlgFactory.createNounPhrase(Words.something);
+      } else {
+        nounPhrase = nlgFactory.createNounPhrase(Words.a, lexicalForm);
       }
-      return nlgFactory.createNounPhrase("a", lexicalForm);
     }
+    return nounPhrase;
   }
 
   @Override
@@ -173,11 +185,31 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final List<OWLClassExpression> operands = getOperandsByPriority(ce);
 
     // process first class
-    final OWLClassExpression first = operands.remove(0);
     final SPhraseSpec phrase = nlgFactory.createClause();
+
+    final OWLClassExpression first = operands.remove(0);
     final NPPhraseSpec firstElement = (NPPhraseSpec) first.accept(this);
     phrase.setSubject(firstElement);
+
+    boolean subjectIsPerson = false;
+    // is first a owl class?
+    if (first.getClassExpressionType().getName().equals(ClassExpressionType.OWL_CLASS.getName())) {
+      final String subject = first.asOWLClass().toString();
+
+      if (Grammar.en.isPerson(subject.toLowerCase())) {
+
+        subjectIsPerson = true;
+      } else {
+        subjectIsPerson = false;
+      }
+      LOG.debug("{} {} Person", subject, subjectIsPerson ? "is" : "is not");
+    } else {
+      // first is not a owl class?
+    }
+
+    LOG.debug("operands: {}", operands.size());
     if (operands.size() >= 2) {
+
       final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
 
       // process the classes
@@ -191,7 +223,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         }
       }
       for (final OWLClass cls : classes) {
-        final SPhraseSpec clause = nlgFactory.createClause("that", "is");
+        final SPhraseSpec clause = nlgFactory.createClause(Words.that, Words.is);
         clause.setObject(cls.accept(this));
         cc.addCoordinate(clause);
       }
@@ -201,33 +233,51 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         final SPhraseSpec clause = nlgFactory.createClause();
         final NLGElement el = operand.accept(this);
         if (parameter.noun) {
-          clause.setSubject("whose");
+          clause.setSubject(Words.whose);
+          LOG.info("test 1");
           clause.setVerbPhrase(el);
         } else {
-          clause.setSubject("that");
+          clause.setSubject(Words.that);
           clause.setVerbPhrase(el);
         }
         cc.addCoordinate(clause);
       }
 
       phrase.setVerbPhrase(cc);
-    } else {
+    } else { // !(operands.size() >= 2)
+
       final OWLClassExpression operand = operands.get(0);
       final SPhraseSpec clause = nlgFactory.createClause();
       final NLGElement el = operand.accept(this);
+
       if (parameter.noun) {
-        if (operand instanceof OWLObjectSomeValuesFrom
-            && ((OWLObjectSomeValuesFrom) operand).getFiller().isOWLThing()) {
+        //
+        final boolean isFillerOfOWLObjectSomeValuesFromAOWLThing = //
+            operand instanceof OWLObjectSomeValuesFrom //
+                && ((OWLObjectSomeValuesFrom) operand).getFiller().isOWLThing();
+
+        if (operand instanceof OWLObjectHasSelf) {
+          if (subjectIsPerson) {
+            clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
+            clause.setVerbPhrase(el);
+          } else {
+            clause.setFeature(Feature.COMPLEMENTISER, Words.that);
+            clause.setVerbPhrase(el);
+          }
+        } else if (isFillerOfOWLObjectSomeValuesFromAOWLThing) {
           // clause.setFeature(Feature.COMPLEMENTISER, "that");
-          clause.setVerb("have");
+          clause.setVerb(Words.have);
           clause.setObject(el);
         } else {
-          clause.setFeature(Feature.COMPLEMENTISER, "whose");
+          clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
           clause.setVerbPhrase(el);
+          if (parameter.plural) {
+            LOG.debug("How to make it plural here?");
+          }
         }
-
       } else {
-        clause.setFeature(Feature.COMPLEMENTISER, "that");
+        // not a noun
+        clause.setFeature(Feature.COMPLEMENTISER, Words.that);
         clause.setVerbPhrase(el);
       }
       phrase.setComplement(clause);
@@ -242,7 +292,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final List<OWLClassExpression> operands = getOperandsByPriority(ce);
 
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
-    cc.setConjunction("or");
+    cc.setConjunction(Words.or);
     for (final OWLClassExpression operand : operands) {
       cc.addCoordinate(operand.accept(this));
     }
@@ -257,7 +307,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     NLGElement phrase = op.accept(this);
     if (!op.isAnonymous()) {
-      phrase = nlgFactory.createClause(null, "is", phrase);
+      phrase = nlgFactory.createClause(null, Words.is, phrase);
     }
 
     phrase.setFeature(Feature.NEGATED, true);
@@ -268,28 +318,67 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     return phrase;
   }
 
+  /**
+   *
+   * @param pos
+   * @return true if pos is of the form "V* N*"
+   */
+  private boolean isVN(final String pos) {
+    final String[] posTags = pos.split(" ");
+    if (posTags.length > 1 && posTags[0].startsWith("V") && posTags[1].startsWith("N")) {
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public NLGElement visit(final OWLObjectSomeValuesFrom ce) {
     parameter.modalDepth++;
     final SPhraseSpec phrase = nlgFactory.createClause();
 
+    // TODO: how to handle inverse?
     final OWLObjectPropertyExpression property = ce.getProperty();
     final OWLClassExpression filler = ce.getFiller();
+    /**
+     * <code>
+     if (property.isAnonymous()) {
+    
+       property = property.getInverseProperty();
+       final PropertyVerbalization propertyVerbalization = verbalize(property);
+       final String verbalizationText = propertyVerbalization.getVerbalizationText();
+       final NPPhraseSpec propertyNounPhrase = nlgFactory//
+           .createNounPhrase(PlingStemmer.stem(verbalizationText));
+       if (filler.isOWLThing()) {
+         propertyNounPhrase.setDeterminer(Words.a);
+         return propertyNounPhrase;
+       }
+       LOG.info("propertyNounPhrase : {}", propertyNounPhrase.toString());
+       phrase.setSubject(propertyNounPhrase);
+       phrase.setVerb(Words.is);
+    
+       final NLGElement fillerElement = filler.accept(this);
+       fillerElement.setPlural(false);
+       phrase.setObject(fillerElement);
+    
+       parameter.noun = true;
+     }
+     </code>
+     **/
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = verbalize(property);
       String verbalizationText = propertyVerbalization.getVerbalizationText();
       if (propertyVerbalization.isNounType()) {
-        final NPPhraseSpec propertyNounPhrase =
-            nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
+
+        final NPPhraseSpec propertyNounPhrase = nlgFactory//
+            .createNounPhrase(PlingStemmer.stem(verbalizationText));
 
         if (filler.isOWLThing()) {
-          propertyNounPhrase.setDeterminer("a");
+          propertyNounPhrase.setDeterminer(Words.a);
           return propertyNounPhrase;
         }
         phrase.setSubject(propertyNounPhrase);
-
-        phrase.setVerb("is");
+        phrase.setVerb(Words.is);
 
         final NLGElement fillerElement = filler.accept(this);
         fillerElement.setPlural(false);
@@ -299,31 +388,28 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       } else if (propertyVerbalization.isVerbType()) {
         // phrase.setVerb(propertyVerbalization.getVerbalizationText());
 
-        final String[] posTags = propertyVerbalization.getPOSTags().split(" ");
-        final String firstTag = posTags[0];
-        final String secondTag = posTags[1];
+        if (isVN(propertyVerbalization.getPOSTags())) {
+          // if(tokens[0].equals("has") || tokens[0].equals(Words.have)){
 
-        if (firstTag.startsWith("V") && secondTag.startsWith("N")) {
-          // if(tokens[0].equals("has") || tokens[0].equals("have")){
           final String[] tokens = verbalizationText.split(" ");
 
           verbalizationText = tokens[0];
 
           if (!filler.isOWLThing()) {
-            verbalizationText += " as";
+            verbalizationText = verbalizationText + " ".concat(Words.as);
           } else {
-            verbalizationText += " a";
+            verbalizationText = verbalizationText + " ".concat(Words.a);
           }
 
           // stem the noun
           // TODO to absolutely correct we have to stem the noun phrase
           String nounToken = tokens[1];
           nounToken = PlingStemmer.stem(nounToken);
-          verbalizationText += " " + nounToken;
+          verbalizationText = verbalizationText.concat(" ") + nounToken;
 
           // append rest of the tokens
           for (int i = 2; i < tokens.length; i++) {
-            verbalizationText += " " + tokens[i];
+            verbalizationText = verbalizationText.concat(" ") + tokens[i];
           }
           verbalizationText = verbalizationText.trim();
 
@@ -345,14 +431,17 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         }
 
         parameter.noun = false;
+
       } else {
-
+        LOG.warn("property has unspecified type: {}", propertyVerbalization.isUnspecifiedType());
       }
-
-    } else {
-      // TODO handle inverse properties
+    } else if (property.isAnonymous()) {
+      //
     }
+
     LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("parameter.modalDepth: {}", parameter.modalDepth);
+
     parameter.modalDepth--;
     return phrase;
   }
@@ -368,58 +457,63 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = verbalize(property);
       String verbalizationText = propertyVerbalization.getVerbalizationText();
+
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb("is");
+        phrase.setVerb(Words.is);
 
         final NLGElement fillerElement = filler.accept(this);
         phrase.setObject(fillerElement);
 
         parameter.noun = true;
       } else if (propertyVerbalization.isVerbType()) {
-        final String[] posTags = propertyVerbalization.getPOSTags().split(" ");
-        final String firstTag = posTags[0];
-        final String secondTag = posTags[1];
 
-        if (firstTag.startsWith("V") && secondTag.startsWith("N")) {
-          // if(tokens[0].equals("has") || tokens[0].equals("have")){
+        if (isVN(propertyVerbalization.getPOSTags())) {
+          // TODO: How handle properties with 3 tokens?
+
+          // if(tokens[0].equals("has") || tokens[0].equals(Words.have)){
           final String[] tokens = verbalizationText.split(" ");
 
           verbalizationText = tokens[0];
-
-          if (!filler.isOWLThing()) {
-            verbalizationText += " as";
+          if (filler.isOWLNothing()) {
+            verbalizationText = verbalizationText + " ".concat(Words.no);
+          } else if (!filler.isOWLThing()) {
+            verbalizationText = verbalizationText + " ".concat(Words.as);
           } else {
-            verbalizationText += " a";
+            verbalizationText = verbalizationText + " ".concat(Words.a);
           }
-
           // stem the noun
           // TODO to be absolutely correct, we have to stem the noun phrase
           String nounToken = tokens[1];
           nounToken = PlingStemmer.stem(nounToken);
-          verbalizationText += " " + nounToken;
-
+          verbalizationText = verbalizationText + " ".concat(nounToken);
           // append rest of the tokens
           for (int i = 2; i < tokens.length; i++) {
-            verbalizationText += " " + tokens[i];
+            verbalizationText = verbalizationText + " ".concat(tokens[i]);
           }
-          verbalizationText += " only";
-          verbalizationText = verbalizationText.trim();
+          if (filler.isOWLNothing()) {
+            final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
+            phrase.setVerb(verb);
 
-          final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
-          phrase.setVerb(verb);
+          } else if (filler.isOWLThing()) {
+            // ?
+          } else if (!filler.isOWLThing()) {
+            // adds only
+            verbalizationText = (verbalizationText + " ".concat(Words.only)).trim();
 
-          if (!filler.isOWLThing()) {
+            final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
+            phrase.setVerb(verb);
+
             final NLGElement fillerElement = filler.accept(this);
             phrase.setObject(fillerElement);
             fillerElement.setFeature(Feature.COMPLEMENTISER, null);
           }
-        } else {
+        } else { // !isVN
           final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
-          verb.addModifier("only");
+          verb.addModifier(Words.only);
           phrase.setVerb(verb);
 
           final NLGElement fillerElement = filler.accept(this);
@@ -429,10 +523,10 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-
+        // propertyVerbalization is not a verb or noun
       }
     } else {
-
+      // property is anonymous: not label exists, mostly for an inverse property
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
@@ -453,7 +547,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb("is");
+        phrase.setVerb(Words.is);
 
         final NLGElement fillerElement = value.accept(converterOWLIndividual);
         phrase.setObject(fillerElement);
@@ -467,10 +561,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-
       }
     } else {
-      // TODO handle inverse properties
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -479,29 +571,38 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectMinCardinality ce) {
-    return processObjectCardinalityRestriction(ce, "at least");
+    return processObjectCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.least));
   }
 
   @Override
   public NLGElement visit(final OWLObjectMaxCardinality ce) {
-    return processObjectCardinalityRestriction(ce, "at most");
+    return processObjectCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.most));
   }
 
   @Override
   public NLGElement visit(final OWLObjectExactCardinality ce) {
-    return processObjectCardinalityRestriction(ce, "exactly");
+    return processObjectCardinalityRestriction(ce, Words.exactly);
   }
 
   private NLGElement processObjectCardinalityRestriction(final OWLObjectCardinalityRestriction ce,
-      String modifier) {
-
-    final SPhraseSpec phrase = nlgFactory.createClause();
+      final String modifier) {
 
     final OWLObjectPropertyExpression property = ce.getProperty();
     final OWLClassExpression filler = ce.getFiller();
     final int cardinality = ce.getCardinality();
 
-    modifier += " " + cardinality;
+    final NLGElement phrase = processOCRn(property, filler, cardinality, modifier);
+
+    LOG.debug(ce + " = " + realiser.realise(phrase));
+    return phrase;
+  }
+
+  private NLGElement processOCRn(final OWLObjectPropertyExpression property,
+      final OWLClassExpression filler, final int cardinality, String modifier) {
+
+    final SPhraseSpec phrase = nlgFactory.createClause();
+
+    modifier = modifier.concat(" ").concat(Words.number(cardinality));
 
     if (!property.isAnonymous()) {
 
@@ -509,14 +610,12 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
       if (propertyVerbalization.isNounType()) {
 
-        final NLGElement word = nlgFactory.createWord(
-            PlingStemmer.stem(propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
+        final NLGElement word = nlgFactory.createWord(PlingStemmer.stem(//
+            propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(word);
-        if (cardinality > 1) {
-          word.setPlural(true);
-          propertyNounPhrase.setPlural(true);
-        }
-        final VPPhraseSpec verb = nlgFactory.createVerbPhrase("have");
+        word.setPlural(cardinality > 1);
+        propertyNounPhrase.setPlural(cardinality > 1);
+        final VPPhraseSpec verb = nlgFactory.createVerbPhrase(Words.have);
         verb.addModifier(modifier);
 
         phrase.setVerb(verb);
@@ -525,10 +624,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         final NLGElement fillerElement = filler.accept(this);
 
         final SPhraseSpec clause = nlgFactory.createClause();
-        if (cardinality > 1) {
-          clause.setPlural(true);
-        }
-        clause.setVerb("be");
+        clause.setPlural(cardinality > 1);
+        clause.setVerb(Words.be);
         clause.setObject(fillerElement);
         if (fillerElement.isA(PhraseCategory.CLAUSE)) {
           fillerElement.setFeature(Feature.COMPLEMENTISER, null);
@@ -551,29 +648,34 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
          * for which verbs the rules holds, but 'has','include','contains',etc. might be a good
          * starting point.
          */
-        final String[] posTags = propertyVerbalization.getPOSTags().split(" ");
-        final String firstTag = posTags[0];
-        final String secondTag = posTags[1];
 
-        if (firstTag.startsWith("V") && secondTag.startsWith("N")) {
-          // if(tokens[0].equals("has") || tokens[0].equals("have")){
+        /**
+         * guess we need to set a flag like: parameter.plural = <true,false>
+         */
+        // LOG.debug("OWLObjectMinCardinality {}", modifier);
+        // LOG.debug("verbalizationText {}", verbalizationText);
+        // LOG.debug("getPOSTags {}", propertyVerbalization.getPOSTags());
+
+        if (isVN(propertyVerbalization.getPOSTags())) {
+          // if(tokens[0].equals("has") || tokens[0].equals(Words.have)){
           final String[] tokens = verbalizationText.split(" ");
-
           verbalizationText = tokens[0];
-          verbalizationText += " " + modifier;
-
+          verbalizationText = verbalizationText.concat(" ") + modifier;
           // stem the noun if card == 1
           String nounToken = tokens[1];
           if (cardinality == 1) {
+            parameter.plural = false;
             nounToken = PlingStemmer.stem(nounToken);
+          } else {
+            parameter.plural = true;
+            nounToken = Grammar.en.plural(nounToken);
           }
-          verbalizationText += " " + nounToken;
+          verbalizationText = verbalizationText.concat(" ") + nounToken;
           for (int i = 2; i < tokens.length; i++) {
-            verbalizationText += " " + tokens[i];
+            // TODO: here plural too? Or check some order and length of the tokens
+            verbalizationText = verbalizationText.concat(" ") + tokens[i];
           }
-          verbalizationText = verbalizationText.trim();
-          final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
-          phrase.setVerb(verb);
+          phrase.setVerb(nlgFactory.createVerbPhrase(verbalizationText.trim()));
         } else {
           final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
           verb.addModifier(modifier);
@@ -582,20 +684,29 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         if (!filler.isOWLThing()) {
           final NLGElement fillerElement = filler.accept(this);
-          if (cardinality > 1) {
-            fillerElement.setPlural(true);
-          }
+          fillerElement.setPlural(cardinality > 1);
           phrase.setObject(fillerElement);
         }
         parameter.noun = false;
       } else {
-        LOG.debug("TODO: handle other types");
       }
     } else {
-      LOG.debug("property is anonymous and not handled yet.");
-      // final OWLObjectPropertyExpression e = property.getInverseProperty();
-      // LOG.info("{},{}", e.getInverseProperty(), property);
-      // e.accept(converterOWLPropertyExpression);
+    }
+
+    return phrase;
+  }
+
+  public NLGElement visit2(final OWLObjectHasSelf ce) {
+    final SPhraseSpec phrase = nlgFactory.createClause();
+    final OWLObjectPropertyExpression property = ce.getProperty();
+    if (!property.isAnonymous()) {
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      // should be pronoun but how i go from "it" to "onself"
+      final NLGElement x = nlgFactory.createWord(Words.oneself, LexicalCategory.ADVERB);
+      final NPPhraseSpec n = nlgFactory.createNounPhrase();
+      n.setNoun(x);
+      phrase.setVerb(propertyVerbalization.getVerbalizationText());
+      phrase.setObject(n);
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     return phrase;
@@ -603,8 +714,20 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectHasSelf ce) {
-    LOG.debug("TODO: handle OWLObjectHasSelf");
-    return null;
+    final SPhraseSpec phrase = nlgFactory.createClause();
+    final OWLObjectPropertyExpression property = ce.getProperty();
+    if (!property.isAnonymous()) {
+      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      // should be pronoun but how i go from "it" to "onself"
+      final NLGElement x = nlgFactory.createWord(Words.oneself, LexicalCategory.ADVERB);
+      final NPPhraseSpec n = nlgFactory.createNounPhrase();
+      n.setNoun(x);
+      phrase.setVerb(propertyVerbalization.getVerbalizationText());
+      phrase.setObject(n);
+
+    }
+    LOG.debug(ce + " = " + realiser.realise(phrase));
+    return phrase;
   }
 
   @Override
@@ -644,7 +767,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb("be");
+        phrase.setVerb(Words.be);
 
         parameter.noun = true;
       } else if (propertyVerbalization.isVerbType()) {
@@ -652,10 +775,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-        LOG.debug("TODO: handle other types");
       }
     } else {
-      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
@@ -677,7 +798,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
             .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb("is");
+        phrase.setVerb(Words.is);
 
         final NLGElement fillerElement = filler.accept(converterOWLDataRange);
         phrase.setObject(fillerElement);
@@ -691,12 +812,12 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
           final VPPhraseSpec verb =
               nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
           phrase.setVerb(verb);
-          verb.addFrontModifier("either");
-          verb.addPostModifier("or not");
+          verb.addFrontModifier(Words.either);
+          verb.addPostModifier(Words.or.concat(" ").concat(Words.not));
         } else {
           final VPPhraseSpec verb =
               nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
-          verb.addModifier("only");
+          verb.addModifier(Words.only);
           phrase.setVerb(verb);
 
           final NLGElement fillerElement = filler.accept(converterOWLDataRange);
@@ -705,11 +826,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-        LOG.debug("TODO: handle other types");
       }
-
     } else {
-      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
     parameter.modalDepth--;
@@ -733,7 +851,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(verbalizationText);
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb("is");
+        phrase.setVerb(Words.is);
 
         final NLGElement valueElement =
             nlgFactory.createNounPhrase(literalConverter.convert(value));
@@ -743,7 +861,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       } else if (propertyVerbalization.isVerbType()) {
         // if phrase starts with something like 'is' and value is a Boolean
         final String[] tokens = verbalizationText.split(" ");
-        if (value.getDatatype().isBoolean() && tokens[0].equals("is")) {
+        if (value.getDatatype().isBoolean() && tokens[0].equals(Words.is)) {
           if (!value.parseBoolean()) {
             phrase.setFeature(Feature.NEGATED, true);
           }
@@ -757,10 +875,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-        LOG.debug("TODO: handle other types");
       }
     } else {
-      LOG.info("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -769,17 +885,17 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLDataMinCardinality ce) {
-    return processDataCardinalityRestriction(ce, "at least");
+    return processDataCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.least));
   }
 
   @Override
   public NLGElement visit(final OWLDataExactCardinality ce) {
-    return processDataCardinalityRestriction(ce, "exactly");
+    return processDataCardinalityRestriction(ce, Words.exactly);
   }
 
   @Override
   public NLGElement visit(final OWLDataMaxCardinality ce) {
-    return processDataCardinalityRestriction(ce, "at most");
+    return processDataCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.most));
   }
 
   private NLGElement processDataCardinalityRestriction(final OWLDataCardinalityRestriction ce,
@@ -801,8 +917,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
           word.setPlural(true);
           propertyNounPhrase.setPlural(true);
         }
-        final VPPhraseSpec verb = nlgFactory.createVerbPhrase("have");
-        verb.addModifier(modifier + " " + cardinality);
+        final VPPhraseSpec verb = nlgFactory.createVerbPhrase(Words.have);
+        verb.addModifier(modifier.concat(" ").concat(Words.number(cardinality)));
 
         phrase.setVerb(verb);
         phrase.setObject(propertyNounPhrase);
@@ -813,7 +929,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         if (cardinality > 1) {
           clause.setPlural(true);
         }
-        clause.setVerb("be");
+        clause.setVerb(Words.be);
         clause.setObject(fillerElement);
         if (fillerElement.isA(PhraseCategory.CLAUSE)) {
           fillerElement.setFeature(Feature.COMPLEMENTISER, null);
@@ -825,7 +941,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       } else if (propertyVerbalization.isVerbType()) {
         final VPPhraseSpec verb =
             nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
-        verb.addModifier(modifier + " " + cardinality);
+        verb.addModifier(modifier.concat(" ").concat(Words.number(cardinality)));
         phrase.setVerb(verb);
 
         final NLGElement fillerElement = filler.accept(converterOWLDataRange);
@@ -834,10 +950,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else {
-        LOG.debug("TODO: handle other types");
       }
     } else {
-      LOG.debug("TODO: handle inverse properties");
     }
     LOG.debug(ce + " = " + realiser.realise(phrase));
 
@@ -851,7 +965,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    * @param ce the class expression
    * @return a list of operands
    */
-  private List<OWLClassExpression> getOperandsByPriority(final OWLNaryBooleanClassExpression ce) {
+  protected List<OWLClassExpression> getOperandsByPriority(final OWLNaryBooleanClassExpression ce) {
     return ce.getOperandsAsList();
   }
 
