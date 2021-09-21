@@ -95,6 +95,7 @@ public class OWLClassExpressionConverter extends AConverter {
 
   private void resetsOWLClassExpressionParameter(final OWLClassExpression ce,
       final boolean isSubClassExpression) {
+
     final OWLClassExpressionToNLGElement.Parameter parameter;
     parameter = ((OWLClassExpressionToNLGElement) owlClassExpression).new Parameter();
     parameter.isSubClassExpression = isSubClassExpression;
@@ -116,12 +117,31 @@ public class OWLClassExpressionConverter extends AConverter {
     return rewrite(ce, false);
   }
 
+  /**
+   *
+   * @param ce
+   * @param inIntersection
+   * @return
+   */
   private OWLClassExpression rewrite(final OWLClassExpression ce, final boolean inIntersection) {
+
+    LOG.info("rewrite before: {}", ce.toString());
+
     if (!ce.isAnonymous()) {
+      //
+      LOG.debug("Anonymous is not supported");
+      //
       return ce;
     } else if (ce instanceof OWLObjectOneOf) {
+      //
+      // OWLObjectOneOf
+      //
+      // TODO: do something?
       return ce;
     } else if (ce instanceof OWLObjectIntersectionOf) {
+      //
+      // OWLObjectIntersectionOf
+      //
       final Set<OWLClassExpression> operands = ((OWLObjectIntersectionOf) ce).getOperands();
       final Set<OWLClassExpression> newOperands = Sets.newHashSet();
 
@@ -135,6 +155,9 @@ public class OWLClassExpressionConverter extends AConverter {
 
       return df.getOWLObjectIntersectionOf(newOperands);
     } else if (ce instanceof OWLObjectUnionOf) {
+      //
+      // OWLObjectUnionOf
+      //
       final Set<OWLClassExpression> operands = ((OWLObjectUnionOf) ce).getOperands();
       final Set<OWLClassExpression> newOperands = Sets.newHashSet();
 
@@ -144,27 +167,42 @@ public class OWLClassExpressionConverter extends AConverter {
 
       return df.getOWLObjectUnionOf(newOperands);
     } else if (ce instanceof OWLObjectSomeValuesFrom) {
-      final OWLClassExpression newCe =
-          df.getOWLObjectSomeValuesFrom(((OWLObjectSomeValuesFrom) ce).getProperty(),
-              rewrite(((OWLObjectSomeValuesFrom) ce).getFiller()));
+      //
+      // OWLObjectSomeValuesFrom
+      //
+      final OWLClassExpression newCe;
+      newCe = df.getOWLObjectSomeValuesFrom(((OWLObjectSomeValuesFrom) ce).getProperty(),
+          rewrite(((OWLObjectSomeValuesFrom) ce).getFiller()));
+
       if (inIntersection) {
         return newCe;
       }
       return df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
     } else if (ce instanceof OWLObjectAllValuesFrom) {
-      final OWLClassExpression newCe =
-          df.getOWLObjectAllValuesFrom(((OWLObjectAllValuesFrom) ce).getProperty(),
-              rewrite(((OWLObjectAllValuesFrom) ce).getFiller()));
+      //
+      // OWLObjectAllValuesFrom
+      //
+      final OWLClassExpression newCe;
+      newCe = df.getOWLObjectAllValuesFrom(((OWLObjectAllValuesFrom) ce).getProperty(),
+          rewrite(((OWLObjectAllValuesFrom) ce).getFiller()));
+
       if (inIntersection) {
         return newCe;
       }
       return df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
     }
+
+    //
     if (inIntersection) {
       return ce;
     }
-    final Set<OWLClassExpression> operands =
-        Sets.<OWLClassExpression>newHashSet(ce, df.getOWLThing());
-    return df.getOWLObjectIntersectionOf(operands);
+
+    final Set<OWLClassExpression> operands;
+    operands = Sets.<OWLClassExpression>newHashSet(ce, df.getOWLThing());
+    final OWLObjectIntersectionOf rtn = df.getOWLObjectIntersectionOf(operands);
+
+    LOG.info("rewrite after: {}", rtn.toString());
+
+    return rtn;
   }
 }
