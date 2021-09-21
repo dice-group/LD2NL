@@ -21,6 +21,8 @@
 package org.aksw.owl2nl.converter;
 
 import org.aksw.owl2nl.data.OWL2NLInput;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,7 +49,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  *
  */
 public class OWLClassExpressionConverterTest {
-
+  protected static final Logger LOG = LogManager.getLogger(OWLClassExpressionConverterTest.class);
   private static OWLDataFactoryImpl df = new OWLDataFactoryImpl();
   private static OWLClassExpressionConverter converter =
       new OWLClassExpressionConverter(new OWL2NLInput());
@@ -59,6 +61,8 @@ public class OWLClassExpressionConverterTest {
   private final OWLClass place = df.getOWLClass("Place", ontology);
   private final OWLClass company = df.getOWLClass("Company", ontology);
   private final OWLClass person = df.getOWLClass("Person", ontology);
+  private final OWLClass woman = df.getOWLClass("Woman", ontology);
+  private final OWLClass professor = df.getOWLClass("Professor", ontology);
   private final OWLClass animal = df.getOWLClass("Animal", ontology);
   private final OWLClass university = df.getOWLClass("University", ontology);
   private final OWLClass softwareCompany = df.getOWLClass("SoftwareCompany", ontology);
@@ -74,6 +78,7 @@ public class OWLClassExpressionConverterTest {
   private final OWLObjectProperty workPlace = df.getOWLObjectProperty("workPlace", ontology);
   private final OWLObjectProperty birthPlace = df.getOWLObjectProperty("birthPlace", ontology);
   private final OWLObjectProperty worksFor = df.getOWLObjectProperty("worksFor", ontology);
+  private final OWLObjectProperty hasChild = df.getOWLObjectProperty("hasChild", ontology);
   private final OWLObjectProperty ledBy = df.getOWLObjectProperty("isLedBy", ontology);
   private final OWLObjectProperty plays = df.getOWLObjectProperty("play", ontology);
   private final OWLObjectProperty owner = df.getOWLObjectProperty("owner", ontology);
@@ -100,6 +105,20 @@ public class OWLClassExpressionConverterTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+  }
+
+  // Person u ≥3 hasChild.(Woman u Professor)
+  @Test
+  public void testQualifiedNumberRestrictions() {
+    LOG.info("testQualifiedNumberRestrictions");
+    Assert.assertEquals(//
+        "a person that has at least three children that a professor whose a woman", // TODOL
+                                                                                    // pluralize!
+        // a person who has at least three children who are professors and females
+        converter.convert(//
+            df.getOWLObjectIntersectionOf(person, df.getOWLObjectMinCardinality(3, hasChild,
+                df.getOWLObjectIntersectionOf(professor, woman))))//
+    );
   }
 
   @Test
@@ -140,7 +159,7 @@ public class OWLClassExpressionConverterTest {
     final OWLObjectSomeValuesFrom ledByPerson = df.getOWLObjectSomeValuesFrom(ledBy, person);
     final OWLObjectIntersectionOf intersection = df.getOWLObjectIntersectionOf(place, ledByPerson);
     Assert.assertEquals(//
-        "something that has at least 3 birth places that are a place that is led by a person", //
+        "something that has at least three birth places that are a place that is led by a person", //
         converter.convert(df.getOWLObjectMinCardinality(3, birthPlace, intersection))//
     );
   }
@@ -152,7 +171,7 @@ public class OWLClassExpressionConverterTest {
             df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person)))//
     );
     Assert.assertEquals(//
-        "something that works for at least 5 that a company that is led by a company or a person", //
+        "something that works for at least five that a company that is led by a company or a person", //
         converter.convert(ce)//
     );
   }
@@ -163,7 +182,7 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectMinCardinality(1, worksFor, df.getOWLObjectIntersectionOf(company,
             df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person))));
     Assert.assertEquals(//
-        "something that works for at least 1 that a company that is led by a company or a person", //
+        "something that works for at least one that a company that is led by a company or a person", //
         converter.convert(ce)//
     );
   }
@@ -174,7 +193,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testMinCardinalityA() {
     Assert.assertEquals(//
-        "something that has at least 3 birth places that are a place", //
+        "something that has at least three birth places that are a place", //
         converter.convert(df.getOWLObjectMinCardinality(3, birthPlace, place))//
     );
   }
@@ -186,7 +205,7 @@ public class OWLClassExpressionConverterTest {
   public void testMinCardinalityB() {
     // works for at least 3 companies
     Assert.assertEquals(//
-        "something that works for at least 3 some companies", //
+        "something that works for at least three some companies", //
         // "something that works for at least 3 companies",
         converter.convert(df.getOWLObjectMinCardinality(3, worksFor, company))//
     );
@@ -198,7 +217,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testMinCardinalityC() {
     Assert.assertEquals(//
-        "something that has at least 3 nr of inhabitants that are greater than or equals to 10000000", //
+        "something that has at least three nr of inhabitants that are greater than or equals to 10000000", //
         converter.convert(df.getOWLDataMinCardinality(3, nrOfInhabitants, dataRange))//
     );
   }
@@ -209,7 +228,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testMaxCardinalityA() {
     Assert.assertEquals(//
-        "something that has at most 3 birth places that are a place", //
+        "something that has at most three birth places that are a place", //
         converter.convert(df.getOWLObjectMaxCardinality(3, birthPlace, place))//
     );
   }
@@ -217,7 +236,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testMaxCardinalityB() {
     Assert.assertEquals(//
-        "something that works for at most 3 some companies", //
+        "something that works for at most three some companies", //
         // "something that works for at most 3 some companies"
         converter.convert(df.getOWLObjectMaxCardinality(3, worksFor, company))//
     );
@@ -226,7 +245,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testMaxCardinalityC() {
     Assert.assertEquals(//
-        "something that has at most 3 nr of inhabitants that are greater than or equals to 10000000", //
+        "something that has at most three nr of inhabitants that are greater than or equals to 10000000", //
         converter.convert(df.getOWLDataMaxCardinality(3, nrOfInhabitants, dataRange))//
     );
   }
@@ -237,7 +256,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testExactCardinalityA() {
     Assert.assertEquals(//
-        "something that has exactly 3 birth places that are a place", //
+        "something that has exactly three birth places that are a place", //
         converter.convert(df.getOWLObjectExactCardinality(3, birthPlace, place))//
     );
   }
@@ -248,7 +267,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testExactCardinalityB() {
     Assert.assertEquals(//
-        "something that works for exactly 3 some companies", //
+        "something that works for exactly three some companies", //
         // "something that works for exactly 3 companies"
         converter.convert(df.getOWLObjectExactCardinality(3, worksFor, company))//
     );
@@ -257,7 +276,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testExactCardinalityC() {
     Assert.assertEquals(//
-        "something that has exactly 3 nr of inhabitants that are greater than or equals to 10000000", //
+        "something that has exactly three nr of inhabitants that are greater than or equals to 10000000", //
         converter.convert(df.getOWLDataExactCardinality(3, nrOfInhabitants, dataRange))//
     );
   }
@@ -414,7 +433,7 @@ public class OWLClassExpressionConverterTest {
             df.getOWLObjectSomeValuesFrom(ledBy, df.getOWLObjectUnionOf(company, person)),
             df.getOWLObjectComplementOf(softwareCompany)));
     Assert.assertEquals(
-        "something that works for at least 5 that a company that are not a software company and that are led by a company or a person", //
+        "something that works for at least five that a company that are not a software company and that are led by a company or a person", //
         converter.convert(ce)//
     );
     /*
@@ -427,7 +446,7 @@ public class OWLClassExpressionConverterTest {
             df.getOWLObjectComplementOf(softwareCompany)));
 
     Assert.assertEquals(//
-        "something that works for at least 1 that a company that is not a software company and that is led by a company or a person", //
+        "something that works for at least one that a company that is not a software company and that is led by a company or a person", //
         converter.convert(ce)//
     );
   }
