@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -28,11 +28,13 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import simplenlg.lexicon.Lexicon;
+
 public abstract class AInput implements IInput {
 
   protected Lexicon lexicon = Lexicon.getDefaultLexicon();
   protected OWLOntology owlOntology = null;
 
+  @Deprecated
   protected OWLOntology loadOntology(final Path path) {
     try {
       return OWLManager//
@@ -62,6 +64,7 @@ public abstract class AInput implements IInput {
     return this;
   }
 
+  @Deprecated
   @Override
   public IInput setOntology(final Path ontology) {
     owlOntology = loadOntology(ontology);
