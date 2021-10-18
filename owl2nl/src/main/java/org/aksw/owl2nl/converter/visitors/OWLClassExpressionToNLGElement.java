@@ -31,9 +31,7 @@ import org.aksw.owl2nl.util.grammar.Grammar;
 import org.aksw.owl2nl.util.grammar.Words;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
-import org.aksw.triple2nl.property.PropertyVerbalizer;
 import org.semanticweb.owlapi.model.ClassExpressionType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLClassExpressionVisitorEx;
@@ -100,7 +98,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     public int modalDepth;
     public OWLClassExpression root;
     public boolean plural;
-
   }
 
   public void setParameter(final Parameter parameter) {
@@ -112,7 +109,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
   protected OWLDataRangeVisitorEx<NLGElement> converterOWLDataRange;
   protected OWLIndividualVisitorEx<NLGElement> converterOWLIndividual;
 
-  private final PropertyVerbalizer propertyVerbalizer;
   private final Realiser realiser;
 
   /**
@@ -133,7 +129,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     this.realiser = realiser;
     this.converterOWLIndividual = converterOWLIndividual;
     this.converterOWLDataRange = converterOWLDataRange;
-    propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
   }
 
   /**
@@ -342,7 +337,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     /**
      * <code>
      if (property.isAnonymous()) {
-    
+
        property = property.getInverseProperty();
        final PropertyVerbalization propertyVerbalization = verbalize(property);
        final String verbalizationText = propertyVerbalization.getVerbalizationText();
@@ -355,19 +350,21 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
        LOG.info("propertyNounPhrase : {}", propertyNounPhrase.toString());
        phrase.setSubject(propertyNounPhrase);
        phrase.setVerb(Words.is);
-    
+
        final NLGElement fillerElement = filler.accept(this);
        fillerElement.setPlural(false);
        phrase.setObject(fillerElement);
-    
+
        parameter.noun = true;
      }
      </code>
      **/
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
-      String verbalizationText = propertyVerbalization.getVerbalizationText();
+      LOG.info(property.toString());
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
+
       if (propertyVerbalization.isNounType()) {
 
         final NPPhraseSpec propertyNounPhrase = nlgFactory//
@@ -455,12 +452,12 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final OWLClassExpression filler = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
-      String verbalizationText = propertyVerbalization.getVerbalizationText();
-
+      LOG.info(property.toString());
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
-        final NPPhraseSpec propertyNounPhrase = nlgFactory
-            .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
+        final NPPhraseSpec propertyNounPhrase =
+            nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
         phrase.setSubject(propertyNounPhrase);
 
         phrase.setVerb(Words.is);
@@ -541,10 +538,11 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final OWLIndividual value = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      final String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
-        final NPPhraseSpec propertyNounPhrase = nlgFactory
-            .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
+        final NPPhraseSpec propertyNounPhrase =
+            nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
         phrase.setSubject(propertyNounPhrase);
 
         phrase.setVerb(Words.is);
@@ -554,7 +552,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = true;
       } else if (propertyVerbalization.isVerbType()) {
-        phrase.setVerb(propertyVerbalization.getVerbalizationText());
+        phrase.setVerb(verbalizationText);
 
         final NLGElement fillerElement = value.accept(converterOWLIndividual);
         phrase.setObject(fillerElement);
@@ -606,12 +604,12 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     if (!property.isAnonymous()) {
 
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
-
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
 
         final NLGElement word = nlgFactory.createWord(PlingStemmer.stem(//
-            propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
+            verbalizationText), LexicalCategory.NOUN);
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(word);
         word.setPlural(cardinality > 1);
         propertyNounPhrase.setPlural(cardinality > 1);
@@ -635,8 +633,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else if (propertyVerbalization.isVerbType()) {
-
-        String verbalizationText = propertyVerbalization.getVerbalizationText();
 
         /*
          * here comes actually one of the most tricky parts Normally, we just use the verbalization
@@ -696,33 +692,16 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     return phrase;
   }
 
-  public NLGElement visit2(final OWLObjectHasSelf ce) {
-    final SPhraseSpec phrase = nlgFactory.createClause();
-    final OWLObjectPropertyExpression property = ce.getProperty();
-    if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
-      // should be pronoun but how i go from "it" to "onself"
-      final NLGElement x = nlgFactory.createWord(Words.oneself, LexicalCategory.ADVERB);
-      final NPPhraseSpec n = nlgFactory.createNounPhrase();
-      n.setNoun(x);
-      phrase.setVerb(propertyVerbalization.getVerbalizationText());
-      phrase.setObject(n);
-    }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
-    return phrase;
-  }
-
   @Override
   public NLGElement visit(final OWLObjectHasSelf ce) {
     final SPhraseSpec phrase = nlgFactory.createClause();
     final OWLObjectPropertyExpression property = ce.getProperty();
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
       // should be pronoun but how i go from "it" to "onself"
       final NLGElement x = nlgFactory.createWord(Words.oneself, LexicalCategory.ADVERB);
       final NPPhraseSpec n = nlgFactory.createNounPhrase();
       n.setNoun(x);
-      phrase.setVerb(propertyVerbalization.getVerbalizationText());
+      phrase.setVerb(propertyVerbalizer(property).getExpandedVerbalizationText());
       phrase.setObject(n);
 
     }
@@ -761,17 +740,17 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         phrase.setObject(fillerElement);
       }
 
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      final String t = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
-        final NPPhraseSpec propertyNounPhrase = nlgFactory
-            .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
+        final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(PlingStemmer.stem(t));
         phrase.setSubject(propertyNounPhrase);
 
         phrase.setVerb(Words.be);
 
         parameter.noun = true;
       } else if (propertyVerbalization.isVerbType()) {
-        phrase.setVerb(propertyVerbalization.getVerbalizationText());
+        phrase.setVerb(t);
 
         parameter.noun = false;
       } else {
@@ -792,10 +771,11 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final OWLDataRange filler = ce.getFiller();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      final String t = propertyVerbalization.getExpandedVerbalizationText();
+
       if (propertyVerbalization.isNounType()) {
-        final NPPhraseSpec propertyNounPhrase = nlgFactory
-            .createNounPhrase(PlingStemmer.stem(propertyVerbalization.getVerbalizationText()));
+        final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(PlingStemmer.stem(t));
         phrase.setSubject(propertyNounPhrase);
 
         phrase.setVerb(Words.is);
@@ -809,14 +789,12 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         if (filler.isDatatype()
             && filler.asOWLDatatype().getIRI().equals(OWL2Datatype.XSD_BOOLEAN.getIRI())) {
           // "either VERB or not"
-          final VPPhraseSpec verb =
-              nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
+          final VPPhraseSpec verb = nlgFactory.createVerbPhrase(t);
           phrase.setVerb(verb);
           verb.addFrontModifier(Words.either);
           verb.addPostModifier(Words.or.concat(" ").concat(Words.not));
         } else {
-          final VPPhraseSpec verb =
-              nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
+          final VPPhraseSpec verb = nlgFactory.createVerbPhrase(t);
           verb.addModifier(Words.only);
           phrase.setVerb(verb);
 
@@ -844,34 +822,33 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     LOG.info("value: {}", value.toString());
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
-      final String verbalizationText = propertyVerbalization.getVerbalizationText();
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      // final String verbalizationText = propertyVerbalization.getVerbalizationText();
+      final String t = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
         // verbalizationText = PlingStemmer.stem(verbalizationText);
-        final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(verbalizationText);
+        final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(t);
         phrase.setSubject(propertyNounPhrase);
 
         phrase.setVerb(Words.is);
 
-        final NLGElement valueElement =
-            nlgFactory.createNounPhrase(literalConverter.convert(value));
+        final NLGElement valueElement = nlgFactory.createNounPhrase(literalConverter(value));
         phrase.setObject(valueElement);
 
         parameter.noun = true;
       } else if (propertyVerbalization.isVerbType()) {
         // if phrase starts with something like 'is' and value is a Boolean
-        final String[] tokens = verbalizationText.split(" ");
+        final String[] tokens = t.split(" ");
         if (value.getDatatype().isBoolean() && tokens[0].equals(Words.is)) {
           if (!value.parseBoolean()) {
             phrase.setFeature(Feature.NEGATED, true);
           }
         } else {
-          final NLGElement valueElement =
-              nlgFactory.createNounPhrase(literalConverter.convert(value));
+          final NLGElement valueElement = nlgFactory.createNounPhrase(literalConverter(value));
           phrase.setObject(valueElement);
         }
 
-        phrase.setVerb(verbalizationText);
+        phrase.setVerb(t);
 
         parameter.noun = false;
       } else {
@@ -908,10 +885,10 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final int cardinality = ce.getCardinality();
 
     if (!property.isAnonymous()) {
-      final PropertyVerbalization propertyVerbalization = verbalize(property);
+      final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
+      final String t = propertyVerbalization.getExpandedVerbalizationText();
       if (propertyVerbalization.isNounType()) {
-        final NLGElement word = nlgFactory.createWord(
-            PlingStemmer.stem(propertyVerbalization.getVerbalizationText()), LexicalCategory.NOUN);
+        final NLGElement word = nlgFactory.createWord(PlingStemmer.stem(t), LexicalCategory.NOUN);
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(word);
         if (cardinality > 1) {
           word.setPlural(true);
@@ -939,8 +916,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
         parameter.noun = false;
       } else if (propertyVerbalization.isVerbType()) {
-        final VPPhraseSpec verb =
-            nlgFactory.createVerbPhrase(propertyVerbalization.getVerbalizationText());
+        final VPPhraseSpec verb = nlgFactory.createVerbPhrase(t);
         verb.addModifier(modifier.concat(" ").concat(Words.number(cardinality)));
         phrase.setVerb(verb);
 
@@ -967,17 +943,5 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    */
   protected List<OWLClassExpression> getOperandsByPriority(final OWLNaryBooleanClassExpression ce) {
     return ce.getOperandsAsList();
-  }
-
-  private PropertyVerbalization verbalize(final OWLObjectPropertyExpression p) {
-    return verbalize(p.asOWLObjectProperty().getIRI());
-  }
-
-  private PropertyVerbalization verbalize(final OWLDataPropertyExpression p) {
-    return verbalize(p.asOWLDataProperty().getIRI());
-  }
-
-  private PropertyVerbalization verbalize(final IRI p) {
-    return propertyVerbalizer.verbalize(p.toString());
   }
 }

@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.io.Resources;
 
@@ -23,28 +27,32 @@ import com.google.common.io.Resources;
  * TODO: Add synonyms to the labels, because, e.g.: `girl` is not a label in the class label file.
  */
 public class DBPedia {
+  protected static final Logger LOG = LogManager.getLogger(DBPedia.class);
 
   private static Set<String> classLabels = null;
+  private static String file = "DBpediaPersonClassLabels.txt";
 
   /**
-   * reads "DBpediaPersonClassLabels.txt"
-   **/
-  public static final Set<String> readClassLabels() {
+   * Is a DBpedia subclass of Person.
+   *
+   * @param word
+   * @return
+   */
+  public static boolean isPerson(final String word) {
+    return readClassLabels().contains(word.trim().toLowerCase());
+  }
+
+  private static final Set<String> readClassLabels() {
     if (classLabels == null) {
       try {
-        classLabels =
-            new HashSet<>(Resources.readLines(Resources.getResource("DBpediaPersonClassLabels.txt"),
-                StandardCharsets.UTF_8));
-
+        classLabels = new HashSet<>(//
+            Resources.readLines(Resources.getResource(file), StandardCharsets.UTF_8)//
+                .stream().map(String::toLowerCase).collect(Collectors.toSet())//
+        );
       } catch (final IOException e) {
-        e.printStackTrace();
+        LOG.error(e.getLocalizedMessage(), e);
       }
     }
     return classLabels;
-  }
-
-  public static boolean isPerson(final String word) {
-    readClassLabels();
-    return classLabels.contains(word);
   }
 }

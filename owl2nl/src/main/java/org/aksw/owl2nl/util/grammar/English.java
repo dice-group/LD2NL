@@ -11,19 +11,6 @@ public class English implements IGrammar {
   WordTypeDetector wtd = null;
   TypeAwareGenderDetector tagd = null;
 
-  /**
-   *
-   * @param args
-   */
-  public static void main(final String[] args) {
-
-    System.out.println(Grammar.en.isPerson("cat"));
-    System.out.println(Grammar.en.isPerson("child"));
-    System.out.println(Grammar.en.isPerson("woman"));
-    System.out.println(Grammar.en.isPerson("professor"));
-    System.out.println(Grammar.en.isPerson("peter"));
-  }
-
   @Override
   public String plural(final String word) {
     return singularOrPlural(word, 2);

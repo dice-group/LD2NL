@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -22,7 +22,6 @@ package org.aksw.owl2nl.converter.visitors;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.triple2nl.property.PropertyVerbalization;
-import org.aksw.triple2nl.property.PropertyVerbalizer;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
@@ -36,10 +35,6 @@ import simplenlg.framework.NLGFactory;
 import simplenlg.phrasespec.SPhraseSpec;
 import simplenlg.phrasespec.VPPhraseSpec;
 
-/**
- * why x and Y?
- */
-@Deprecated
 public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     implements OWLPropertyExpressionVisitorEx<NLGElement> {
 
@@ -64,12 +59,9 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     this.parameter = parameter;
   }
 
-  private final PropertyVerbalizer propertyVerbalizer;
-
   public OWLPropertyExpressiontoNLGElement(final NLGFactory nlgFactory, final IInput input) {
     super(nlgFactory, input);
 
-    propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
   }
 
   /**
@@ -138,10 +130,11 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
 
   private SPhraseSpec getSentencePhraseFromProperty(final OWLProperty pe, final String subject,
       final String object) {
+    LOG.warn("getSentencePhraseFromProperty");
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     if (!pe.isAnonymous()) {
-      final PropertyVerbalization verbal = propertyVerbalizer.verbalize(pe.getIRI().toString());
+      final PropertyVerbalization verbal = propertyVerbalizer(pe);
       final String verbalizationText = verbal.getVerbalizationText();
       if (verbal.isNounType()) {
         phrase.setSubject(subject);

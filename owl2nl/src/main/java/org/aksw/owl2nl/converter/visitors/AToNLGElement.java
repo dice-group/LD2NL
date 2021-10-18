@@ -24,9 +24,16 @@ import org.aksw.owl2nl.data.IInput;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.converter.LiteralConverter;
 import org.aksw.triple2nl.converter.SimpleIRIConverter;
+import org.aksw.triple2nl.property.PropertyVerbalization;
+import org.aksw.triple2nl.property.PropertyVerbalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLPropertyExpression;
 
 import simplenlg.framework.NLGFactory;
 
@@ -39,9 +46,11 @@ abstract class AToNLGElement {
   protected static final Logger LOG = LogManager.getLogger(AToNLGElement.class);
 
   protected NLGFactory nlgFactory;
-  protected IRIConverter iriConverter;
-  protected LiteralConverter literalConverter;
-  protected IInput input;
+
+  private final IRIConverter iriConverter;
+  private final PropertyVerbalizer propertyVerbalizer;
+  private final LiteralConverter literalConverter;
+  private final IInput input;
 
   /**
    * Abstract constructor.
@@ -56,13 +65,64 @@ abstract class AToNLGElement {
 
     iriConverter = new SimpleIRIConverter();
     literalConverter = new LiteralConverter(iriConverter);
+    propertyVerbalizer = new PropertyVerbalizer(iriConverter, null);
   }
 
   /**
-   * Converts the IRI of the given OWLEntity into natural language. Uses given labels if any.
+   * Calls {@link #getLexicalFormFromOntology(OWLPropertyExpression)} to set a new label for a new
+   * {@link org.aksw.triple2nl.property.PropertyVerbalization } object or uses a fall back to create
+   * a label.
+   *
+   * @param OWLPropertyExpression
+   * @return PropertyVerbalization
+   */
+  protected PropertyVerbalization propertyVerbalizer(final OWLPropertyExpression property) {
+    final String l = getLexicalFormFromOntology(property);
+    IRI iri = null;
+    if (property.isDataPropertyExpression()) {
+      iri = ((OWLDataPropertyExpression) property)//
+          .asOWLDataProperty().getIRI();
+    } else if (property.isObjectPropertyExpression()) {
+      iri = ((OWLObjectPropertyExpression) property)//
+          .asOWLObjectProperty().getIRI();
+    }
+    final PropertyVerbalization p = propertyVerbalizer(iri);
+    if (l != null && !l.trim().isEmpty()) {
+      p.setExpandedVerbalizationText(l);
+      // TODO: update the rest after setting a new text?
+      // p.getTense()
+      // p.getPOSTags()
+      LOG.info("new: {}", p.getVerbalizationText());
+    }
+    LOG.info(p.getExpandedVerbalizationText());
+    return p;
+  }
+
+  /**
+   * Gets the lexical value of this literal by using the
+   * {@link org.aksw.triple2nl.converter.LiteralConverter#convert(OWLLiteral)} or the
+   * {@link org.semanticweb.owlapi.model.OWLLiteral#getLiteral()} method.
+   *
+   * @param literal
+   * @return
+   */
+  protected String literalConverter(final OWLLiteral literal) {
+    String literalString = literalConverter.convert(literal);
+
+    if (literalString == null || literalString.trim().isEmpty()) {
+      literalString = literal.getLiteral();
+      LOG.debug("No literal with the LiteralConverter. Using OWLLiteral#getLiteral(): {}, {}",
+          literalString, literal.toString());
+    }
+    return literalString;
+  }
+
+  /**
+   *
+   * Calls { @link {@link #getLexicalFormFromOntology(OWLEntity)} to get a label otherwise converts
+   * the IRI of the given OWLEntity into natural language.
    *
    * @param entity
-   *
    * @return natural language or null
    */
   protected String getLexicalForm(final OWLEntity entity) {
@@ -75,15 +135,63 @@ abstract class AToNLGElement {
     if (label == null) {
       LOG.trace("Could not find label with the IRI converter: {}", entity.toStringID());
     }
-
     return label;
   }
 
+  // private helpers
+  /**
+   *
+   * @param IRI
+   * @return PropertyVerbalization object
+   */
+  private PropertyVerbalization propertyVerbalizer(final IRI iri) {
+    return propertyVerbalizer.verbalize(iri.toString());
+  }
+
+  /**
+   * Calls the {@link org.aksw.triple2nl.converter.IRIConverter#convert(String) }.
+   *
+   * @param entity
+   * @return a natural language representation
+   */
   private String getLexicalFormFromIRIConverter(final OWLEntity entity) {
     return iriConverter.convert(entity.toStringID());
   }
 
+  /**
+   * Overloaded method calls {@link #getLexicalFormFromOntology(IRI)}.
+   *
+   * @param entity
+   * @return label or null
+   */
   private String getLexicalFormFromOntology(final OWLEntity entity) {
-    return input != null ? input.getEnglishLabel(entity.getIRI()) : null;
+    return getLexicalFormFromOntology(entity.getIRI());
+  }
+
+  /**
+   * Gets the label from the given ontology by calling
+   * {@link org.aksw.owl2nl.data.IInput#getEnglishLabel(IRI)}.
+   *
+   * @param iri
+   * @return label or null
+   */
+  private String getLexicalFormFromOntology(final IRI iri) {
+    return input != null ? input.getEnglishLabel(iri) : null;
+  }
+
+  private String getLexicalFormFromOntology(final OWLPropertyExpression property) {
+    IRI iri = null;
+    if (property.isDataPropertyExpression()) {
+      iri = ((OWLDataPropertyExpression) property)//
+          .asOWLDataProperty().getIRI();
+    } else if (property.isObjectPropertyExpression()) {
+      iri = ((OWLObjectPropertyExpression) property)//
+          .asOWLObjectProperty().getIRI();
+    }
+    String l = null;
+    if (iri != null) {
+      l = getLexicalFormFromOntology(iri);
+    }
+    return l;
   }
 }

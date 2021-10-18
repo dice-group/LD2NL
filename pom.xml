@@ -338,6 +338,7 @@
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
+				<!--  DO WE NEED THIS? With mvn install, it creates an error. 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
@@ -348,6 +349,7 @@
 						</archive>
 					</configuration>
 				</plugin>
+				 -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>

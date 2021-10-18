@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
+import org.aksw.owl2nl.util.grammar.Words;
 import org.semanticweb.owlapi.model.OWLDataComplementOf;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
@@ -56,21 +57,36 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
 
   protected OWLDataFactory df = new OWLDataFactoryImpl();
 
-  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final IInput in) {
-    super(nlgFactory, in);
+  /**
+   *
+   * @param nlgFactory
+   * @param input
+   */
+  public OWLDataRangeToNLGElement(final NLGFactory nlgFactory, final IInput input) {
+    super(nlgFactory, input);
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDatatype)
+   */
   @Override
   public NLGElement visit(final OWLDatatype node) {
     return nlgFactory.createNounPhrase(getLexicalForm(node));
   }
 
+  /*
+   * If it contains more than one value, i.e. oneOf(v1_,...,v_n) with n > 1, we rewrite it as
+   * unionOf(oneOf(v_1),...,oneOf(v_n))
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDataOneOf)
+   */
   @Override
   public NLGElement visit(final OWLDataOneOf node) {
-    // if it contains more than one value, i.e. oneOf(v1_,...,v_n) with n > 1, we rewrite it as
-    // unionOf(oneOf(v_1),...,oneOf(v_n))
     final Set<OWLLiteral> values = node.getValues();
-
     if (values.size() > 1) {
       final Set<OWLDataRange> operands = new HashSet<>(values.size());
       for (final OWLLiteral value : values) {
@@ -78,9 +94,17 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
       }
       return df.getOWLDataUnionOf(operands).accept(this);
     }
-    return nlgFactory.createNounPhrase(literalConverter.convert(values.iterator().next()));
+    final String literal = literalConverter(values.iterator().next());
+
+    return nlgFactory.createNounPhrase(literal);
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDataComplementOf)
+   */
   @Override
   public NLGElement visit(final OWLDataComplementOf node) {
     final NLGElement nlgElement = node.getDataRange().accept(this);
@@ -88,29 +112,44 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
     return nlgElement;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDataIntersectionOf)
+   */
   @Override
   public NLGElement visit(final OWLDataIntersectionOf node) {
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
-
     for (final OWLDataRange op : node.getOperands()) {
       cc.addCoordinate(op.accept(this));
     }
-
     return cc;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDataUnionOf)
+   */
   @Override
   public NLGElement visit(final OWLDataUnionOf node) {
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
-    cc.setConjunction("or");
+    cc.setConjunction(Words.or);
 
     for (final OWLDataRange op : node.getOperands()) {
       cc.addCoordinate(op.accept(this));
     }
-
     return cc;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.semanticweb.owlapi.model.OWLDataRangeVisitorEx#visit(org.semanticweb.owlapi.model.
+   * OWLDatatypeRestriction)
+   */
   @Override
   public NLGElement visit(final OWLDatatypeRestriction node) {
     final Set<OWLFacetRestriction> facetRestrictions = node.getFacetRestrictions();
@@ -168,7 +207,6 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
       }
       return coordinatedPhrase;
     }
-
     return phrases.get(0);
   }
 }
