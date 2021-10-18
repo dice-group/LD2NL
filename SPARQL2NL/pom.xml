@@ -205,6 +205,29 @@
 			<version>1.19</version>
 		</dependency>
 	</dependencies>
+	<build><!--  --> 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.10</version>
+					<executions>
+						<execution>
+							<id>timestamp-property</id>
+							<goals>
+								<goal>timestamp-property</goal>
+							</goals>
+							<configuration>
+								<name>build.time</name>
+								<pattern>MM/dd/yyyy hh:mm aa</pattern>
+								<locale>en_US</locale>
+								<timeZone>Europe/Berlin</timeZone>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>
-
-
