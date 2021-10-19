@@ -24,6 +24,7 @@
 package org.aksw.sparql2nl.naturallanguagegeneration;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import org.aksw.triple2nl.converter.DefaultIRIConverter;
 import org.dllearner.kb.sparql.SparqlEndpoint;
@@ -106,6 +107,8 @@ public class FilterExpressionConverterTest {
 		/*
 		 * date literals
 		 */
+		System.out.println("user time: "+System.getProperty("user.timezone"));
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin")); // Test fails sometimes.
 		Calendar cal = Calendar.getInstance();
 		cal.set(1999, 11, 21);
 		value = NodeValue.makeDate(cal);
