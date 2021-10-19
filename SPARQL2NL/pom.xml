@@ -205,29 +205,52 @@
 			<version>1.19</version>
 		</dependency>
 	</dependencies>
-	<build><!--  --> 
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.10</version>
-					<executions>
-						<execution>
-							<id>timestamp-property</id>
-							<goals>
-								<goal>timestamp-property</goal>
-							</goals>
-							<configuration>
-								<name>build.time</name>
-								<pattern>MM/dd/yyyy hh:mm aa</pattern>
-								<locale>en_US</locale>
-								<timeZone>Europe/Berlin</timeZone>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>download-files</id>
+						<phase>process-resources</phase>
+						<configuration>
+							<target>
+								<!-- download file dest="${project.build.directory}/downloads/" -->
+								<get
+									src="https://hobbitdata.informatik.uni-leipzig.de/LD2NL/NIHLexicon.zip"
+									dest="src/main/resources/NIHLexicon.zip" verbose="true"
+									usetimestamp="true" />
+								<unzip src="src/main/resources/NIHLexicon.zip"
+									dest="src/main/resources/" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<id>timestamp-property</id>
+						<goals>
+							<goal>timestamp-property</goal>
+						</goals>
+						<configuration>
+							<name>build.time</name>
+							<pattern>MM/dd/yyyy hh:mm aa</pattern>
+							<locale>en_US</locale>
+							<timeZone>Europe/Berlin</timeZone>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 </project>

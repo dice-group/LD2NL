@@ -4,9 +4,12 @@ LD2NL
 ### About
 This project aims at delivering a framework for converting Linked Data related concepts to Natural language.
 
+<!---
 ### Required files 
 
 Please download the <a href="https://hobbitdata.informatik.uni-leipzig.de/LD2NL/NIHLexicon.zip">NIHLexion</a> and unzip it within the resources folder of SPARQL2NL (LD2NL/SPARQL2NL/src/main/resources/)
+-->
+
  
 ### Structure
 
