@@ -26,14 +26,13 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.OWLPropertyExpression;
 import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 
+import simplenlg.features.Feature;
+import simplenlg.features.Form;
 import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
-import simplenlg.phrasespec.SPhraseSpec;
-import simplenlg.phrasespec.VPPhraseSpec;
 
 public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     implements OWLPropertyExpressionVisitorEx<NLGElement> {
@@ -59,97 +58,59 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     this.parameter = parameter;
   }
 
+  /**
+   * OWLPropertyExpressiontoNLGElement constructor.
+   *
+   * @param nlgFactory
+   * @param input
+   */
   public OWLPropertyExpressiontoNLGElement(final NLGFactory nlgFactory, final IInput input) {
     super(nlgFactory, input);
-
-  }
-
-  /**
-   * Object properties connect pairs of individuals.<br>
-   * <br>
-   * Example: <br>
-   * ObjectPropertyAssertion( a:parentOf a:Peter a:Chris ) <br>
-   * Peter is a parent of Chris.
-   */
-  @Override
-  public NLGElement visit(final OWLObjectProperty pe) {
-    SPhraseSpec phrase = null;
-    if (parameter.isTransitiveObjectProperty == true) {
-      switch (parameter.countTransitive) {
-        case 0:
-          phrase = getSentencePhraseFromProperty(pe, "X", "Y");
-          break;
-
-        case 1:
-          phrase = getSentencePhraseFromProperty(pe, "Y", "Z");
-          break;
-
-        case 2:
-          phrase = getSentencePhraseFromProperty(pe, "X", "Z");
-          parameter.isTransitiveObjectProperty = false;
-          parameter.countTransitive = 0;
-          break;
-      }
-      parameter.countTransitive++;
-    } else {
-      phrase = getSentencePhraseFromProperty(pe, "X", "Y");
-    }
-
-    return phrase;
-  }
-
-  /**
-   * An inverse object property expression connects an individual A with B if and only if the object
-   * property connects B with A. <br>
-   * <br>
-   * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
-   */
-  @Override
-  public NLGElement visit(final OWLObjectInverseOf owlObjectInverseOf) {
-    final OWLObjectProperty property = owlObjectInverseOf.getInverse().getNamedProperty();
-    return getSentencePhraseFromProperty(property, "Y", "X");
-  }
-
-  /**
-   * Data properties connect individuals with literals.<br>
-   * <br>
-   * Example:<br>
-   * DataPropertyAssertion( a:hasName a:Peter "Peter Griffin" )<br>
-   * Peter's name is "Peter Griffin".
-   */
-  @Override
-  public NLGElement visit(final OWLDataProperty pe) {
-    return getSentencePhraseFromProperty(pe, "X", "Y");
   }
 
   @Override
   public NLGElement visit(final OWLAnnotationProperty owlAnnotationProperty) {
-    LOG.warn("Not implemented yet: OWLAnnotationProperty.");
-    return null;
+    throw new UnsupportedOperationException(
+        "Convertion of OWLAnnotationProperty not supported yet!");
   }
 
-  private SPhraseSpec getSentencePhraseFromProperty(final OWLProperty pe, final String subject,
-      final String object) {
-    LOG.warn("getSentencePhraseFromProperty");
-    final SPhraseSpec phrase = nlgFactory.createClause();
+  @Override
+  public NLGElement visit(final OWLObjectInverseOf owlObjectInverseOf) {
+    return owlObjectInverseOf.getInverse().accept(this);
+  }
 
-    if (!pe.isAnonymous()) {
-      final PropertyVerbalization verbal = propertyVerbalizer(pe);
-      final String verbalizationText = verbal.getVerbalizationText();
-      if (verbal.isNounType()) {
-        phrase.setSubject(subject);
-        phrase.setVerb("is");
-        phrase.setObject(verbalizationText);
-        // noun = true;
-      } else if (verbal.isVerbType()) {
-        final VPPhraseSpec verb = nlgFactory.createVerbPhrase(verbalizationText);
-        phrase.setVerb(verb); // Issues with verbs like 'doneBy'
-        phrase.setSubject(subject);
-        phrase.setObject(object);
-        // noun = false;
-      }
+  @Override
+  public NLGElement visit(final OWLObjectProperty pe) {
+    LOG.info("visit OWLObjectProperty");
+
+    NLGElement phrase = null;
+
+    final PropertyVerbalization verbal = propertyVerbalizer(pe);
+    final String verbalizationText = verbal.getVerbalizationText();
+
+    if (verbal.isNounType()) {
+      phrase = nlgFactory.createNounPhrase(getLexicalForm(pe));
+    } else if (verbal.isVerbType()) {
+
+      phrase = nlgFactory.createVerbPhrase(verbalizationText);
+      // e.setFeature(LexicalFeature.PRESENT_PARTICIPLE, true);
+      phrase.setFeature(Feature.FORM, Form.PRESENT_PARTICIPLE);
     }
+    return phrase;
+  }
 
+  @Override
+  public NLGElement visit(final OWLDataProperty pe) {
+    NLGElement phrase = null;
+
+    final PropertyVerbalization verbal = propertyVerbalizer(pe);
+    final String verbalizationText = verbal.getVerbalizationText();
+    if (verbal.isNounType()) {
+      phrase = nlgFactory.createNounPhrase(getLexicalForm(pe));
+    } else if (verbal.isVerbType()) {
+      phrase = nlgFactory.createVerbPhrase(verbalizationText);
+      phrase.setFeature(Feature.FORM, Form.PRESENT_PARTICIPLE);
+    }
     return phrase;
   }
 }

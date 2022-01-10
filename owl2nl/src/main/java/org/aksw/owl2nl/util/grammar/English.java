@@ -16,6 +16,10 @@ public class English implements IGrammar {
     return singularOrPlural(word, 2);
   }
 
+  /**
+   *
+   * @param word in singular form
+   */
   @Override
   public String singular(final String word) {
     return singularOrPlural(word, 1);

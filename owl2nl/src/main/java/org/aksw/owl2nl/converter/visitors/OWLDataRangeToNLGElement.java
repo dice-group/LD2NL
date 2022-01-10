@@ -137,7 +137,6 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
   public NLGElement visit(final OWLDataUnionOf node) {
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
     cc.setConjunction(Words.or);
-
     for (final OWLDataRange op : node.getOperands()) {
       cc.addCoordinate(op.accept(this));
     }

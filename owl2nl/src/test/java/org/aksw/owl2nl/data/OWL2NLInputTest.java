@@ -8,29 +8,28 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
 package org.aksw.owl2nl.data;
 
-import java.nio.file.Paths;
-
 import org.junit.Assert;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.IRI;
 
 public class OWL2NLInputTest {
 
   @Test
   public void test() {
     final IInput input = new OWL2NLInput().setOntology(//
-        Paths.get(OWL2NLInputTest.class.getClassLoader().getResource("test.owl").getPath())//
+        IRI.create(OWL2NLInputTest.class.getClassLoader().getResource("test.owl"))//
     );
 
     Assert.assertNotNull(input);

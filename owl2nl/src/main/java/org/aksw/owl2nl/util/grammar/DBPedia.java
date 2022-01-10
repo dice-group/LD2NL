@@ -22,8 +22,8 @@ import com.google.common.io.Resources;
       ?x rdfs:label ?y .
       FILTER (lang(?y) = 'en')
     }
-</code>
- *
+</code> <br>
+ * <br>
  * TODO: Add synonyms to the labels, because, e.g.: `girl` is not a label in the class label file.
  */
 public class DBPedia {
@@ -39,7 +39,7 @@ public class DBPedia {
    * @return
    */
   public static boolean isPerson(final String word) {
-    return readClassLabels().contains(word.trim().toLowerCase());
+    return word == null ? false : readClassLabels().contains(word.trim().toLowerCase());
   }
 
   private static final Set<String> readClassLabels() {

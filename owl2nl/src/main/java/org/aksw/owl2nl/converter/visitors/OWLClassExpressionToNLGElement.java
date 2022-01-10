@@ -67,6 +67,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import simplenlg.features.Feature;
 import simplenlg.features.InternalFeature;
+import simplenlg.features.Person;
 import simplenlg.framework.CoordinatedPhraseElement;
 import simplenlg.framework.LexicalCategory;
 import simplenlg.framework.NLGElement;
@@ -218,7 +219,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         }
       }
       for (final OWLClass cls : classes) {
-        final SPhraseSpec clause = nlgFactory.createClause(Words.that, Words.is);
+        final SPhraseSpec clause = nlgFactory.createClause(Words.that, Words.be);
+        clause.getVerb().setFeature(Feature.PERSON, Person.THIRD);
         clause.setObject(cls.accept(this));
         cc.addCoordinate(clause);
       }
@@ -302,7 +304,9 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     NLGElement phrase = op.accept(this);
     if (!op.isAnonymous()) {
-      phrase = nlgFactory.createClause(null, Words.is, phrase);
+      final SPhraseSpec clause = nlgFactory.createClause(null, Words.be, phrase);
+      clause.getVerb().setFeature(Feature.PERSON, Person.THIRD);
+      phrase = clause;
     }
 
     phrase.setFeature(Feature.NEGATED, true);
@@ -361,7 +365,6 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
      **/
 
     if (!property.isAnonymous()) {
-      LOG.info(property.toString());
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
       String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
 
@@ -375,7 +378,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
           return propertyNounPhrase;
         }
         phrase.setSubject(propertyNounPhrase);
-        phrase.setVerb(Words.is);
+        phrase.setVerb(Words.be);
+        phrase.getVerb().setFeature(Feature.PERSON, Person.THIRD);
 
         final NLGElement fillerElement = filler.accept(this);
         fillerElement.setPlural(false);
@@ -460,8 +464,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
             nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb(Words.is);
-
+        phrase.setVerb(Words.be);
+        phrase.getVerb().setFeature(Feature.PERSON, Person.THIRD);
         final NLGElement fillerElement = filler.accept(this);
         phrase.setObject(fillerElement);
 
@@ -545,8 +549,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
             nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb(Words.is);
-
+        phrase.setVerb(Words.be);
+        phrase.getVerb().setFeature(Feature.PERSON, Person.THIRD);
         final NLGElement fillerElement = value.accept(converterOWLIndividual);
         phrase.setObject(fillerElement);
 
@@ -778,8 +782,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(PlingStemmer.stem(t));
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb(Words.is);
-
+        phrase.setVerb(Words.be);
+        phrase.getVerb().setFeature(Feature.PERSON, Person.THIRD);
         final NLGElement fillerElement = filler.accept(converterOWLDataRange);
         phrase.setObject(fillerElement);
 
@@ -830,8 +834,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(t);
         phrase.setSubject(propertyNounPhrase);
 
-        phrase.setVerb(Words.is);
-
+        phrase.setVerb(Words.be);
+        phrase.getVerb().setFeature(Feature.PERSON, Person.THIRD);
         final NLGElement valueElement = nlgFactory.createNounPhrase(literalConverter(value));
         phrase.setObject(valueElement);
 
@@ -839,7 +843,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       } else if (propertyVerbalization.isVerbType()) {
         // if phrase starts with something like 'is' and value is a Boolean
         final String[] tokens = t.split(" ");
-        if (value.getDatatype().isBoolean() && tokens[0].equals(Words.is)) {
+        if (value.getDatatype().isBoolean() && tokens[0].equals("is")) { // is it working as
+                                                                         // expected?
           if (!value.parseBoolean()) {
             phrase.setFeature(Feature.NEGATED, true);
           }

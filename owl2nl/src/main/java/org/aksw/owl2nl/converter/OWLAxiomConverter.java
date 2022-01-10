@@ -21,12 +21,16 @@
 package org.aksw.owl2nl.converter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.owl2nl.converter.visitors.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
 import org.aksw.owl2nl.util.grammar.Words;
+import org.aksw.owl2nl.util.nlg.Phrases;
+import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
@@ -37,6 +41,7 @@ import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
@@ -61,9 +66,12 @@ import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLPropertyAxiom;
+import org.semanticweb.owlapi.model.OWLPropertyExpression;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
@@ -73,13 +81,20 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLRule;
 
 import simplenlg.features.Feature;
+import simplenlg.features.Person;
+import simplenlg.features.Tense;
+import simplenlg.framework.CoordinatedPhraseElement;
+import simplenlg.framework.LexicalCategory;
 import simplenlg.framework.NLGElement;
 import simplenlg.lexicon.Lexicon;
+import simplenlg.phrasespec.AdvPhraseSpec;
+import simplenlg.phrasespec.NPPhraseSpec;
+import simplenlg.phrasespec.PPPhraseSpec;
 import simplenlg.phrasespec.SPhraseSpec;
+import simplenlg.phrasespec.VPPhraseSpec;
 
 /**
  * Converts OWL logical axioms into natural language.
@@ -123,17 +138,22 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     this(Lexicon.getDefaultLexicon());
   }
 
-  // TODO: Merge subjects and objects
   protected void optimize(final List<NLGElement> clauses) {
-    for (final NLGElement clause : clauses) {
-      if (clause.getCategory().toString().equals("CLAUSE")) {
-        final NLGElement subject = ((SPhraseSpec) clause).getSubject();
-        final NLGElement object = ((SPhraseSpec) clause).getObject();
+    // TODO: merge objects and subjects
 
-        LOG.debug("s: {} ", realiser.realise(subject).toString());
-        LOG.debug("o: {} ", realiser.realise(object).toString());
-      }
-    }
+    /**
+     * <code>
+     for (final NLGElement clause : clauses) {
+       if (clause.getCategory().toString().equals("CLAUSE")) {
+         final NLGElement subject = ((SPhraseSpec) clause).getSubject();
+         final NLGElement object = ((SPhraseSpec) clause).getObject();
+
+         LOG.trace("s: {} ", realiser.realise(subject).toString());
+         LOG.trace("o: {} ", realiser.realise(object).toString());
+       }
+     }
+     </code>
+     */
   }
 
   /**
@@ -145,28 +165,27 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * @return the natural language expression
    */
   public String convert(final OWLAxiom axiom) {
-    LOG.info("============================================");
+    LOG.debug("============================================");
 
     clauses.clear();
 
     if (!axiom.isLogicalAxiom()) {
+      LOG.debug("Non logical axioms aren't supported yet.");
       return null;
     } else {
-
+      LOG.debug(axiom);
       axiom.accept(this);
       optimize(clauses);
       final StringBuilder sb = new StringBuilder();
       for (final NLGElement clause : realiser.realise(clauses)) {
-        sb//
-            .append(StringUtils.capitalize(clause.toString()))//
-            .append(". ");
+        sb.append(StringUtils.capitalize(clause.toString())).append(". ");
       }
       return sb.toString();
     }
   }
 
   // #########################################################
-  // ################# OWLAxiomVisitor ################
+  // ################# OWLAxiomVisitor #######################
   // #########################################################
 
   /**
@@ -182,20 +201,11 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   @Override
   public void visit(final OWLSubClassOfAxiom axiom) {
     LOG.debug("Converting SubClassOf axiom: {}", axiom);
-
-    final OWLClassExpression subClass = axiom.getSubClass();
-    final OWLClassExpression superClass = axiom.getSuperClass();
-
-    LOG.info(subClass);
-    LOG.info(superClass);
-    final NLGElement subClassElement = ceConverter.asNLGElement(subClass, true);
-    final NLGElement superClassElement = ceConverter.asNLGElement(superClass);
-
-    final SPhraseSpec clause;
-    clause = nlgFactory.createClause(subClassElement, Words.be, superClassElement);
-    superClassElement.setFeature(Feature.COMPLEMENTISER, null);
-
-    clauses.add(clause);
+    addClause(//
+        ceConverter.asNLGElement(axiom.getSubClass(), true), //
+        Phrases.getBe(nlgFactory), //
+        ceConverter.asNLGElement(axiom.getSuperClass())//
+    ).getObject().setFeature(Feature.COMPLEMENTISER, null);
   }
 
   /**
@@ -269,9 +279,9 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDisjointUnionAxiom axiom) {
-    // verb.addFrontModifier("either");
+    LOG.debug("Converting OWLDisjointUnionAxiom");
+
     final Set<OWLClassExpression> classExpressions = axiom.getClassExpressions();
-    LOG.debug("Converting DisjointUnion axiom: {}, {}", axiom, classExpressions);
 
     df.getOWLEquivalentClassesAxiom(//
         axiom.getOWLClass(), df.getOWLObjectUnionOf(classExpressions)//
@@ -286,57 +296,97 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLSubObjectPropertyOfAxiom axiom) {
-    LOG.info("OWLSubObjectPropertyOfAxiom");
+    LOG.debug("Converting OWLSubObjectPropertyOf");
 
-    final OWLObjectPropertyExpression superProperty = axiom.getSuperProperty();
-    final OWLObjectPropertyExpression subProperty = axiom.getSubProperty();
-
-    final NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true);
-    final NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
-    superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
-
-    clauses.add(//
-        nlgFactory.createClause(subPropertyElement, "imply", superPropertyElement)//
-    );
+    addClause( //
+        peConverter.asNLGElement(axiom.getSubProperty(), true), //
+        Words.imply, //
+        peConverter.asNLGElement(axiom.getSuperProperty())//
+    ).getObject()// Do we need this?
+        .setFeature(Feature.COMPLEMENTISER, null);
   }
 
-  /**
-   * SubObjectPropertyOf(OPE1 OPE2) SubObjectPropertyOf(OPE2 OPE1)
-   */
   @Override
   public void visit(final OWLEquivalentObjectPropertiesAxiom axiom) {
-    axiom.asSubObjectPropertyOfAxioms().forEach(p -> p.accept(this));
+    LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
+
+    final NPPhraseSpec s = getSubject(axiom);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.synonym);
+    o.setPlural(true);
+
+    addClause(s, v, o).setPlural(true);
   }
 
-  // TODO: implement me
   @Override
-  public void visit(final OWLDisjointObjectPropertiesAxiom axiom) {}
+  public void visit(final OWLDisjointObjectPropertiesAxiom axiom) {
+    LOG.debug("Converting OWLDisjointObjectPropertiesAxiom");
+
+    final NPPhraseSpec s = getSubject(axiom);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.pairwiseDisjoint);
+    o.setPlural(true);
+
+    addClause(s, v, o).setPlural(true);
+  }
 
   /**
    * SubClassOf(ObjectSomeValuesFrom(OPE owl:Thing) CE)
    */
   @Override
   public void visit(final OWLObjectPropertyDomainAxiom axiom) {
+    LOG.debug("Converting OWLObjectPropertyDomainAxiom");
+
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
-  /**
-   * SubClassOf(owl:Thing ObjectAllValuesFrom(OPE CE))
-   */
   @Override
   public void visit(final OWLObjectPropertyRangeAxiom axiom) {
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    LOG.debug("Converting OWLObjectPropertyRangeAxiom");
+
+    final String dataProperty = getPropertyVerbalizationText(//
+        axiom.getProperty().asOWLObjectProperty()//
+    );
+
+    final NPPhraseSpec s = Phrases.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory//
+        .createNounPhrase(axiom.getRange().accept(ceConverter.owlClassExpression));
+
+    addClause(s, v, o);
   }
 
   /**
-   * EquivalentObjectProperties(OPE1 ObjectInverseOf(OPE2))
    */
   @Override
   public void visit(final OWLInverseObjectPropertiesAxiom axiom) {
-    df.getOWLEquivalentObjectPropertiesAxiom(//
-        axiom.getFirstProperty(), //
-        axiom.getSecondProperty().getInverseProperty()//
-    ).accept(this);
+    LOG.debug("Converting OWLInverseObjectPropertiesAxiom");
+
+    final String forward = getPropertyVerbalizationText(axiom.getFirstProperty());
+    final String inverse = getPropertyVerbalizationText(axiom.getSecondProperty());
+
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase();
+
+    s.setDeterminer(Words.the);
+    s.setPreModifier(inverse);
+    s.setNoun(Words.property);
+
+    final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
+    o.setPreModifier(Words.the);
+    o.setNoun(Words.opposite);
+    o.setPostModifier(pp);
+
+    final NPPhraseSpec np = nlgFactory.createNounPhrase();
+    pp.setPreModifier(Words.of);
+    pp.setPreposition(np);
+
+    np.setDeterminer(Words.the);
+    np.setNoun(forward);
+    np.setPostModifier(Words.property);
+
+    addClause(s, v, o);
   }
 
   /**
@@ -344,13 +394,87 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLFunctionalObjectPropertyAxiom");
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
-  // TODO: implement me
   @Override
   public void visit(final OWLAsymmetricObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLAsymmetricObjectPropertyAxiom");
 
+    final String propertyText =
+        getPropertyVerbalizationText(axiom.getProperty().asOWLObjectProperty());
+
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase();
+
+    { // If an individual
+      s.setPreModifier(Words.iff);
+      s.setNoun(Phrases.getAnIndividual(nlgFactory));
+    }
+
+    final VPPhraseSpec vp = nlgFactory.createVerbPhrase();
+    {// with the X property
+      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, propertyText, Words.object);
+      final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
+      pp.setPreposition(Words.with);
+      pp.setPostModifier(np);
+      vp.setPostModifier(pp);
+    }
+
+    { // to another individual
+      final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
+      final NPPhraseSpec np = nlgFactory.createNounPhrase();
+      pp.setPreposition(Words.to);
+      pp.setPostModifier(np);
+      np.setDeterminer(Words.another);
+      np.setNoun(Words.individual);
+
+      vp.addPostModifier(pp);
+    }
+    vp.setVerb(Words.connect);
+    vp.setFeature(Feature.TENSE, Tense.PAST);
+
+    o.setNoun(vp);
+
+    // then this other individual is not connected with the X property to the individual
+    final AdvPhraseSpec then = nlgFactory.createAdverbPhrase();
+    {
+      then.setAdverb(Words.then);
+      o.setComplement(then);
+    }
+    final NPPhraseSpec in = Phrases.getIndividual(nlgFactory);
+    { // this other individual
+      in.setDeterminer(Words.thiss);
+      in.setPreModifier(Words.other);
+      then.setPostModifier(in);
+    }
+    final VPPhraseSpec notConnect = nlgFactory.createVerbPhrase(Words.connect);
+    { // is not connected with the X property
+      notConnect.setFeature(Feature.TENSE, Tense.PAST);
+      final VPPhraseSpec is = Phrases.getBe(nlgFactory);
+      is.setFeature(Feature.NEGATED, true);
+      is.setPostModifier(notConnect);
+      in.setPostModifier(is);
+
+      // with the X property
+      final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
+      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, propertyText, Words.object);
+      with.setPreposition(Words.with);
+      with.setPostModifier(np);
+      notConnect.setPostModifier(with);
+    }
+
+    { // to the individual
+      final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
+      final NPPhraseSpec np = Phrases.getTheIndividual(nlgFactory);
+      pp.setPreposition(Words.to);
+      pp.setPostModifier(np);
+
+      notConnect.addPostModifier(pp);
+    }
+    addClause(s, v, o);
   }
 
   /**
@@ -358,6 +482,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLReflexiveObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLReflexiveObjectPropertyAxiom");
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -366,19 +491,22 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLSymmetricObjectPropertyAxiom");
     df.getOWLSubObjectPropertyOfAxiom(//
         axiom.getProperty(), //
         axiom.getProperty().getInverseProperty()//
     ).accept(this);
   }
 
-  // TODO: implement me
+  // SubObjectPropertyOf(ObjectPropertyChain(OPE OPE) OPE)
   @Override
   public void visit(final OWLTransitiveObjectPropertyAxiom axiom) {
-    // SubObjectPropertyOf(ObjectPropertyChain(OPE OPE) OPE)
-    // df.getOWLSubObjectPropertyOfAxiom(//
-    //
-    // ).accept(this);
+    LOG.debug("Converting OWLTransitiveObjectPropertyAxiom");
+
+    final List<OWLObjectPropertyExpression> chain = new ArrayList<>();
+    chain.add(axiom.getProperty());
+
+    df.getOWLSubPropertyChainOfAxiom(chain, axiom.getProperty()).accept(this);
   }
 
   /**
@@ -386,6 +514,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLIrreflexiveObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLIrreflexiveObjectPropertyAxiom");
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -394,6 +523,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLInverseFunctionalObjectPropertyAxiom axiom) {
+    LOG.debug("Converting OWLInverseFunctionalObjectPropertyAxiom");
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -409,23 +539,35 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * SubDataPropertyOf(a:hasLastName a:hasName) <br>
    * A last name of someone is his/her name as well.
    */
-  // TODO: implement me
   @Override
   public void visit(final OWLSubDataPropertyOfAxiom axiom) {
+    LOG.debug("Converting OWLSubDataPropertyOfAxiom");
 
-    final OWLDataPropertyExpression dpe1 = axiom.getSubProperty();
-    final OWLDataPropertyExpression dpe2 = axiom.getSuperProperty();
+    final OWLDataPropertyExpression subProperty = axiom.getSubProperty();
+    final OWLDataPropertyExpression superProperty = axiom.getSuperProperty();
 
-    LOG.info("{} {} ", dpe1, dpe2);
+    final NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true); // why true?
+    final NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
+
+    superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
+
+    addClause(subPropertyElement, Phrases.getBe(nlgFactory), superPropertyElement);
   }
 
   /**
-   * SubDataPropertyOf(DPE1 DPE2) <br>
-   * SubDataPropertyOf(DPE2 DPE1)
    */
   @Override
   public void visit(final OWLEquivalentDataPropertiesAxiom axiom) {
-    axiom.asSubDataPropertyOfAxioms().forEach(p -> p.accept(this));
+    LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
+
+    final NPPhraseSpec s = getSubject(axiom);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.synonym);
+
+    s.setPlural(true);
+    o.setPlural(true);
+
+    addClause(s, v, o);
   }
 
   /**
@@ -437,75 +579,324 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * DisjointDataProperties(a:hasName a:hasAddress) <br>
    * Someone's name must be different from his address.
    */
-  // TODO: implement me
   @Override
   public void visit(final OWLDisjointDataPropertiesAxiom axiom) {
+    LOG.debug("Converting OWLDisjointDataPropertiesAxiom");
 
+    final NPPhraseSpec s = getSubject(axiom);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.pairwiseDisjoint);
+    o.setPlural(true);
+
+    addClause(s, v, o).setPlural(true);
   }
 
+  /**
+   * A data property domain axiom DataPropertyDomain( DPE CE ) states that the domain of the data
+   * property expression DPE is the class expression CE
+   *
+   *
+   * example<br>
+   * Only people can have names. <br>
+   * DataPropertyDomain( a:hasName a:Person )
+   */
   @Override
   public void visit(final OWLDataPropertyDomainAxiom axiom) {
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    LOG.debug("Converting OWLDataPropertyDomainAxiom");
+
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NLGElement o = axiom.getDomain().accept(ceConverter.owlClassExpression);
+
+    s.setDeterminer(Words.the);
+    s.setNoun(//
+        Words.domain.concat(" ")//
+            .concat(Words.of).concat(" ")//
+            .concat(Words.the).concat(" ")//
+            .concat(getPropertyVerbalizationText(axiom.getProperty().asOWLDataProperty()))
+            .concat(" ")//
+            .concat(Words.property));
+
+    addClause(s, v, o);
   }
 
+  /**
+   * example<br>
+   * The range of the a:hasName property is xsd:string.<br>
+   * DataPropertyRange( a:hasName xsd:string )
+   */
   @Override
   public void visit(final OWLDataPropertyRangeAxiom axiom) {
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    LOG.debug("Converting OWLDataPropertyRangeAxiom");
+
+    final OWLDataRange range = axiom.getRange();
+
+    final String verbalizationText = getPropertyVerbalizationText(//
+        axiom.getProperty().asOWLDataProperty()//
+    );
+
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(range.accept(ceConverter.owlDataRange));
+
+    s.setDeterminer(Words.the);
+    s.setNoun(//
+        Words.range.concat(" ")//
+            .concat(Words.of).concat(" ")//
+            .concat(Words.the).concat(" ")//
+            .concat(verbalizationText).concat(" ")//
+            .concat(Words.property));
+
+    addClause(s, v, o);
   }
 
   @Override
   public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
+
+    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
+
+    final NPPhraseSpec s = Phrases.getAnIndividual(nlgFactory);
+
+    final VPPhraseSpec v = nlgFactory.createVerbPhrase();
+    v.setPreModifier(Words.can);
+    v.setVerb(Words.have);
+
+    final AdvPhraseSpec a = nlgFactory.createAdverbPhrase();
+    {
+      a.setPreModifier(Words.at);
+      a.setAdverb(Words.much);
+      a.setPostModifier(Words.one);
+      a.setFeature(Feature.IS_SUPERLATIVE, true);
+    }
+    final NPPhraseSpec value = nlgFactory.createNounPhrase();
+    {
+      value.setNoun(Words.value);
+      value.setPreModifier(a);
+    }
+    final PPPhraseSpec forr = nlgFactory.createPrepositionPhrase();
+    {
+      forr.setPreposition(verbalizationText);
+      forr.setPreModifier(Words.forr);
+    }
+    final NPPhraseSpec o = nlgFactory.createNounPhrase();
+    {
+      o.setNoun(value);
+      o.setPostModifier(forr);
+    }
+
+    addClause(s, v, o);
   }
 
   // #########################################################
   // ################# other logical axioms ##################
   // #########################################################
 
-  // TODO: implement me
+  /**
+   * The more complex form is SubObjectPropertyOf( ObjectPropertyChain( OPE1 ... OPEn ) OPE ). This
+   * axiom states that, if an individual x is connected by a sequence of object property expressions
+   * OPE1, ..., OPEn with an individual y, then x is also connected with y by the object property
+   * expression OPE. <br>
+   * Such axioms are also known as complex role inclusions [SROIQ].
+   */
+  // ORDER!
   @Override
   public void visit(final OWLSubPropertyChainOfAxiom axiom) {
-    LOG.info(axiom.getPropertyChain());
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    final VPPhraseSpec v = nlgFactory.createVerbPhrase();
+    final NPPhraseSpec o = nlgFactory.createNounPhrase();
+
+    final String superProperty = getPropertyVerbalizationText(axiom.getSuperProperty());
+    // If an individual is connected by the sequence of the X,Y, and Z object property with another
+    // individual, then the individual is also connected by the A object property with the another
+    // individual.
+    {
+      // if an individual
+      s.setPreModifier(Words.iff);
+      s.setNoun(Phrases.getAnIndividual(nlgFactory));
+    }
+
+    {
+      // is connected
+      final VPPhraseSpec be = nlgFactory.createVerbPhrase(Words.be);
+      be.setFeature(Feature.PERSON, Person.THIRD);
+      v.setPreModifier(be);
+      v.setVerb(Words.connect);
+      v.setFeature(Feature.TENSE, Tense.PAST);
+    }
+
+    // with another individual
+    final NPPhraseSpec eee = Phrases.getIndividual(nlgFactory);
+    eee.setDeterminer(Words.with);
+    eee.setPreModifier(Words.another);
+    v.setPostModifier(eee);
+
+    // by
+    final PPPhraseSpec by = nlgFactory.createPrepositionPhrase();
+    o.setNoun(by);
+    by.setPreModifier(Words.by);
+
+    final NPPhraseSpec theListofProperties = nlgFactory.createNounPhrase();
+    theListofProperties.setDeterminer(Words.the);
+
+    if (axiom.getPropertyChain().size() > 1) {
+      // the sequence
+      final NPPhraseSpec theseq = nlgFactory.createNounPhrase();
+      by.setPreposition(theseq);
+
+      theseq.setDeterminer(Words.the);
+      theseq.setNoun(Words.sequence);
+      // of
+      final PPPhraseSpec of = nlgFactory.createPrepositionPhrase();
+      theseq.setPostModifier(of);
+
+      of.setPreModifier(Words.of);
+      of.setPreposition(theListofProperties);
+    } else {
+      by.setPostModifier(theListofProperties);
+    }
+
+    // list
+    final CoordinatedPhraseElement coo = nlgFactory.createCoordinatedPhrase();
+    coo.setConjunction(Words.and);
+    for (final OWLObjectPropertyExpression p : axiom.getPropertyChain()) {
+      // TODO: check type?
+      coo.addCoordinate(nlgFactory.createStringElement(getPropertyVerbalizationText(p)));
+    }
+    o.setPostModifier(coo);
+
+    // object property
+    final NPPhraseSpec op = nlgFactory.createNounPhrase();
+    op.setNoun(Words.object.concat(" ").concat(Words.property));
+
+    //
+    coo.addPostModifier(op);
+
+    final NPPhraseSpec oo = nlgFactory.createNounPhrase();
+
+    // then this other individual is not connected with the X property to the individual
+    final AdvPhraseSpec then = nlgFactory.createAdverbPhrase();
+    {
+      then.setAdverb(Words.then);
+      oo.setComplement(then);
+    }
+    final NPPhraseSpec in = Phrases.getIndividual(nlgFactory);
+    { // this other individual
+      in.setDeterminer(Words.the);
+      // in.setPreModifier(Words.other);
+      then.setPostModifier(in);
+    }
+    final VPPhraseSpec connect = nlgFactory.createVerbPhrase(Words.connect);
+    { // is also connected by the X property
+      connect.setFeature(Feature.TENSE, Tense.PAST);
+      final VPPhraseSpec is = Phrases.getBe(nlgFactory);
+      is.setPostModifier(connect);
+      connect.setPreModifier(Words.also);
+      in.setPostModifier(is);
+
+      // by the X property
+      final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
+      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, superProperty, Words.object);
+      with.setPreposition(Words.by);
+      with.setPostModifier(np);
+      connect.setPostModifier(with);
+    }
+
+    { // with the other individual
+      final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
+      final NPPhraseSpec np = Phrases.getTheIndividual(nlgFactory);
+      np.setPreModifier(Words.other);
+      pp.setPreposition(Words.with);
+      pp.setPostModifier(np);
+
+      connect.addPostModifier(pp);
+    }
+
+    // eee.addComplement(oo);
+    v.addPostModifier(oo);
+    addClause(s, v, o);
   }
 
-  // TODO: implement me
+  // TODO:
   @Override
   public void visit(final OWLHasKeyAxiom axiom) {
-    LOG.info(axiom);
+    LOG.debug("Converting OWLHasKeyAxiom");
+
+    final OWLClassExpression ce = axiom.getClassExpression();
+    axiom.getDataPropertyExpressions();
+    axiom.getObjectPropertyExpressions();
+
+    final NLGElement s = ceConverter.asNLGElement(ce, true);
+    final VPPhraseSpec v = nlgFactory.createVerbPhrase();
+    final NPPhraseSpec o = nlgFactory.createNounPhrase();
+
+    {
+      // is connected
+      final VPPhraseSpec be = nlgFactory.createVerbPhrase(Words.be);
+      be.setFeature(Feature.PERSON, Person.THIRD);
+      be.addPostModifier(nlgFactory.createWord(Words.uniquely, LexicalCategory.ADVERB));
+      v.setPreModifier(be);
+      v.setVerb(Words.identify);
+      v.setFeature(Feature.TENSE, Tense.PAST);
+    }
+
+    final CoordinatedPhraseElement coo = nlgFactory.createCoordinatedPhrase();
+    coo.setConjunction(Words.and);
+
+    for (final OWLPropertyExpression pe : axiom.getPropertyExpressions()) {
+      coo.addCoordinate(nlgFactory.createStringElement(getPropertyVerbalizationText(pe)));
+    }
+
+    // o.setPreModifier(Words.by);
+    // o.addPreModifier(Words.its);
+    o.addPreModifier(Words.by + " " + Words.its);
+
+    o.setComplement(coo);
+
+    addClause(s, v, o);
   }
 
   @Override
   public void visit(final OWLDatatypeDefinitionAxiom axiom) {
+    LOG.debug("Converting OWLDatatypeDefinitionAxiom");
 
     final OWLDatatype datatype = axiom.getDatatype();
     final OWLDataRange datarange = axiom.getDataRange();
 
-    String name = "";
+    final NPPhraseSpec s = nlgFactory.createNounPhrase(Words.datatype);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(datarange.accept(ceConverter.owlDataRange));
+
+    s.setPreModifier(Words.the);
+
     if (datatype.isNamed()) {
-      name = datatype.getIRI().getShortForm();
+      s.setPostModifier(datatype.getIRI().getShortForm());
     } else if (datatype.isBuiltIn()) {
-      name = datatype.getBuiltInDatatype().getShortForm();
+      s.setPostModifier(datatype.getBuiltInDatatype().getShortForm());
     } else {
       LOG.warn("Not implemented yet.");
     }
 
-    clauses.add(//
-        nlgFactory.createClause(//
-            "The datatype ".concat(name), //
-            "be", //
-            datarange.accept(ceConverter.owlDataRange)//
-        ));
+    addClause(s, v, o);
   }
 
-  // TODO: implement me
   @Override
   public void visit(final SWRLRule axiom) {
+    LOG.debug("Converting SWRLRule");
+    /**
+     * not explicit in the OWL 2 specification<br>
+     * <code>
 
-    final Set<SWRLAtom> head = axiom.getHead();
-    final Set<SWRLAtom> body = axiom.getBody();
+    final Set<SWRLAtom> concequent = axiom.getHead();
+    final Set<SWRLAtom> antecedent = axiom.getBody();
 
-    LOG.info("head:{}\nbody:{}", head, body);
+    LOG.info("type {} ", axiom.getAxiomType());
 
+    LOG.info("type {} ", axiom.getSimplified());
+
+    LOG.info("head:{}\nbody:{}", concequent, antecedent);
+    </code>
+     */
   }
 
   // #########################################################
@@ -513,42 +904,154 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   // #########################################################
 
   @Override
-  public void visit(final OWLClassAssertionAxiom axiom) {}
+  public void visit(final OWLClassAssertionAxiom axiom) {
+    LOG.debug("OWLClassAssertionAxiom");
+  }
 
   @Override
-  public void visit(final OWLObjectPropertyAssertionAxiom axiom) {}
+  public void visit(final OWLObjectPropertyAssertionAxiom axiom) {
+    LOG.debug("OWLObjectPropertyAssertionAxiom ");
+  }
 
   @Override
-  public void visit(final OWLDataPropertyAssertionAxiom axiom) {}
+  public void visit(final OWLDataPropertyAssertionAxiom axiom) {
+    LOG.debug("OWLDataPropertyAssertionAxiom");
+  }
 
   @Override
-  public void visit(final OWLNegativeObjectPropertyAssertionAxiom axiom) {}
+  public void visit(final OWLNegativeObjectPropertyAssertionAxiom axiom) {
+    LOG.debug("OWLNegativeObjectPropertyAssertionAxiom");
+  }
 
   @Override
-  public void visit(final OWLNegativeDataPropertyAssertionAxiom axiom) {}
+  public void visit(final OWLNegativeDataPropertyAssertionAxiom axiom) {
+    LOG.debug("OWLNegativeDataPropertyAssertionAxiom");
+  }
 
   @Override
-  public void visit(final OWLDifferentIndividualsAxiom axiom) {}
+  public void visit(final OWLDifferentIndividualsAxiom axiom) {
+    LOG.debug("OWLDifferentIndividualsAxiom");
+  }
 
   @Override
-  public void visit(final OWLSameIndividualAxiom axiom) {}
+  public void visit(final OWLSameIndividualAxiom axiom) {
+    LOG.debug("OWLSameIndividualAxiom");
+  }
 
   // #########################################################
   // ################# non-logical axioms ####################
   // #########################################################
 
   @Override
-  public void visit(final OWLAnnotationAssertionAxiom axiom) {}
+  public void visit(final OWLAnnotationAssertionAxiom axiom) {
+    LOG.debug("OWLAnnotationAssertionAxiom");
+  }
 
   @Override
-  public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {}
+  public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {
+    LOG.debug("OWLSubAnnotationPropertyOfAxiom");
+  }
 
   @Override
-  public void visit(final OWLAnnotationPropertyDomainAxiom axiom) {}
+  public void visit(final OWLAnnotationPropertyDomainAxiom axiom) {
+    LOG.debug("OWLAnnotationPropertyDomainAxiom");
+  }
 
   @Override
-  public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {}
+  public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {
+    LOG.debug("OWLAnnotationPropertyRangeAxiom");
+  }
 
   @Override
-  public void visit(final OWLDeclarationAxiom axiom) {}
+  public void visit(final OWLDeclarationAxiom axiom) {
+    LOG.debug("OWLDeclarationAxiom");
+  }
+
+  // #########################################################
+  // ################# helpers ###############################
+  // #########################################################
+  private NPPhraseSpec getSubject(final OWLPropertyAxiom axiom) {
+
+    final CoordinatedPhraseElement coo = nlgFactory.createCoordinatedPhrase();
+    coo.setConjunction(Words.and);
+
+    final NPPhraseSpec np = nlgFactory.createNounPhrase();
+    final NPPhraseSpec npp = nlgFactory.createNounPhrase();
+
+    int n = 0;
+    if (axiom instanceof OWLObjectPropertyAxiom) {
+      Set<OWLObjectPropertyExpression> e;
+      if (axiom instanceof OWLDisjointObjectPropertiesAxiom) {
+        e = ((OWLDisjointObjectPropertiesAxiom) axiom).getProperties();
+      } else if (axiom instanceof OWLEquivalentObjectPropertiesAxiom) {
+        e = ((OWLEquivalentObjectPropertiesAxiom) axiom).getProperties();
+        // } else if (axiom instanceof OWLSubPropertyChainOfAxiom) {
+        // e = ((OWLSubPropertyChainOfAxiom) axiom).getPropertyChain();
+      } else {
+        LOG.warn("Could not process: {}", axiom.getAxiomType());
+        e = new HashSet<>();
+      }
+      n = e.size();
+      for (final OWLObjectPropertyExpression p : e) {
+        // TODO: check type?
+        coo.addCoordinate(nlgFactory.createStringElement(getPropertyVerbalizationText(p)));
+      }
+      npp.setPreModifier(Words.object);
+    } else if (axiom instanceof OWLDataPropertyAxiom) {
+      Set<OWLDataPropertyExpression> e;
+      if (axiom instanceof OWLDisjointDataPropertiesAxiom) {
+        e = ((OWLDisjointDataPropertiesAxiom) axiom).getProperties();
+      } else if (axiom instanceof OWLEquivalentDataPropertiesAxiom) {
+        e = ((OWLEquivalentDataPropertiesAxiom) axiom).getProperties();
+      } else {
+        e = new HashSet<>();
+      }
+
+      n = e.size();
+
+      for (final OWLDataPropertyExpression p : e) {
+        // TODO: check type?
+        coo.addCoordinate(nlgFactory.createStringElement(getPropertyVerbalizationText(p)));
+      }
+      npp.setPreModifier(Words.data);
+    } else {
+      LOG.debug("Should never be the case.");
+    }
+
+    // data or object property
+    npp.setNoun(Words.property);
+    npp.setPlural(true);
+
+    np.setDeterminer(Words.the);
+    np.setPreModifier(Words.number(n));
+    np.setNoun(npp);
+
+    final NPPhraseSpec s = nlgFactory.createNounPhrase();
+    s.setPreModifier(np);
+    s.setNoun(coo);
+
+    return s;
+  }
+
+  /**
+   * Adds an instance of SPhraseSpec to {@link #clauses}.
+   *
+   * @param s subject
+   * @param v verb
+   * @param o object
+   *
+   * @return added clause or null
+   */
+  private SPhraseSpec addClause(final Object s, final Object v, final Object o) {
+    final SPhraseSpec c = Phrases.createClause(nlgFactory, s, v, o);
+    return clauses.add(c) ? c : null;
+  }
+
+  private PropertyVerbalization getPropertyVerbalization(final OWLPropertyExpression p) {
+    return ((OWLClassExpressionToNLGElement) ceConverter.owlClassExpression).propertyVerbalizer(p);
+  }
+
+  private String getPropertyVerbalizationText(final OWLPropertyExpression p) {
+    return getPropertyVerbalization(p).getVerbalizationText();
+  }
 }

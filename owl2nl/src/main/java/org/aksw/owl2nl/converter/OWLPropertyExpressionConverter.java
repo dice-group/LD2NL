@@ -58,19 +58,14 @@ public class OWLPropertyExpressionConverter {
 
   public NLGElement asNLGElement(final OWLPropertyExpression pe, final boolean isTransitive) {
 
-    resetsOWLPropertyExpressionParameter(pe, isTransitive);
-
+    final OWLPropertyExpressiontoNLGElement.Parameter parameter;
+    parameter = ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).new Parameter();
+    {
+      parameter.root = pe;
+      parameter.isTransitiveObjectProperty = isTransitive;
+      parameter.countTransitive = 0;
+      ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).setParameter(parameter);
+    }
     return pe.accept(owlPropertyExpression);
-  }
-
-  private void resetsOWLPropertyExpressionParameter(final OWLPropertyExpression pe,
-      final boolean isTransitive) {
-
-    final OWLPropertyExpressiontoNLGElement.Parameter parameter =
-        ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).new Parameter();
-    parameter.root = pe;
-    parameter.isTransitiveObjectProperty = isTransitive;
-    parameter.countTransitive = 0;
-    ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).setParameter(parameter);
   }
 }

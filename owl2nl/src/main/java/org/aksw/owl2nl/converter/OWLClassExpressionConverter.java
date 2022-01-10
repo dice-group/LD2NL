@@ -117,31 +117,22 @@ public class OWLClassExpressionConverter extends AConverter {
     return rewrite(ce, false);
   }
 
-  /**
-   *
-   * @param ce
-   * @param inIntersection
-   * @return
-   */
   private OWLClassExpression rewrite(final OWLClassExpression ce, final boolean inIntersection) {
 
+    if (!ce.isAnonymous()) {
+      return ce;
+    } else {
+      LOG.debug("rewriting...");
+    }
     LOG.info("rewrite before: {}", ce.toString());
 
-    if (!ce.isAnonymous()) {
-      //
-      LOG.debug("Anonymous is not supported");
-      //
-      return ce;
-    } else if (ce instanceof OWLObjectOneOf) {
-      //
-      // OWLObjectOneOf
+    if (ce instanceof OWLObjectOneOf) {
+      LOG.debug("OWLObjectOneOf");
       //
       // TODO: do something?
       return ce;
     } else if (ce instanceof OWLObjectIntersectionOf) {
-      //
-      // OWLObjectIntersectionOf
-      //
+      LOG.debug("OWLObjectIntersectionOf");
       final Set<OWLClassExpression> operands = ((OWLObjectIntersectionOf) ce).getOperands();
       final Set<OWLClassExpression> newOperands = Sets.newHashSet();
 
@@ -155,9 +146,7 @@ public class OWLClassExpressionConverter extends AConverter {
 
       return df.getOWLObjectIntersectionOf(newOperands);
     } else if (ce instanceof OWLObjectUnionOf) {
-      //
-      // OWLObjectUnionOf
-      //
+      LOG.debug("OWLObjectUnionOf");
       final Set<OWLClassExpression> operands = ((OWLObjectUnionOf) ce).getOperands();
       final Set<OWLClassExpression> newOperands = Sets.newHashSet();
 
@@ -167,9 +156,7 @@ public class OWLClassExpressionConverter extends AConverter {
 
       return df.getOWLObjectUnionOf(newOperands);
     } else if (ce instanceof OWLObjectSomeValuesFrom) {
-      //
-      // OWLObjectSomeValuesFrom
-      //
+      LOG.debug("OWLObjectSomeValuesFrom");
       final OWLClassExpression newCe;
       newCe = df.getOWLObjectSomeValuesFrom(((OWLObjectSomeValuesFrom) ce).getProperty(),
           rewrite(((OWLObjectSomeValuesFrom) ce).getFiller()));
@@ -179,9 +166,7 @@ public class OWLClassExpressionConverter extends AConverter {
       }
       return df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
     } else if (ce instanceof OWLObjectAllValuesFrom) {
-      //
-      // OWLObjectAllValuesFrom
-      //
+      LOG.debug("OWLObjectAllValuesFrom");
       final OWLClassExpression newCe;
       newCe = df.getOWLObjectAllValuesFrom(((OWLObjectAllValuesFrom) ce).getProperty(),
           rewrite(((OWLObjectAllValuesFrom) ce).getFiller()));
