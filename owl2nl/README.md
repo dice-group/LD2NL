@@ -17,7 +17,9 @@ mvn exec:java -B -Dexec.mainClass=org.aksw.owl2nl.ui.OWL2NLCommandLineInterface 
 
 ```
 
-### Example
+For more information take a look at `cli.sh` and `cli2html.sh` as well as at the java tests in `src/test/java/org/aksw/owl2nl/converter`
+
+### Example Verbalization
 
 #### DL:
 
