@@ -6,9 +6,10 @@ repository/
 .project
 *.log
 *.db
-SPARQL2NL/src/main/resources/NIHLexicon/lexAccess2013.properties
-SPARQL2NL/src/main/resources/NIHLexicon/lexAccess2013.script
-SPARQL2NL/src/main/resources/NIHLexicon/lexAccess2013.data
-SPARQL2NL/src/main/resources/NIHLexicon/lexAccess2013.data.zip
-SPARQL2NL/src/main/resources/NIHLexicon/NIHLexicon.zip
+SPARQL2NL/src/main/resources/NIHLexicon.zip
+SPARQL2NL/src/main/resources/NIHLexicon/*
+SPARQL2NL/src/main/resources/__MACOSX/*
 avatar/cache/*
+
+*/bin/*
+owl2nl/testData
