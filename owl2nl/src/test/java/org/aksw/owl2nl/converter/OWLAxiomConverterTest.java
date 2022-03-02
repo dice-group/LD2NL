@@ -83,56 +83,56 @@ public class OWLAxiomConverterTest {
       // TBOX
       if (AxiomType.TBoxAxiomTypes.contains(a)) {
         if (a.equals(AxiomType.EQUIVALENT_CLASSES)) {
-          LOG.info("=== starts testOWLEquivalentClassesAxiom()");
-          assertEquals(testOWLEquivalentClassesAxiomA());
-          LOG.info("=== starts testOWLEquivalentClassesAxiom()");
-          assertEquals(testOWLEquivalentClassesAxiomB());
+          LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
+          assertEquals(testsOWLEquivalentClassesAxiomA());
+          LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
+          assertEquals(testsOWLEquivalentClassesAxiomB());
         } else if (a.equals(AxiomType.SUBCLASS_OF)) {
-          LOG.info("=== starts testOWLSubClassOfAxiom()");
-          assertEquals(testOWLSubClassOfAxiomA());
-          LOG.info("=== starts testOWLSubClassOfAxiom()");
-          assertEquals(testOWLSubClassOfAxiomB());
+          LOG.info("=== starts testsOWLSubClassOfAxiom()");
+          assertEquals(testsOWLSubClassOfAxiomA());
+          LOG.info("=== starts testsOWLSubClassOfAxiom()");
+          assertEquals(testsOWLSubClassOfAxiomB());
         } else if (a.equals(AxiomType.DISJOINT_CLASSES)) {
-          LOG.info("=== starts testOWLDisjointClasses()");
-          assertEquals(testOWLDisjointClasses());
+          LOG.info("=== starts testsOWLDisjointClasses()");
+          assertEquals(testsOWLDisjointClasses());
         } else if (a.equals(AxiomType.DISJOINT_UNION)) {
-          LOG.info("=== starts testOWLDisjointUnion()");
-          assertEquals(testOWLDisjointUnionA());
-          LOG.info("=== starts testOWLDisjointUnion()");
-          assertEquals(testOWLDisjointUnionB());
+          LOG.info("=== starts testsOWLDisjointUnion()");
+          assertEquals(testsOWLDisjointUnionA());
+          LOG.info("=== starts testsOWLDisjointUnion()");
+          assertEquals(testsOWLDisjointUnionB());
         } else if (a.equals(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
-          LOG.info("=== starts testOWLObjectPropertyDomain()");
-          assertEquals(testOWLObjectPropertyDomain());
+          LOG.info("=== starts testsOWLObjectPropertyDomain()");
+          assertEquals(testsOWLObjectPropertyDomain());
         } else if (a.equals(AxiomType.OBJECT_PROPERTY_RANGE)) {
-          LOG.info("=== starts testOWLObjectPropertyRange()");
-          assertEquals(testOWLObjectPropertyRange());
+          LOG.info("=== starts testsOWLObjectPropertyRange()");
+          assertEquals(testsOWLObjectPropertyRange());
         } else if (a.equals(AxiomType.DATA_PROPERTY_DOMAIN)) {
-          LOG.info("=== starts testOWLDataPropertyDomain()");
-          assertEquals(testOWLDataPropertyDomain());
+          LOG.info("=== starts testsOWLDataPropertyDomain()");
+          assertEquals(testsOWLDataPropertyDomain());
         } else if (a.equals(AxiomType.DATA_PROPERTY_RANGE)) {
-          LOG.info("=== starts testOWLDataPropertyRange()");
-          assertEquals(testOWLDataPropertyRange());
+          LOG.info("=== starts testsOWLDataPropertyRange()");
+          assertEquals(testsOWLDataPropertyRange());
         } else if (a.equals(AxiomType.DATATYPE_DEFINITION)) {
-          LOG.info("=== starts testOWLDatatypeDefinition()");
-          assertEquals(testOWLDatatypeDefinitionA());
-          LOG.info("=== starts testOWLDatatypeDefinition()");
-          assertEquals(testOWLDatatypeDefinitionB());
+          LOG.info("=== starts testsOWLDatatypeDefinition()");
+          assertEquals(testsOWLDatatypeDefinitionA());
+          LOG.info("=== starts testsOWLDatatypeDefinition()");
+          assertEquals(testsOWLDatatypeDefinitionB());
         } else if (a.equals(AxiomType.HAS_KEY)) {
-          LOG.info("=== starts testOWLHasKey()");
-          assertEquals(testOWLHasKeyA());
-          LOG.info("=== starts testOWLHasKey()");
-          assertEquals(testOWLHasKeyB());
+          LOG.info("=== starts testsOWLHasKey()");
+          assertEquals(testsOWLHasKeyA());
+          LOG.info("=== starts testsOWLHasKey()");
+          assertEquals(testsOWLHasKeyB());
         } else if (a.equals(AxiomType.FUNCTIONAL_OBJECT_PROPERTY)) {
-          LOG.info("=== starts testOWLFunctionalObjectProperty()");
-          assertEquals(testOWLFunctionalObjectProperty());
+          LOG.info("=== starts testsOWLFunctionalObjectProperty()");
+          assertEquals(testsOWLFunctionalObjectProperty());
         } else if (a.equals(AxiomType.FUNCTIONAL_DATA_PROPERTY)) {
-          LOG.info("=== starts testOWLFunctionalDataProperty()");
-          assertEquals(testOWLFunctionalDataProperty());
-          LOG.info("=== starts testOWLFunctionalDataProperty()");
-          assertEquals(testOWLFunctionalDataPropertyB());
+          LOG.info("=== starts testsOWLFunctionalDataProperty()");
+          assertEquals(testsOWLFunctionalDataProperty());
+          LOG.info("=== starts testsOWLFunctionalDataProperty()");
+          assertEquals(testsOWLFunctionalDataPropertyB());
         } else if (a.equals(AxiomType.INVERSE_FUNCTIONAL_OBJECT_PROPERTY)) {
-          LOG.info("=== starts testOWLInverseFunctionalObjectProperty()");
-          assertEquals(testOWLInverseFunctionalObjectProperty());
+          LOG.info("=== starts testsOWLInverseFunctionalObjectProperty()");
+          assertEquals(testsOWLInverseFunctionalObjectProperty());
         }
       }
       // ABOX
@@ -257,14 +257,14 @@ public class OWLAxiomConverterTest {
     );
   }
 
-  private Pair<String, String> testOWLObjectPropertyDomain() {
+  private Pair<String, String> testsOWLObjectPropertyDomain() {
     return Pair.of(//
         "Everything that has a dog is a person. ", //
         axiomConverter.convert(df.getOWLObjectPropertyDomainAxiom(hasDog, person)//
         ));
   }
 
-  private Pair<String, String> testOWLObjectPropertyRange() {
+  private Pair<String, String> testsOWLObjectPropertyRange() {
     return Pair.of(//
         "The range of the has dog object property is a dog. ", //
         axiomConverter.convert(df.getOWLObjectPropertyRangeAxiom(hasDog, dog)//
@@ -272,14 +272,14 @@ public class OWLAxiomConverterTest {
   }
 
   // TODO: "Everything is something that has at most one father. ", //
-  private Pair<String, String> testOWLFunctionalObjectProperty() {
+  private Pair<String, String> testsOWLFunctionalObjectProperty() {
     return Pair.of(//
         "Everything is something that has at most one father that is something. ", //
         axiomConverter.convert(df.getOWLFunctionalObjectPropertyAxiom(father)));
   }
 
   // TODO:
-  private Pair<String, String> testOWLInverseFunctionalObjectProperty() {
+  private Pair<String, String> testsOWLInverseFunctionalObjectProperty() {
     return Pair.of(//
         // Each object can have at most one father.
         // "Each object can have at most one father. ", //
@@ -374,7 +374,7 @@ public class OWLAxiomConverterTest {
     );
   }
 
-  private Pair<String, String> testOWLDataPropertyDomain() {
+  private Pair<String, String> testsOWLDataPropertyDomain() {
     return Pair.of(//
         "The domain of the name property is a person. ", //
         axiomConverter.convert(//
@@ -383,7 +383,7 @@ public class OWLAxiomConverterTest {
         ));
   }
 
-  private Pair<String, String> testOWLDataPropertyRange() {
+  private Pair<String, String> testsOWLDataPropertyRange() {
     return Pair.of(//
         "The range of the name property is string. ", //
         axiomConverter.convert(//
@@ -394,7 +394,7 @@ public class OWLAxiomConverterTest {
         ));
   }
 
-  private Pair<String, String> testOWLDatatypeDefinitionA() {
+  private Pair<String, String> testsOWLDatatypeDefinitionA() {
     return Pair.of(//
         "The datatype temperature is lower than or equals to 0.2. ", //
         axiomConverter.convert(//
@@ -405,7 +405,7 @@ public class OWLAxiomConverterTest {
         ));
   }
 
-  private Pair<String, String> testOWLDatatypeDefinitionB() {
+  private Pair<String, String> testsOWLDatatypeDefinitionB() {
     return Pair.of(//
         "The datatype integer is greater than 10000000. ", //
         axiomConverter.convert(//
@@ -419,20 +419,98 @@ public class OWLAxiomConverterTest {
     );
   }
 
-  private Pair<String, String> testOWLFunctionalDataProperty() {
+  private Pair<String, String> testsOWLFunctionalDataProperty() {
     return Pair.of(//
         "An individual can has at most one value for age. ", //
         axiomConverter.convert(df.getOWLFunctionalDataPropertyAxiom(hasAge)));
   }
 
-  protected Pair<String, String> testOWLFunctionalDataPropertyB() {
+  private Pair<String, String> testsOWLFunctionalDataPropertyB() {
     return Pair.of(//
         "An individual can has at most one value for number of children. ", //
         axiomConverter.convert(df.getOWLFunctionalDataPropertyAxiom(numberOfChildren)));
   }
 
   // #########################################################
-  // ################# ##################
+  // ################# class axioms ##########################
+  // #########################################################
+
+  private Pair<String, String> testsOWLEquivalentClassesAxiomA() {
+    return Pair.of(//
+        "Every homo sapien is a human. ", //
+        axiomConverter.convert(df.getOWLEquivalentClassesAxiom(human, homoSapien)));
+  }
+
+  private Pair<String, String> testsOWLEquivalentClassesAxiomB() {
+    return Pair.of(//
+        "Every boy is a child whose a man. ", //
+        axiomConverter.convert(
+            df.getOWLEquivalentClassesAxiom(boy, df.getOWLObjectIntersectionOf(child, man))));
+  }
+
+  private Pair<String, String> testsOWLSubClassOfAxiomA() {
+    return Pair.of(//
+        "Every place is a thing. ", //
+        axiomConverter.convert(df.getOWLSubClassOfAxiom(place, thing)));
+  }
+
+  private Pair<String, String> testsOWLSubClassOfAxiomB() {
+    return Pair.of(//
+        "Every place is a place. ", //
+        axiomConverter.convert(df.getOWLSubClassOfAxiom(place, place)));
+  }
+
+  private Pair<String, String> testsOWLDisjointClasses() {
+    return Pair.of(""//
+
+        + "Every boy is something that is not a girl and is something that is not a place. " //
+        + "Every girl is something that is not a place. ",
+        // + "Every boy is something that is not a girl. "
+        // + "Every boy is something that is not a place. "
+        // + "Every girl is something that is not a place. ",
+        axiomConverter.convert(df.getOWLDisjointClassesAxiom(//
+            boy, girl, place)//
+        ));
+  }
+
+  private Pair<String, String> testsOWLDisjointUnionA() {
+    return Pair.of(""//
+
+        + "Every football player is an american football player, a canadian football player or a german football player. "
+        + "Every american football player is something that is not a canadian football player and is something that is not a german football player. "
+        + "Every canadian football player is something that is not a german football player. ",
+
+        // + "Every football player is an american football player, "
+        // + "a canadian football player or a german football player. "
+        // + "Every american football player is something that is not a canadian football player. "
+        // + "Every american football player is something that is not a german football player. "
+        // + "Every canadian football player is something that is not a german football player. ",
+        // //
+        axiomConverter.convert(//
+            df.getOWLDisjointUnionAxiom(//
+                df.getOWLClass("FootballPlayer", dpo), //
+                new HashSet<>(Arrays.asList(//
+                    df.getOWLClass("GermanFootballPlayer", dpo), //
+                    df.getOWLClass("AmericanFootballPlayer", dpo), //
+                    df.getOWLClass("CanadianFootballPlayer", dpo)))//
+            )//
+        ));
+  }
+
+  // TODO:
+  private Pair<String, String> testsOWLDisjointUnionB() {
+    return Pair.of(//
+        // Every child is a boy or a girl, and a boy is never a girl.
+        "Every child is a boy or a girl. Every boy is something that is not a girl. ", //
+        axiomConverter.convert(//
+            df.getOWLDisjointUnionAxiom(//
+                child, //
+                new HashSet<>(Arrays.asList(boy, girl)) //
+            )//
+        ));
+  }
+  // #########################################################
+  // ##################### other tests #######################
   // #########################################################
 
   @Test
@@ -475,83 +553,13 @@ public class OWLAxiomConverterTest {
     Assert.assertEquals(pair.getLeft(), pair.getRight());
   }
 
-  // #########################################################
-  // ################# class axioms ##########################
-  // #########################################################
-
-  private Pair<String, String> testOWLEquivalentClassesAxiomA() {
-    return Pair.of(//
-        "Every homo sapien is a human. ", //
-        axiomConverter.convert(df.getOWLEquivalentClassesAxiom(human, homoSapien)));
-  }
-
-  private Pair<String, String> testOWLEquivalentClassesAxiomB() {
-    return Pair.of(//
-        "Every boy is a child whose a man. ", //
-        axiomConverter.convert(
-            df.getOWLEquivalentClassesAxiom(boy, df.getOWLObjectIntersectionOf(child, man))));
-  }
-
-  private Pair<String, String> testOWLSubClassOfAxiomA() {
-    return Pair.of(//
-        "Every place is a thing. ", //
-        axiomConverter.convert(df.getOWLSubClassOfAxiom(place, thing)));
-  }
-
-  private Pair<String, String> testOWLSubClassOfAxiomB() {
-    return Pair.of(//
-        "Every place is a place. ", //
-        axiomConverter.convert(df.getOWLSubClassOfAxiom(place, place)));
-  }
-
-  private Pair<String, String> testOWLDisjointClasses() {
-    return Pair.of(""//
-        + "Every boy is something that is not a girl. "
-        + "Every boy is something that is not a place. "
-        + "Every girl is something that is not a place. ",
-        axiomConverter.convert(df.getOWLDisjointClassesAxiom(//
-            boy, girl, place)//
-        ));
-  }
-
-  private Pair<String, String> testOWLDisjointUnionA() {
-    return Pair.of(""//
-        + "Every football player is an american football player, "
-        + "a canadian football player or a german football player. "
-        + "Every american football player is something that is not a canadian football player. "
-        + "Every american football player is something that is not a german football player. "
-        + "Every canadian football player is something that is not a german football player. ", //
-        axiomConverter.convert(//
-            df.getOWLDisjointUnionAxiom(//
-                df.getOWLClass("FootballPlayer", dpo), //
-                new HashSet<>(Arrays.asList(//
-                    df.getOWLClass("GermanFootballPlayer", dpo), //
-                    df.getOWLClass("AmericanFootballPlayer", dpo), //
-                    df.getOWLClass("CanadianFootballPlayer", dpo)))//
-            )//
-        ));
-  }
-
-  // TODO:
-  private Pair<String, String> testOWLDisjointUnionB() {
-    return Pair.of(//
-        // Every child is a boy or a girl, and a boy is never a girl.
-        "Every child is a boy or a girl. Every boy is something that is not a girl. ", //
-        axiomConverter.convert(//
-            df.getOWLDisjointUnionAxiom(//
-                child, //
-                new HashSet<>(Arrays.asList(boy, girl)) //
-            )//
-        ));
-  }
-
-  private Pair<String, String> testOWLHasKeyA() { // DataPropertyExpression
+  private Pair<String, String> testsOWLHasKeyA() { // DataPropertyExpression
     return Pair.of(//
         "Every person is uniquely identified by its name. ", //
         axiomConverter.convert(df.getOWLHasKeyAxiom(person, name)));
   }
 
-  private Pair<String, String> testOWLHasKeyB() { // ObjectPropertyExpression
+  private Pair<String, String> testsOWLHasKeyB() { // ObjectPropertyExpression
     return Pair.of(//
         "Every person is uniquely identified by its social security number. ", //
         axiomConverter.convert(df.getOWLHasKeyAxiom(person, hasSSN)));

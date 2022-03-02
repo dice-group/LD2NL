@@ -17,5 +17,11 @@ public class GrammarTest {
 
     Assert.assertEquals(true, Grammar.en.isNoun("cat"));
     Assert.assertEquals(true, Grammar.en.isNoun("cats"));
+
+    Assert.assertEquals(false, Grammar.en.isNoun("is"));
+    Assert.assertEquals(false, Grammar.en.isNoun("concerned"));
+
+    Assert.assertEquals(false, Grammar.en.isPerson("cats"));
+    Assert.assertEquals(true, Grammar.en.isPerson("Peter"));
   }
 }

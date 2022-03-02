@@ -83,12 +83,14 @@ import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
 
+import simplenlg.aggregation.ForwardConjunctionReductionRule;
 import simplenlg.features.Feature;
 import simplenlg.features.Person;
 import simplenlg.features.Tense;
 import simplenlg.framework.CoordinatedPhraseElement;
 import simplenlg.framework.LexicalCategory;
 import simplenlg.framework.NLGElement;
+import simplenlg.framework.PhraseCategory;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.phrasespec.AdvPhraseSpec;
 import simplenlg.phrasespec.NPPhraseSpec;
@@ -108,6 +110,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   private final OWLPropertyExpressionConverter peConverter;
 
   private final List<NLGElement> clauses = new ArrayList<>();
+
+  final ForwardConjunctionReductionRule x = new ForwardConjunctionReductionRule();
 
   /**
    * OWLAxiomConverter class constructor.
@@ -138,22 +142,29 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     this(Lexicon.getDefaultLexicon());
   }
 
-  protected void optimize(final List<NLGElement> clauses) {
-    // TODO: merge objects and subjects
+  protected List<NLGElement> optimize(final List<NLGElement> clauses) {
+    if (clauses.size() < 2) {
+      return clauses;
+    }
 
-    /**
-     * <code>
-     for (final NLGElement clause : clauses) {
-       if (clause.getCategory().toString().equals("CLAUSE")) {
-         final NLGElement subject = ((SPhraseSpec) clause).getSubject();
-         final NLGElement object = ((SPhraseSpec) clause).getObject();
+    // final PhraseSet pset = new PhraseSet(DiscourseFunction.SUBJECT, clauses.get(0));
+    // pset.addPhrases(clauses.subList(1, clauses.size()));
 
-         LOG.trace("s: {} ", realiser.realise(subject).toString());
-         LOG.trace("o: {} ", realiser.realise(object).toString());
-       }
-     }
-     </code>
-     */
+    final List<NLGElement> a = x.apply(clauses);
+
+    return a.isEmpty() ? clauses : a;
+  }
+
+  protected void print(final List<NLGElement> clauses) {
+    for (final NLGElement clause : clauses) {
+      if (clause.getCategory().equals(PhraseCategory.CLAUSE)) {
+        final NLGElement subject = ((SPhraseSpec) clause).getSubject();
+        final NLGElement object = ((SPhraseSpec) clause).getObject();
+
+        LOG.trace("s: {} ", realiser.realise(subject).toString());
+        LOG.trace("o: {} ", realiser.realise(object).toString());
+      }
+    }
   }
 
   /**
@@ -175,9 +186,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     } else {
       LOG.debug(axiom);
       axiom.accept(this);
-      optimize(clauses);
       final StringBuilder sb = new StringBuilder();
-      for (final NLGElement clause : realiser.realise(clauses)) {
+      for (final NLGElement clause : realiser.realise(optimize(clauses))) {
         sb.append(StringUtils.capitalize(clause.toString())).append(". ");
       }
       return sb.toString();
@@ -886,14 +896,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
-
+    
     final Set<SWRLAtom> concequent = axiom.getHead();
     final Set<SWRLAtom> antecedent = axiom.getBody();
-
+    
     LOG.info("type {} ", axiom.getAxiomType());
-
+    
     LOG.info("type {} ", axiom.getSimplified());
-
+    
     LOG.info("head:{}\nbody:{}", concequent, antecedent);
     </code>
      */
