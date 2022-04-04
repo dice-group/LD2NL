@@ -368,9 +368,9 @@ public class OWLAxiomConverterTest {
 
   private Pair<String, String> testsOWLDisjointDataPropertiesAxiom() {
     return Pair.of(//
-        "The two data properties age and name are pairwise disjoint. ",
+        "The three data properties age, last name and name are pairwise disjoint. ",
         // "Someone's name must be different from his age. ", //
-        axiomConverter.convert(df.getOWLDisjointDataPropertiesAxiom(name, hasAge))//
+        axiomConverter.convert(df.getOWLDisjointDataPropertiesAxiom(name, lastName, hasAge))//
     );
   }
 
@@ -421,13 +421,13 @@ public class OWLAxiomConverterTest {
 
   private Pair<String, String> testsOWLFunctionalDataProperty() {
     return Pair.of(//
-        "An individual can has at most one value for age. ", //
+        "An individual can have at most one value for age. ", //
         axiomConverter.convert(df.getOWLFunctionalDataPropertyAxiom(hasAge)));
   }
 
   private Pair<String, String> testsOWLFunctionalDataPropertyB() {
     return Pair.of(//
-        "An individual can has at most one value for number of children. ", //
+        "An individual can have at most one value for number of children. ", //
         axiomConverter.convert(df.getOWLFunctionalDataPropertyAxiom(numberOfChildren)));
   }
 

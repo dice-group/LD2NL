@@ -83,6 +83,7 @@ import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
 
+import simplenlg.aggregation.AggregationRule;
 import simplenlg.aggregation.ForwardConjunctionReductionRule;
 import simplenlg.features.Feature;
 import simplenlg.features.Person;
@@ -111,7 +112,10 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   private final List<NLGElement> clauses = new ArrayList<>();
 
-  final ForwardConjunctionReductionRule x = new ForwardConjunctionReductionRule();
+  // new BackwardConjunctionReductionRule();
+  // new ClauseCoordinationRule();
+  // new ForwardConjunctionReductionRule();
+  final AggregationRule reductionRule = new ForwardConjunctionReductionRule();
 
   /**
    * OWLAxiomConverter class constructor.
@@ -150,9 +154,12 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     // final PhraseSet pset = new PhraseSet(DiscourseFunction.SUBJECT, clauses.get(0));
     // pset.addPhrases(clauses.subList(1, clauses.size()));
 
-    final List<NLGElement> a = x.apply(clauses);
+    final List<NLGElement> reduced = reductionRule.apply(clauses);
+    if (!reduced.isEmpty() && reduced.size() < clauses.size()) {
+      return reduced;
+    }
 
-    return a.isEmpty() ? clauses : a;
+    return clauses;
   }
 
   protected void print(final List<NLGElement> clauses) {
@@ -667,6 +674,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
 
     final NPPhraseSpec s = Phrases.getAnIndividual(nlgFactory);
+    s.setFeature(Feature.PERSON, Person.FIRST);
 
     final VPPhraseSpec v = nlgFactory.createVerbPhrase();
     v.setPreModifier(Words.can);

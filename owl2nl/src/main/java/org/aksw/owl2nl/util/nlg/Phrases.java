@@ -2,6 +2,10 @@ package org.aksw.owl2nl.util.nlg;
 
 import org.aksw.owl2nl.util.grammar.Words;
 
+import simplenlg.features.Feature;
+import simplenlg.features.NumberAgreement;
+import simplenlg.features.Person;
+import simplenlg.features.Tense;
 import simplenlg.framework.NLGFactory;
 import simplenlg.phrasespec.NPPhraseSpec;
 import simplenlg.phrasespec.PPPhraseSpec;
@@ -23,7 +27,12 @@ public class Phrases {
   }
 
   public static NPPhraseSpec getIndividual(final NLGFactory nlgFactory) {
-    return nlgFactory.createNounPhrase(Words.individual);
+    final NPPhraseSpec s = nlgFactory.createNounPhrase(Words.individual);
+    s.setFeature(Feature.TENSE, Tense.PRESENT);
+    s.setFeature(Feature.PERSON, Person.THIRD);
+    s.setFeature(Feature.NUMBER, NumberAgreement.SINGULAR);
+
+    return s;
   }
 
   public static SPhraseSpec createClause(final NLGFactory nlgFactory, final Object s,
