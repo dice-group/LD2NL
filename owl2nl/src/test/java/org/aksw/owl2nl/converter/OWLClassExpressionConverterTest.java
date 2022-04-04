@@ -20,91 +20,65 @@
  */
 package org.aksw.owl2nl.converter;
 
+import static org.aksw.owl2nl.converter.DataHelper.LOG;
+import static org.aksw.owl2nl.converter.DataHelper.df;
+import static org.aksw.owl2nl.converter.DataHelper.literal;
+import static org.aksw.owl2nl.converter.DataHelper.minInclusive;
+import static org.aksw.owl2nl.converter.DataHelper.salary;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.animal;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.company;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.narcisticPerson;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.person;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.place;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.professor;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.softwareCompany;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.university;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.woman;
+import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.amountOfSalary;
+import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.earns;
+import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.nrOfInhabitants;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.cricket;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.football;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.golf;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.hiphop;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.hockey;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.jazz;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.karaoke;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.leipzig;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.paderborn;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.rock;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.tennis;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.birthPlace;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasChild;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.ledBy;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.love;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.plays;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.sings;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.workPlace;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.worksFor;
+
 import org.aksw.owl2nl.data.OWL2NLInput;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.PrefixManager;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-
-/**
- * @author Lorenz Buehmann
- * @author rspeck
- *
- */
 public class OWLClassExpressionConverterTest {
-  protected static final Logger LOG = LogManager.getLogger(OWLClassExpressionConverterTest.class);
-  private static OWLDataFactoryImpl df = new OWLDataFactoryImpl();
-  private static OWLClassExpressionConverter converter =
+
+  private final OWLClassExpressionConverter converter =
       new OWLClassExpressionConverter(new OWL2NLInput());
-  final PrefixManager ontology =
-      new DefaultPrefixManager(null, null, "http://dbpedia.org/ontology/");
-  final PrefixManager resource =
-      new DefaultPrefixManager(null, null, "http://dbpedia.org/resource/");
 
-  private final OWLClass place = df.getOWLClass("Place", ontology);
-  private final OWLClass company = df.getOWLClass("Company", ontology);
-  private final OWLClass person = df.getOWLClass("Person", ontology);
-  private final OWLClass woman = df.getOWLClass("Woman", ontology);
-  private final OWLClass professor = df.getOWLClass("Professor", ontology);
-  private final OWLClass animal = df.getOWLClass("Animal", ontology);
-  private final OWLClass university = df.getOWLClass("University", ontology);
-  private final OWLClass softwareCompany = df.getOWLClass("SoftwareCompany", ontology);
+  @Test
+  public void testSelf() {
 
-  private final OWLDataProperty amountOfSalary = df.getOWLDataProperty("amountOfSalary", ontology);
-  private final OWLDataProperty earns = df.getOWLDataProperty("earns", ontology);
-  private final OWLDataProperty nrOfInhabitants =
-      df.getOWLDataProperty("nrOfInhabitants", ontology);
-
-  private final OWLDataRange dataRange = df.getOWLDatatypeMinInclusiveRestriction(10000000);
-
-  private final OWLObjectProperty sings = df.getOWLObjectProperty("sing", ontology);
-  private final OWLObjectProperty workPlace = df.getOWLObjectProperty("workPlace", ontology);
-  private final OWLObjectProperty birthPlace = df.getOWLObjectProperty("birthPlace", ontology);
-  private final OWLObjectProperty worksFor = df.getOWLObjectProperty("worksFor", ontology);
-  private final OWLObjectProperty hasChild = df.getOWLObjectProperty("hasChild", ontology);
-  private final OWLObjectProperty ledBy = df.getOWLObjectProperty("isLedBy", ontology);
-  private final OWLObjectProperty plays = df.getOWLObjectProperty("play", ontology);
-  private final OWLObjectProperty owner = df.getOWLObjectProperty("owner", ontology);
-  private final OWLObjectProperty hasWorkPlace = df.getOWLObjectProperty("hasWorkPlace", ontology);
-
-  private final OWLNamedIndividual leipzig =
-      df.getOWLNamedIndividual("Leipzig_University", resource);
-  private final OWLNamedIndividual bob = df.getOWLNamedIndividual("Albert_Einstein", resource);
-  private final OWLNamedIndividual paderborn = df.getOWLNamedIndividual("Paderborn", resource);
-  private final OWLNamedIndividual karaoke = df.getOWLNamedIndividual("karaoke", resource);
-  private final OWLNamedIndividual Jazz = df.getOWLNamedIndividual("jazz", resource);
-  private final OWLNamedIndividual football = df.getOWLNamedIndividual("football", resource);
-  private final OWLNamedIndividual Cricket = df.getOWLNamedIndividual("cricket", resource);
-  private final OWLNamedIndividual hockey = df.getOWLNamedIndividual("hockey", resource);
-  private final OWLNamedIndividual tennis = df.getOWLNamedIndividual("tennis", resource);
-  private final OWLNamedIndividual golf = df.getOWLNamedIndividual("golf", resource);
-  private final OWLNamedIndividual hiphop = df.getOWLNamedIndividual("hiphop", resource);
-  private final OWLNamedIndividual rock = df.getOWLNamedIndividual("rock", resource);
-  private final OWLNamedIndividual chess = df.getOWLNamedIndividual("Chess", resource);
-
-  private final OWLLiteral salary = df.getOWLLiteral(40000);
-  private final OWLLiteral literal = df.getOWLLiteral(1000000);
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+    Assert.assertEquals(//
+        "a narcissistic person that loves oneself", //
+        // a narcissistic person is someone who loves himself.
+        converter.convert(//
+            df.getOWLObjectIntersectionOf(narcisticPerson, df.getOWLObjectHasSelf(love)))//
+    );
   }
 
   // Person u ≥3 hasChild.(Woman u Professor)
@@ -115,6 +89,10 @@ public class OWLClassExpressionConverterTest {
         "a person that has at least three children that a professor whose a woman",
         // TODO: pluralize!
         // a person who has at least three children who are professors and females
+
+        // a person who has at least three children who are professors and females
+        // class of all persons with 3 or more daughters who are professors
+
         converter.convert(//
             df.getOWLObjectIntersectionOf(person, df.getOWLObjectMinCardinality(3, hasChild,
                 df.getOWLObjectIntersectionOf(professor, woman))))//
@@ -218,7 +196,7 @@ public class OWLClassExpressionConverterTest {
   public void testMinCardinalityC() {
     Assert.assertEquals(//
         "something that has at least three nr of inhabitants that are greater than or equals to 10000000", //
-        converter.convert(df.getOWLDataMinCardinality(3, nrOfInhabitants, dataRange))//
+        converter.convert(df.getOWLDataMinCardinality(3, nrOfInhabitants, minInclusive))//
     );
   }
 
@@ -246,7 +224,7 @@ public class OWLClassExpressionConverterTest {
   public void testMaxCardinalityC() {
     Assert.assertEquals(//
         "something that has at most three nr of inhabitants that are greater than or equals to 10000000", //
-        converter.convert(df.getOWLDataMaxCardinality(3, nrOfInhabitants, dataRange))//
+        converter.convert(df.getOWLDataMaxCardinality(3, nrOfInhabitants, minInclusive))//
     );
   }
 
@@ -277,7 +255,7 @@ public class OWLClassExpressionConverterTest {
   public void testExactCardinalityC() {
     Assert.assertEquals(//
         "something that has exactly three nr of inhabitants that are greater than or equals to 10000000", //
-        converter.convert(df.getOWLDataExactCardinality(3, nrOfInhabitants, dataRange))//
+        converter.convert(df.getOWLDataExactCardinality(3, nrOfInhabitants, minInclusive))//
     );
   }
 
@@ -303,7 +281,7 @@ public class OWLClassExpressionConverterTest {
         "something whose nr of inhabitant is greater than or equals to 10000000", //
         // final String expected = "everything whose nr of inhabitant is greater than or equal to
         // 10000000"
-        converter.convert(df.getOWLDataAllValuesFrom(nrOfInhabitants, dataRange))//
+        converter.convert(df.getOWLDataAllValuesFrom(nrOfInhabitants, minInclusive))//
     );
   }
 
@@ -314,7 +292,8 @@ public class OWLClassExpressionConverterTest {
   public void testAllValuesFromC() {
     final String expected = "something that earns only greater than or equals to 10000000";
     // final String expected = "everyone who earns greater than or equal to 10000000"
-    Assert.assertEquals(expected, converter.convert(df.getOWLDataAllValuesFrom(earns, dataRange)));
+    Assert.assertEquals(expected,
+        converter.convert(df.getOWLDataAllValuesFrom(earns, minInclusive)));
   }
 
   @Test
@@ -406,7 +385,7 @@ public class OWLClassExpressionConverterTest {
      */
     OWLObjectIntersectionOf ce =
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(birthPlace, paderborn),
-            df.getOWLDataMaxCardinality(500000, nrOfInhabitants, dataRange));
+            df.getOWLDataMaxCardinality(500000, nrOfInhabitants, minInclusive));
     ce = df
         .getOWLObjectIntersectionOf(
             df.getOWLObjectIntersectionOf(df.getOWLObjectComplementOf(
@@ -489,7 +468,7 @@ public class OWLClassExpressionConverterTest {
     // a person that sings karaoke or a person that sings jazz
     final OWLObjectUnionOf ce1 = df.getOWLObjectUnionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
 
     // "a person that sings jazz or karaoke"
     Assert.assertEquals(//
@@ -502,7 +481,7 @@ public class OWLClassExpressionConverterTest {
   public void testComplex7() {
     // a person that sings karaoke or jazz
     final OWLObjectIntersectionOf ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(
-        df.getOWLObjectHasValue(sings, karaoke), df.getOWLObjectHasValue(sings, Jazz)), person);
+        df.getOWLObjectHasValue(sings, karaoke), df.getOWLObjectHasValue(sings, jazz)), person);
 
     // "that something that sings jazz and karaoke"
     Assert.assertEquals(//
@@ -516,7 +495,7 @@ public class OWLClassExpressionConverterTest {
     // a person that sings karaoke and a person that sings jazz
     final OWLObjectIntersectionOf ce2 = df.getOWLObjectIntersectionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
 
     Assert.assertEquals(//
         "something that a person that sings jazz and that a person that sings karaoke", //
@@ -529,7 +508,7 @@ public class OWLClassExpressionConverterTest {
   public void testComplex5() {
     // a person that plays Cricket or a person that plays football or a person that plays hockey.
     final OWLObjectUnionOf ce = df.getOWLObjectUnionOf(
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, Cricket), person),
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, cricket), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, football), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, hockey), person));
 
@@ -544,7 +523,7 @@ public class OWLClassExpressionConverterTest {
   public void testmultipleConnectors() {
     // sentences for multiple connectors
     final OWLObjectUnionOf ce = df.getOWLObjectUnionOf(
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, Cricket), person),
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, cricket), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, football), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, hockey), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, tennis), person),
@@ -561,7 +540,7 @@ public class OWLClassExpressionConverterTest {
   public void testComplex2() {
     final OWLObjectIntersectionOf ce = df.getOWLObjectIntersectionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person),
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, rock), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, hiphop), person));
 
@@ -576,7 +555,7 @@ public class OWLClassExpressionConverterTest {
   public void testComplex3() {
     final OWLObjectUnionOf ce1 = df.getOWLObjectUnionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
     final OWLObjectIntersectionOf ce = df.getOWLObjectIntersectionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, rock), person), ce1);
 
@@ -591,9 +570,9 @@ public class OWLClassExpressionConverterTest {
   public void testComplex4() {
     final OWLObjectIntersectionOf ce2 = df.getOWLObjectIntersectionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, Jazz), person));
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
     final OWLObjectUnionOf ce = df.getOWLObjectUnionOf(
-        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, Cricket), person), ce2);
+        df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, cricket), person), ce2);
 
     Assert.assertEquals(//
         "a person that plays cricket or something that a person that sings jazz and that a person that sings karaoke",

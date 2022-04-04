@@ -76,7 +76,7 @@ abstract class AToNLGElement {
    * @param OWLPropertyExpression
    * @return PropertyVerbalization
    */
-  protected PropertyVerbalization propertyVerbalizer(final OWLPropertyExpression property) {
+  public PropertyVerbalization propertyVerbalizer(final OWLPropertyExpression property) {
     final String l = getLexicalFormFromOntology(property);
     IRI iri = null;
     if (property.isDataPropertyExpression()) {

@@ -1,12 +1,18 @@
 #!/bin/sh
+#
+#
 # input parameters
-i="https://protege.stanford.edu/ontologies/travel.owl"
-# i="http://www.ling.helsinki.fi/kit/2004k/ctl310semw/Protege/koala.owl"
-# i="/media/store/travel.owl"
-o="eval.html"
-u="true" # true for URL, false for File
 #
+# i: file or url
+# u: input type: true for a URL, false for a file
+# o: output file
 #
+i="travel.owl"
+#i="https://protege.stanford.edu/ontologies/travel.owl"
+o="travel.html"
+u="false" 
+#
+# run the app
 #
 mainClass="org.aksw.owl2nl.ui.OWLAxiomConversionEvaluationInterface"
 args="-i$i -o$o -u$u"

@@ -9,26 +9,63 @@ package org.aksw.owl2nl.util.grammar;
 public class Words {
 
   public static String a = "a";
+  public static String also = "also";
   public static String and = "and";
+  public static String another = "another";
   public static String as = "as";
   public static String at = "at";
   public static String be = "be";
+  public static String by = "by";
+  public static String can = "can";
+  public static String connect = "connect";
+  public static String data = "data";
+  public static String datatype = "datatype";
+  public static String domain = "domain";
   public static String either = "either";
   public static String every = "every";
   public static String everything = "everything";
   public static String exactly = "exactly";
+  public static String forr = "for";
   public static String have = "have";
-  public static String is = "is";
+  public static String identify = "identify";
+
+  public static String iff = "if";
+  public static String imply = "imply";
+  public static String individual = "individual";
+  @Deprecated
+  // public static String is = "is";
   public static String least = "least";
+  @Deprecated
   public static String most = "most";
+
+  public static String its = "its";
+
+  public static String much = "much";
   public static String no = "no";
   public static String not = "not";
+  public static String object = "object";
+  public static String of = "of";
+  public static String one = "one";
   public static String oneself = "oneself";
   public static String only = "only";
+  public static String opposite = "opposite";
   public static String or = "or";
+  public static String other = "other";
+  public static String pairwiseDisjoint = "pairwise disjoint";
+  public static String property = "property";
+  public static String range = "range";
+  public static String sequence = "sequence";
   public static String something = "something";
+  public static String synonym = "synonym";
   public static String that = "that";
+  public static String the = "the";
+  public static String then = "then";
+  public static String thiss = "this";
+  public static String to = "to";
+  public static String uniquely = "uniquely";
+  public static String value = "value";
   public static String whose = "whose";
+  public static String with = "with";
 
   /**
    * Writes out numbers with just one digit.
@@ -71,4 +108,5 @@ public class Words {
     }
     return r;
   }
+
 }
