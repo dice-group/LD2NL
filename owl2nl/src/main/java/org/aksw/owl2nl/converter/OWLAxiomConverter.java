@@ -367,8 +367,9 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final NPPhraseSpec s = Phrases.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
     final VPPhraseSpec v = Phrases.getBe(nlgFactory);
-    final NPPhraseSpec o = nlgFactory//
-        .createNounPhrase(axiom.getRange().accept(ceConverter.owlClassExpression));
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(//
+        ceConverter.asNLGElement(axiom.getRange(), false)//
+    );
 
     addClause(s, v, o);
   }
@@ -623,8 +624,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
     final VPPhraseSpec v = Phrases.getBe(nlgFactory);
-    final NLGElement o = axiom.getDomain().accept(ceConverter.owlClassExpression);
-
+    final NLGElement o = ceConverter.asNLGElement(axiom.getDomain(), false);
     s.setDeterminer(Words.the);
     s.setNoun(//
         Words.domain.concat(" ")//
