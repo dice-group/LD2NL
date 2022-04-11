@@ -46,9 +46,9 @@ import simplenlg.framework.NLGElement;
  */
 public class OWLClassExpressionConverter extends AConverter {
 
-  public OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
-  public OWLIndividualVisitorEx<NLGElement> owlIndividual;
-  public OWLDataRangeVisitorEx<NLGElement> owlDataRange;
+  protected OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
+  protected OWLIndividualVisitorEx<NLGElement> owlIndividual;
+  protected OWLDataRangeVisitorEx<NLGElement> owlDataRange;
 
   /**
    * Converts class expressions.
