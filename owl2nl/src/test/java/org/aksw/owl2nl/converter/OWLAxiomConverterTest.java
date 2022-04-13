@@ -259,7 +259,7 @@ public class OWLAxiomConverterTest {
 
   private Pair<String, String> testsOWLObjectPropertyDomain() {
     return Pair.of(//
-        "Everything that has a dog is a person. ", //
+        "The domain of the has dog object property is a person. ", //
         axiomConverter.convert(df.getOWLObjectPropertyDomainAxiom(hasDog, person)//
         ));
   }
@@ -569,18 +569,18 @@ public class OWLAxiomConverterTest {
    * not explicit in the OWL 2 specification<br>
    * <code>
   public void testsSWRLRule() {
-  
+
     final Set<SWRLAtom> concequent = new HashSet<>();
     final Set<SWRLAtom> antecedent = new HashSet<>();
-  
+
     concequent.add(df.getSWRLClassAtom(person, df.getSWRLIndividualArgument(albert)));
     antecedent.add(df.getSWRLClassAtom(professor, df.getSWRLIndividualArgument(albert)));
-  
+
     final String text = axiomConverter.convert(df.getSWRLRule(antecedent, concequent));
-  
+
     LOG.info(text);
   }
-  
+
   private Pair<String, String> testsOWLSubPropertyChainOfAxiom() {
   }
   </code>
