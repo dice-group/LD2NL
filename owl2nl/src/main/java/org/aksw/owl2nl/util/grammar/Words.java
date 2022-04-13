@@ -27,6 +27,7 @@ public class Words {
   public static String exactly = "exactly";
   public static String forr = "for";
   public static String have = "have";
+  public static String has = "has";
   public static String identify = "identify";
 
   public static String iff = "if";
