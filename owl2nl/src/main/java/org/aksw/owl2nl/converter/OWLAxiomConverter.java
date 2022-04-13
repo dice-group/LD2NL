@@ -354,7 +354,18 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   public void visit(final OWLObjectPropertyDomainAxiom axiom) {
     LOG.debug("Converting OWLObjectPropertyDomainAxiom");
 
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    final String dataProperty = getPropertyVerbalizationText(//
+        axiom.getProperty().asOWLObjectProperty()//
+    );
+
+    final NPPhraseSpec s =
+        Phrases.getProperty(nlgFactory, Words.domain, dataProperty, Words.object);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(//
+        ceConverter.asNLGElement(axiom.getDomain(), false)//
+    );
+
+    addClause(s, v, o);
   }
 
   @Override
@@ -904,14 +915,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
-    
+
     final Set<SWRLAtom> concequent = axiom.getHead();
     final Set<SWRLAtom> antecedent = axiom.getBody();
-    
+
     LOG.info("type {} ", axiom.getAxiomType());
-    
+
     LOG.info("type {} ", axiom.getSimplified());
-    
+
     LOG.info("head:{}\nbody:{}", concequent, antecedent);
     </code>
      */
