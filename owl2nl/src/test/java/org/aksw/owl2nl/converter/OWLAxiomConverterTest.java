@@ -59,10 +59,13 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.paren
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.plays;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.sings;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.sister;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.worksFor;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.aksw.owl2nl.converter.DataHelper.OWLClassHelper;
+import org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -79,6 +82,7 @@ public class OWLAxiomConverterTest {
 
   @Test
   public void test() {
+
     for (final AxiomType<?> a : AxiomType.AXIOM_TYPES) {
       // TBOX
       if (AxiomType.TBoxAxiomTypes.contains(a)) {
@@ -87,6 +91,12 @@ public class OWLAxiomConverterTest {
           assertEquals(testsOWLEquivalentClassesAxiomA());
           LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
           assertEquals(testsOWLEquivalentClassesAxiomB());
+          LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
+          assertEquals(testsOWLEquivalentClassesAxiomC());
+          LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
+          assertEquals(testsOWLEquivalentClassesAxiomCC());
+          LOG.info("=== starts testsOWLEquivalentClassesAxiom()");
+          assertEquals(testsOWLEquivalentClassesAxiomD());
         } else if (a.equals(AxiomType.SUBCLASS_OF)) {
           LOG.info("=== starts testsOWLSubClassOfAxiom()");
           assertEquals(testsOWLSubClassOfAxiomA());
@@ -448,6 +458,50 @@ public class OWLAxiomConverterTest {
             df.getOWLEquivalentClassesAxiom(boy, df.getOWLObjectIntersectionOf(child, man))));
   }
 
+  private Pair<String, String> testsOWLEquivalentClassesAxiomD() {
+    return Pair.of(//
+        "Every professor is a person that works for an university. ", //
+        axiomConverter.convert(
+            df.getOWLEquivalentClassesAxiom(OWLClassHelper.professor, df.getOWLObjectIntersectionOf(
+                df.getOWLObjectSomeValuesFrom(worksFor, OWLClassHelper.university), person)))//
+    );
+  }
+
+  private Pair<String, String> testsOWLEquivalentClassesAxiomCC() {
+    return Pair.of(//
+        "Every placebo is a drug that has for active principle an active principle. ",
+        axiomConverter.convert(//
+            df.getOWLEquivalentClassesAxiom(//
+                DataHelper.OWLClassHelper.placebo, //
+                df.getOWLObjectIntersectionOf(//
+                    DataHelper.OWLClassHelper.drug, //
+                    df.getOWLObjectSomeValuesFrom(OWLObjectPropertyHelper.has_for_active_principle,
+                        OWLClassHelper.activePrinciple)//
+                )//
+            )//
+        )//
+    );
+  }
+
+  private Pair<String, String> testsOWLEquivalentClassesAxiomC() {
+    return Pair.of(//
+        "Every placebo is a drug that does not have for active principle an active principle. ",
+        axiomConverter.convert(//
+            df.getOWLEquivalentClassesAxiom(//
+                DataHelper.OWLClassHelper.placebo, //
+                df.getOWLObjectIntersectionOf(//
+                    DataHelper.OWLClassHelper.drug, //
+                    df.getOWLObjectComplementOf(//
+                        df.getOWLObjectSomeValuesFrom(
+                            OWLObjectPropertyHelper.has_for_active_principle,
+                            OWLClassHelper.activePrinciple)//
+                    )//
+                )//
+            )//
+        )//
+    );
+  }
+
   private Pair<String, String> testsOWLSubClassOfAxiomA() {
     return Pair.of(//
         "Every place is a thing. ", //
@@ -462,12 +516,8 @@ public class OWLAxiomConverterTest {
 
   private Pair<String, String> testsOWLDisjointClasses() {
     return Pair.of(""//
-
         + "Every boy is something that is not a girl and is something that is not a place. " //
         + "Every girl is something that is not a place. ",
-        // + "Every boy is something that is not a girl. "
-        // + "Every boy is something that is not a place. "
-        // + "Every girl is something that is not a place. ",
         axiomConverter.convert(df.getOWLDisjointClassesAxiom(//
             boy, girl, place)//
         ));
@@ -475,17 +525,9 @@ public class OWLAxiomConverterTest {
 
   private Pair<String, String> testsOWLDisjointUnionA() {
     return Pair.of(""//
-
         + "Every football player is an american football player, a canadian football player or a german football player. "
         + "Every american football player is something that is not a canadian football player and is something that is not a german football player. "
         + "Every canadian football player is something that is not a german football player. ",
-
-        // + "Every football player is an american football player, "
-        // + "a canadian football player or a german football player. "
-        // + "Every american football player is something that is not a canadian football player. "
-        // + "Every american football player is something that is not a german football player. "
-        // + "Every canadian football player is something that is not a german football player. ",
-        // //
         axiomConverter.convert(//
             df.getOWLDisjointUnionAxiom(//
                 df.getOWLClass("FootballPlayer", dpo), //
@@ -569,18 +611,18 @@ public class OWLAxiomConverterTest {
    * not explicit in the OWL 2 specification<br>
    * <code>
   public void testsSWRLRule() {
-
+  
     final Set<SWRLAtom> concequent = new HashSet<>();
     final Set<SWRLAtom> antecedent = new HashSet<>();
-
+  
     concequent.add(df.getSWRLClassAtom(person, df.getSWRLIndividualArgument(albert)));
     antecedent.add(df.getSWRLClassAtom(professor, df.getSWRLIndividualArgument(albert)));
-
+  
     final String text = axiomConverter.convert(df.getSWRLRule(antecedent, concequent));
-
+  
     LOG.info(text);
   }
-
+  
   private Pair<String, String> testsOWLSubPropertyChainOfAxiom() {
   }
   </code>

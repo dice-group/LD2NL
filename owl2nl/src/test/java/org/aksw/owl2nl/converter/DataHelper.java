@@ -48,6 +48,11 @@ public class DataHelper {
     public static OWLClass narcisticPerson = df.getOWLClass("NarcissisticPerson", dpo);
     public static OWLClass human = df.getOWLClass("Human", dpo);
     public static OWLClass homoSapien = df.getOWLClass("HomoSapien", dpo);
+
+    public static OWLClass placebo = df.getOWLClass("Placebo", dpo);
+    public static OWLClass drug = df.getOWLClass("Drug", dpo);
+    public static OWLClass activePrinciple = df.getOWLClass("ActivePrinciple", dpo);
+
   }
 
   public static class OWLDataPropertyHelper {
@@ -92,6 +97,11 @@ public class DataHelper {
     public static OWLObjectProperty parent = df.getOWLObjectProperty("parent", dpo);
     public static OWLObjectProperty sister = df.getOWLObjectProperty("sister", dpo);
     public static OWLObjectProperty aunt = df.getOWLObjectProperty("aunt", dpo);
+
+    public static OWLObjectProperty has_for_active_principle =
+        df.getOWLObjectProperty("has_for_active_principle", dpo);
+    // df.getOWLObjectProperty("active_principle", dpo);
+
   }
 
   public static class OWLNamedIndividualHelper {
