@@ -373,8 +373,11 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
         element.setVerb(Words.be);
         element.getVerb().setFeature(Feature.PERSON, Person.THIRD);
 
-        setObject(element, filler).setPlural(false);
+        final NLGElement e = setObject(element, filler);
+        e.setPlural(false);
+        e.setFeature(Feature.COMPLEMENTISER, null);
 
+        LOG.info("realiser: {}, property:{}", realiser.realise(element), verbalText);
         parameter.noun = true;
       } else if (verbal.isVerbType()) {
         LOG.debug("property is verb POS: {}", verbal.getPOSTags());
