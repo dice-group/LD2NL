@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLPropertyExpression;
+import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitorEx;
 
 import simplenlg.features.Feature;
@@ -37,26 +37,26 @@ import simplenlg.framework.NLGFactory;
 public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     implements OWLPropertyExpressionVisitorEx<NLGElement> {
 
-  // holds parameter
-  protected Parameter parameter = new Parameter();
-
-  /**
-   * Holds parameters used in the OWLPropertyExpressiontoNLGElement class.
-   */
-  public class Parameter {
-
-    public OWLPropertyExpression root;
-
-    // True if the transitive object property is getting called
-    public boolean isTransitiveObjectProperty = false;
-
-    // Counts transitive object property as it requires 3 different subject-object combinations
-    public int countTransitive = 0;
-  }
-
-  public void setParameter(final Parameter parameter) {
-    this.parameter = parameter;
-  }
+  // // holds parameter
+  // protected Parameter parameter = new Parameter();
+  //
+  // /**
+  // * Holds parameters used in the OWLPropertyExpressiontoNLGElement class.
+  // */
+  // public class Parameter2 {
+  //
+  // public OWLPropertyExpression root;
+  //
+  // // True if the transitive object property is getting called
+  // public boolean isTransitiveObjectProperty = false;
+  //
+  // // Counts transitive object property as it requires 3 different subject-object combinations
+  // public int countTransitive = 0;
+  // }
+  //
+  // public void setParameter(final Parameter parameter) {
+  // this.parameter = parameter;
+  // }
 
   /**
    * OWLPropertyExpressiontoNLGElement constructor.
@@ -82,25 +82,16 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
   @Override
   public NLGElement visit(final OWLObjectProperty pe) {
     LOG.info("visit OWLObjectProperty");
-
-    NLGElement phrase = null;
-
-    final PropertyVerbalization verbal = propertyVerbalizer(pe);
-    final String verbalizationText = verbal.getVerbalizationText();
-
-    if (verbal.isNounType()) {
-      phrase = nlgFactory.createNounPhrase(getLexicalForm(pe));
-    } else if (verbal.isVerbType()) {
-
-      phrase = nlgFactory.createVerbPhrase(verbalizationText);
-      // e.setFeature(LexicalFeature.PRESENT_PARTICIPLE, true);
-      phrase.setFeature(Feature.FORM, Form.PRESENT_PARTICIPLE);
-    }
-    return phrase;
+    return visitOWLProperty(pe);
   }
 
   @Override
   public NLGElement visit(final OWLDataProperty pe) {
+    LOG.info("visit OWLDataProperty");
+    return visitOWLProperty(pe);
+  }
+
+  public NLGElement visitOWLProperty(final OWLProperty pe) {
     NLGElement phrase = null;
 
     final PropertyVerbalization verbal = propertyVerbalizer(pe);
