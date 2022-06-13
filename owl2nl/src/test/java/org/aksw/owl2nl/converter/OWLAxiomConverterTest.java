@@ -29,6 +29,7 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.animal;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.boy;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.child;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.dog;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.french;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.girl;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.homoSapien;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.human;
@@ -42,8 +43,10 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.lastNam
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.name;
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.numberOfChildren;
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.surname;
+import static org.aksw.owl2nl.converter.DataHelper.OWLNamedIndividualHelper.france;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.ancestorOf;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.aunt;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.birthPlace;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.brother;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.father;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.fatherOf;
@@ -52,6 +55,7 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasCh
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasDog;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasSSN;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.know;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.locatedIn;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.love;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.maleSibling;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.mother;
@@ -76,7 +80,40 @@ public class OWLAxiomConverterTest {
 
   protected final static OWLAxiomConverter axiomConverter = new OWLAxiomConverter();
 
+  @Test
+  public void testPaper() {
+    final Pair<String, String> pair = _testPaper();
+    Assert.assertEquals(pair.getLeft(), pair.getRight());
+  }
+
+  protected Pair<String, String> _testPaper() {
+    // French EquivalentTo Person and (birthPlace some (Place and (locatedIn some France)))
+    return Pair.of(//
+        // people whose birth place is a city that is located in France.
+        "Every french is a person whose birth place is a place that locates in France. ", //
+        axiomConverter.convert(//
+            df.getOWLEquivalentClassesAxiom(//
+                french, df.getOWLObjectIntersectionOf(//
+                    person, df.getOWLObjectSomeValuesFrom(//
+                        birthPlace, df.getOWLObjectIntersectionOf(//
+                            place, df.getOWLObjectHasValue(//
+                                locatedIn, france//
+                            )//
+                        )//
+                    )//
+                )//
+            )//
+        )//
+    );
+  }
+
+  /**
+   * <code>
+  
+  </code>
+   **/
   private void assertEquals(final Pair<String, String> pair) {
+    LOG.info(pair.getLeft());
     Assert.assertEquals(pair.getLeft(), pair.getRight());
   }
 
@@ -281,10 +318,9 @@ public class OWLAxiomConverterTest {
         ));
   }
 
-  // TODO: "Everything is something that has at most one father. ", //
   private Pair<String, String> testsOWLFunctionalObjectProperty() {
     return Pair.of(//
-        "Everything is something that has at most one father that is something. ", //
+        "An individual can have at most one value for father. ", //
         axiomConverter.convert(df.getOWLFunctionalObjectPropertyAxiom(father)));
   }
 
@@ -494,7 +530,8 @@ public class OWLAxiomConverterTest {
                     df.getOWLObjectComplementOf(//
                         df.getOWLObjectSomeValuesFrom(
                             OWLObjectPropertyHelper.has_for_active_principle,
-                            OWLClassHelper.activePrinciple)//
+                            OWLClassHelper.activePrinciple//
+                        )//
                     )//
                 )//
             )//

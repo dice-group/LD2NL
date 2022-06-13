@@ -2,7 +2,7 @@ package org.aksw.owl2nl.converter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -19,11 +19,13 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 public class DataHelper {
 
   protected static final Logger LOG = LogManager.getLogger(DataHelper.class);
-  static {
-    ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-  }
-
   protected final static OWLDataFactoryImpl df = new OWLDataFactoryImpl();
+
+  static {
+    // ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+
+    ToStringRenderer.getInstance().setRenderer(new ManchesterOWLSyntaxOWLObjectRendererImplExt());
+  }
 
   protected final static PrefixManager dpo = new DefaultPrefixManager(null, null, //
       "http://dbpedia.org/ontology/");
@@ -31,6 +33,8 @@ public class DataHelper {
       "http://dbpedia.org/resource/");
 
   public static class OWLClassHelper {
+
+    public static OWLClass french = df.getOWLClass("French", dpo);
     public static OWLClass place = df.getOWLClass("Place", dpo);
     public static OWLClass company = df.getOWLClass("Company", dpo);
     public static OWLClass person = df.getOWLClass("Person", dpo);
@@ -75,6 +79,8 @@ public class DataHelper {
     public static OWLObjectProperty worksFor = df.getOWLObjectProperty("worksFor", dpo);
     public static OWLObjectProperty hasChild = df.getOWLObjectProperty("hasChild", dpo);
     public static OWLObjectProperty ledBy = df.getOWLObjectProperty("isLedBy", dpo);
+    public static OWLObjectProperty locatedIn = df.getOWLObjectProperty("locatedIn", dpo);
+
     public static OWLObjectProperty friend = df.getOWLObjectProperty("friend", dpo);
     public static OWLObjectProperty plays = df.getOWLObjectProperty("play", dpo);
     public static OWLObjectProperty owner = df.getOWLObjectProperty("owner", dpo);
@@ -105,6 +111,7 @@ public class DataHelper {
   }
 
   public static class OWLNamedIndividualHelper {
+    public static OWLNamedIndividual france = df.getOWLNamedIndividual("France", dpr);
     public static OWLNamedIndividual leipzig = df.getOWLNamedIndividual("Leipzig_University", dpr);
     public static OWLNamedIndividual albert = df.getOWLNamedIndividual("Albert_Einstein", dpr);
     public static OWLNamedIndividual bob = df.getOWLNamedIndividual("bob", dpr);
