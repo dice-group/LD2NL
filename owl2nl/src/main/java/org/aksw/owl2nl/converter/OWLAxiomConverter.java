@@ -347,14 +347,22 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o).setPlural(true);
   }
 
-  /**
-   * SubClassOf(ObjectSomeValuesFrom(OPE owl:Thing) CE)
-   */
   @Override
   public void visit(final OWLObjectPropertyDomainAxiom axiom) {
     LOG.debug("Converting OWLObjectPropertyDomainAxiom");
 
-    axiom.asOWLSubClassOfAxiom().accept(this);
+    final String dataProperty = getPropertyVerbalizationText(//
+        axiom.getProperty().asOWLObjectProperty()//
+    );
+
+    final NPPhraseSpec s =
+        Phrases.getProperty(nlgFactory, Words.domain, dataProperty, Words.object);
+    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(//
+        ceConverter.asNLGElement(axiom.getDomain(), false)//
+    );
+
+    addClause(s, v, o);
   }
 
   @Override
@@ -367,8 +375,9 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final NPPhraseSpec s = Phrases.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
     final VPPhraseSpec v = Phrases.getBe(nlgFactory);
-    final NPPhraseSpec o = nlgFactory//
-        .createNounPhrase(axiom.getRange().accept(ceConverter.owlClassExpression));
+    final NPPhraseSpec o = nlgFactory.createNounPhrase(//
+        ceConverter.asNLGElement(axiom.getRange(), false)//
+    );
 
     addClause(s, v, o);
   }
@@ -406,13 +415,12 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o);
   }
 
-  /**
-   * SubClassOf(owl:Thing ObjectMaxCardinality(1 OPE))
-   */
   @Override
   public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
     LOG.debug("Converting OWLFunctionalObjectPropertyAxiom");
-    axiom.asOWLSubClassOfAxiom().accept(this);
+
+    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
+    visitOWLFunctionalPropertyAxiom(verbalizationText);
   }
 
   @Override
@@ -623,8 +631,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
     final VPPhraseSpec v = Phrases.getBe(nlgFactory);
-    final NLGElement o = axiom.getDomain().accept(ceConverter.owlClassExpression);
-
+    final NLGElement o = ceConverter.asNLGElement(axiom.getDomain(), false);
     s.setDeterminer(Words.the);
     s.setNoun(//
         Words.domain.concat(" ")//
@@ -667,12 +674,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o);
   }
 
-  @Override
-  public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
-    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
-
-    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
-
+  protected void visitOWLFunctionalPropertyAxiom(final String verbalizationText) {
     final NPPhraseSpec s = Phrases.getAnIndividual(nlgFactory);
     s.setFeature(Feature.PERSON, Person.FIRST);
 
@@ -704,6 +706,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     }
 
     addClause(s, v, o);
+  }
+
+  @Override
+  public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
+    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
+
+    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
+    visitOWLFunctionalPropertyAxiom(verbalizationText);
   }
 
   // #########################################################
@@ -904,14 +914,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
-    
+
     final Set<SWRLAtom> concequent = axiom.getHead();
     final Set<SWRLAtom> antecedent = axiom.getBody();
-    
+
     LOG.info("type {} ", axiom.getAxiomType());
-    
+
     LOG.info("type {} ", axiom.getSimplified());
-    
+
     LOG.info("head:{}\nbody:{}", concequent, antecedent);
     </code>
      */

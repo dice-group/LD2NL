@@ -359,10 +359,8 @@ public class OWLClassExpressionConverterTest {
 
   @Test
   public void testNegationB() {
-    // does not work for a company
     Assert.assertEquals(//
-        "something that does not works not for a company", //
-        // "everything that does not work for a company"
+        "something that works not for a company", //
         converter
             .convert(df.getOWLObjectComplementOf(df.getOWLObjectSomeValuesFrom(worksFor, company)))//
     );
@@ -371,7 +369,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void simpleNegation() {
     /* someone who does not work for a person or a company */
-    Assert.assertEquals("something that does not works not for a company or a person", //
+    Assert.assertEquals("something that works not for a company or a person", //
         converter.convert(df.getOWLObjectComplementOf(
             df.getOWLObjectSomeValuesFrom(worksFor, df.getOWLObjectUnionOf(person, company))))//
     );
@@ -393,7 +391,7 @@ public class OWLClassExpressionConverterTest {
             ce);
 
     Assert.assertEquals(
-        "something that something that does not works not for a company"
+        "something that something that works not for a company"
             + " or a person and that something whose birth place is Paderborn and that has"
             + " at most 500000 nr of inhabitants that are greater than or equals to 10000000",
         converter.convert(ce)//

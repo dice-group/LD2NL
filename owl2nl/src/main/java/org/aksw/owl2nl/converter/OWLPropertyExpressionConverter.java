@@ -29,21 +29,15 @@ import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
 import simplenlg.realiser.english.Realiser;
 
-/**
- * Converts property expression.
- */
 public class OWLPropertyExpressionConverter {
 
-  protected OWLPropertyExpressionVisitorEx<NLGElement> owlPropertyExpression;
+  protected OWLPropertyExpressionVisitorEx<NLGElement> propertyVisitor;
 
   private final Realiser realiser;
 
-  /**
-   * Converts property expression.
-   */
   public OWLPropertyExpressionConverter(final IInput in) {
     realiser = new Realiser(in.getLexicon());
-    owlPropertyExpression = new OWLPropertyExpressiontoNLGElement(//
+    propertyVisitor = new OWLPropertyExpressiontoNLGElement(//
         new NLGFactory(in.getLexicon()), in//
     );
   }
@@ -57,15 +51,6 @@ public class OWLPropertyExpressionConverter {
   }
 
   public NLGElement asNLGElement(final OWLPropertyExpression pe, final boolean isTransitive) {
-
-    final OWLPropertyExpressiontoNLGElement.Parameter parameter;
-    parameter = ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).new Parameter();
-    {
-      parameter.root = pe;
-      parameter.isTransitiveObjectProperty = isTransitive;
-      parameter.countTransitive = 0;
-      ((OWLPropertyExpressiontoNLGElement) owlPropertyExpression).setParameter(parameter);
-    }
-    return pe.accept(owlPropertyExpression);
+    return pe.accept(propertyVisitor);
   }
 }

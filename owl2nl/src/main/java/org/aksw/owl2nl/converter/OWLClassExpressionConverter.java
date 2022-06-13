@@ -32,7 +32,6 @@ import org.semanticweb.owlapi.model.OWLDataRangeVisitorEx;
 import org.semanticweb.owlapi.model.OWLIndividualVisitorEx;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
-import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 
@@ -46,9 +45,9 @@ import simplenlg.framework.NLGElement;
  */
 public class OWLClassExpressionConverter extends AConverter {
 
-  public OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
-  public OWLIndividualVisitorEx<NLGElement> owlIndividual;
-  public OWLDataRangeVisitorEx<NLGElement> owlDataRange;
+  protected OWLClassExpressionVisitorEx<NLGElement> owlClassExpression;
+  protected OWLIndividualVisitorEx<NLGElement> owlIndividual;
+  protected OWLDataRangeVisitorEx<NLGElement> owlDataRange;
 
   /**
    * Converts class expressions.
@@ -118,76 +117,85 @@ public class OWLClassExpressionConverter extends AConverter {
   }
 
   private OWLClassExpression rewrite(final OWLClassExpression ce, final boolean inIntersection) {
+    OWLClassExpression rtn = ce;
 
-    if (!ce.isAnonymous()) {
-      return ce;
-    } else {
-      LOG.debug("rewriting...");
+    if (ce.isAnonymous()) {
+      LOG.info("rewrite before: {}", rtn.toString());
+      rtn = rewriteAnonymous(ce, inIntersection);
+      LOG.info("rewrite after: {}", rtn.toString());
     }
-    LOG.info("rewrite before: {}", ce.toString());
+    return rtn;
+  }
 
-    if (ce instanceof OWLObjectOneOf) {
-      LOG.debug("OWLObjectOneOf");
-      //
-      // TODO: do something?
-      return ce;
-    } else if (ce instanceof OWLObjectIntersectionOf) {
+  private OWLClassExpression rewriteAnonymous(final OWLClassExpression ce,
+      final boolean inIntersection) {
+
+    OWLClassExpression rtn = ce;
+
+    if (ce instanceof OWLObjectIntersectionOf) {
       LOG.debug("OWLObjectIntersectionOf");
-      final Set<OWLClassExpression> operands = ((OWLObjectIntersectionOf) ce).getOperands();
-      final Set<OWLClassExpression> newOperands = Sets.newHashSet();
-
-      for (final OWLClassExpression operand : operands) {
-        newOperands.add(rewrite(operand, true));
-      }
-
-      if (!containsNamedClass(operands)) {
-        newOperands.add(df.getOWLThing());
-      }
-
-      return df.getOWLObjectIntersectionOf(newOperands);
+      rtn = rewriteAnonymousOWLObjectIntersectionOf(ce);
     } else if (ce instanceof OWLObjectUnionOf) {
       LOG.debug("OWLObjectUnionOf");
-      final Set<OWLClassExpression> operands = ((OWLObjectUnionOf) ce).getOperands();
-      final Set<OWLClassExpression> newOperands = Sets.newHashSet();
-
-      for (final OWLClassExpression operand : operands) {
-        newOperands.add(rewrite(operand));
-      }
-
-      return df.getOWLObjectUnionOf(newOperands);
+      rtn = rewriteAnonymousOWLObjectUnionOf(ce);
     } else if (ce instanceof OWLObjectSomeValuesFrom) {
       LOG.debug("OWLObjectSomeValuesFrom");
-      final OWLClassExpression newCe;
-      newCe = df.getOWLObjectSomeValuesFrom(((OWLObjectSomeValuesFrom) ce).getProperty(),
-          rewrite(((OWLObjectSomeValuesFrom) ce).getFiller()));
-
-      if (inIntersection) {
-        return newCe;
-      }
-      return df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
+      rtn = rewriteAnonymousOWLObjectSomeValuesFrom(ce, inIntersection);
     } else if (ce instanceof OWLObjectAllValuesFrom) {
       LOG.debug("OWLObjectAllValuesFrom");
-      final OWLClassExpression newCe;
-      newCe = df.getOWLObjectAllValuesFrom(((OWLObjectAllValuesFrom) ce).getProperty(),
-          rewrite(((OWLObjectAllValuesFrom) ce).getFiller()));
-
-      if (inIntersection) {
-        return newCe;
-      }
-      return df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
+      rtn = rewriteAnonymousOWLObjectAllValuesFrom(ce, inIntersection);
+    } else if (!inIntersection) {
+      rtn = df.getOWLObjectIntersectionOf(//
+          Sets.<OWLClassExpression>newHashSet(ce, df.getOWLThing())//
+      );
     }
-
-    //
-    if (inIntersection) {
-      return ce;
-    }
-
-    final Set<OWLClassExpression> operands;
-    operands = Sets.<OWLClassExpression>newHashSet(ce, df.getOWLThing());
-    final OWLObjectIntersectionOf rtn = df.getOWLObjectIntersectionOf(operands);
-
-    LOG.info("rewrite after: {}", rtn.toString());
-
     return rtn;
+  }
+
+  private OWLClassExpression rewriteAnonymousOWLObjectIntersectionOf(final OWLClassExpression ce) {
+
+    final Set<OWLClassExpression> operands = ((OWLObjectIntersectionOf) ce).getOperands();
+    final Set<OWLClassExpression> newOperands = Sets.newHashSet();
+
+    for (final OWLClassExpression operand : operands) {
+      newOperands.add(rewrite(operand, true));
+    }
+
+    if (!containsNamedClass(operands)) {
+      newOperands.add(df.getOWLThing());
+    }
+
+    return df.getOWLObjectIntersectionOf(newOperands);
+  }
+
+  private OWLClassExpression rewriteAnonymousOWLObjectUnionOf(final OWLClassExpression ce) {
+    final Set<OWLClassExpression> operands = ((OWLObjectUnionOf) ce).getOperands();
+    final Set<OWLClassExpression> newOperands = Sets.newHashSet();
+
+    for (final OWLClassExpression operand : operands) {
+      newOperands.add(rewrite(operand));
+    }
+
+    return df.getOWLObjectUnionOf(newOperands);
+  }
+
+  private OWLClassExpression rewriteAnonymousOWLObjectSomeValuesFrom(final OWLClassExpression ce,
+      final boolean inIntersection) {
+
+    final OWLClassExpression newCe =
+        df.getOWLObjectSomeValuesFrom(((OWLObjectSomeValuesFrom) ce).getProperty(),
+            rewrite(((OWLObjectSomeValuesFrom) ce).getFiller()));
+
+    return inIntersection ? newCe : df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
+  }
+
+  private OWLClassExpression rewriteAnonymousOWLObjectAllValuesFrom(final OWLClassExpression ce,
+      final boolean inIntersection) {
+
+    final OWLClassExpression newCe =
+        df.getOWLObjectAllValuesFrom(((OWLObjectAllValuesFrom) ce).getProperty(),
+            rewrite(((OWLObjectAllValuesFrom) ce).getFiller()));
+
+    return inIntersection ? newCe : df.getOWLObjectIntersectionOf(df.getOWLThing(), newCe);
   }
 }
