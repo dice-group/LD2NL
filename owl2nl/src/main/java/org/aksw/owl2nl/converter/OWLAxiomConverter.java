@@ -347,9 +347,6 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o).setPlural(true);
   }
 
-  /**
-   * SubClassOf(ObjectSomeValuesFrom(OPE owl:Thing) CE)
-   */
   @Override
   public void visit(final OWLObjectPropertyDomainAxiom axiom) {
     LOG.debug("Converting OWLObjectPropertyDomainAxiom");
@@ -418,13 +415,12 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o);
   }
 
-  /**
-   * SubClassOf(owl:Thing ObjectMaxCardinality(1 OPE))
-   */
   @Override
   public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
     LOG.debug("Converting OWLFunctionalObjectPropertyAxiom");
-    axiom.asOWLSubClassOfAxiom().accept(this);
+
+    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
+    visitOWLFunctionalPropertyAxiom(verbalizationText);
   }
 
   @Override
@@ -678,12 +674,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     addClause(s, v, o);
   }
 
-  @Override
-  public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
-    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
-
-    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
-
+  protected void visitOWLFunctionalPropertyAxiom(final String verbalizationText) {
     final NPPhraseSpec s = Phrases.getAnIndividual(nlgFactory);
     s.setFeature(Feature.PERSON, Person.FIRST);
 
@@ -715,6 +706,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     }
 
     addClause(s, v, o);
+  }
+
+  @Override
+  public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
+    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
+
+    final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
+    visitOWLFunctionalPropertyAxiom(verbalizationText);
   }
 
   // #########################################################
