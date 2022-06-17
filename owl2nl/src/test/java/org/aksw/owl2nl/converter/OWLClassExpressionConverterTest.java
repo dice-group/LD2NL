@@ -89,10 +89,6 @@ public class OWLClassExpressionConverterTest {
         "a person that has at least three children that a professor whose a woman",
         // TODO: pluralize!
         // a person who has at least three children who are professors and females
-
-        // a person who has at least three children who are professors and females
-        // class of all persons with 3 or more daughters who are professors
-
         converter.convert(//
             df.getOWLObjectIntersectionOf(person, df.getOWLObjectMinCardinality(3, hasChild,
                 df.getOWLObjectIntersectionOf(professor, woman))))//
