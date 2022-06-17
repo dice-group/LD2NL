@@ -662,6 +662,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
     final VPPhraseSpec v = Phrases.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(range.accept(ceConverter.owlDataRange));
+    o.setDeterminer(Words.a);
 
     s.setDeterminer(Words.the);
     s.setNoun(//
@@ -914,14 +915,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
-
+    
     final Set<SWRLAtom> concequent = axiom.getHead();
     final Set<SWRLAtom> antecedent = axiom.getBody();
-
+    
     LOG.info("type {} ", axiom.getAxiomType());
-
+    
     LOG.info("type {} ", axiom.getSimplified());
-
+    
     LOG.info("head:{}\nbody:{}", concequent, antecedent);
     </code>
      */
