@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.util.grammar.Grammar;
+import org.aksw.owl2nl.util.grammar.IGrammar;
 import org.aksw.owl2nl.util.grammar.Words;
 import org.aksw.triple2nl.nlp.stemming.PlingStemmer;
 import org.aksw.triple2nl.property.PropertyVerbalization;
@@ -89,9 +90,6 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 public class OWLClassExpressionToNLGElement extends AToNLGElement
     implements OWLClassExpressionVisitorEx<NLGElement> {
 
-  // holds parameter
-  protected Parameter parameter;
-
   /**
    * Holds parameters used in the OWLClassExpressionToNLGElement class.
    */
@@ -103,9 +101,10 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     public boolean plural;
   }
 
-  public void setParameter(final Parameter parameter) {
-    this.parameter = parameter;
-  }
+  // holds parameter
+  protected Parameter parameter;
+
+  protected IGrammar en = Grammar.getEN();
 
   protected OWLDataFactory df = new OWLDataFactoryImpl();
 
@@ -134,6 +133,10 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     this.converterOWLDataRange = converterOWLDataRange;
   }
 
+  public void setParameter(final Parameter parameter) {
+    this.parameter = parameter;
+  }
+
   /**
    *
    * @param ce
@@ -143,18 +146,18 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     final NPPhraseSpec nounPhrase;
     parameter.noun = true;
-    String lexicalForm = getLexicalForm(ce).toLowerCase();
 
+    String lexicalForm = getLexicalForm(ce).toLowerCase();
     if (lexicalForm.split(" ").length == 1) {
       lexicalForm = PlingStemmer.stem(lexicalForm);
     }
 
     if (parameter.isSubClassExpression) {
       if (ce.isOWLThing()) {
+
         final NLGElement word = nlgFactory.createWord(//
             parameter.modalDepth == 1 ? Words.everything : Words.something, LexicalCategory.NOUN//
         );
-
         word.setFeature(InternalFeature.NON_MORPH, true);
         nounPhrase = nlgFactory.createNounPhrase(word);
       } else {
@@ -184,22 +187,19 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     final NPPhraseSpec firstElement = (NPPhraseSpec) first.accept(this);
     phrase.setSubject(firstElement);
 
+    // is first a owl class and a person?
     boolean subjectIsPerson = false;
-    // is first a owl class?
     if (first.getClassExpressionType().getName().equals(ClassExpressionType.OWL_CLASS.getName())) {
-      final String subject = first.asOWLClass().toString();
-
-      if (Grammar.en.isPerson(subject.toLowerCase())) {
-
-        subjectIsPerson = true;
-      } else {
-        subjectIsPerson = false;
+      String realised = firstElement.getNoun().getRealisation();
+      if (realised == null || realised.trim().isEmpty()) {
+        realised = realiser.realise(firstElement).toString();
       }
-      LOG.debug("{} {} Person", subject, subjectIsPerson ? "is" : "is not");
-    } else {
-      // first is not a owl class?
+      if (realised == null || realised.trim().isEmpty()) {
+        LOG.warn("Could not get a label for: {}", firstElement.toString());
+      } else {
+        subjectIsPerson = en.isPerson(realised);
+      }
     }
-
     LOG.debug("operands: {}", operands.size());
     if (operands.size() >= 2) {
 
@@ -244,14 +244,14 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       final NLGElement el = operand.accept(this);
 
       if (parameter.noun) {
-        //
+
         final boolean isFillerOfOWLObjectSomeValuesFromAOWLThing = //
             operand instanceof OWLObjectSomeValuesFrom //
                 && ((OWLObjectSomeValuesFrom) operand).getFiller().isOWLThing();
 
         if (operand instanceof OWLObjectHasSelf) {
           if (subjectIsPerson) {
-            clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
+            clause.setFeature(Feature.COMPLEMENTISER, Words.who);
             clause.setVerbPhrase(el);
           } else {
             clause.setFeature(Feature.COMPLEMENTISER, Words.that);
@@ -617,6 +617,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
   private NLGElement processOCRn(final OWLObjectPropertyExpression property,
       final OWLClassExpression filler, final int cardinality, String modifier) {
 
+    LOG.debug("OWLObjectPropertyExpression ....");
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     modifier = modifier.concat(" ").concat(Words.number(cardinality));
@@ -678,12 +679,13 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
           verbalizationText = verbalizationText.concat(" ") + modifier;
           // stem the noun if card == 1
           String nounToken = tokens[1];
+          LOG.debug(tokens);
           if (cardinality == 1) {
             parameter.plural = false;
             nounToken = PlingStemmer.stem(nounToken);
           } else {
             parameter.plural = true;
-            nounToken = Grammar.en.plural(nounToken);
+            nounToken = en.plural(nounToken);
           }
           verbalizationText = verbalizationText.concat(" ") + nounToken;
           for (int i = 2; i < tokens.length; i++) {
@@ -707,7 +709,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-
+    LOG.debug("OWLObjectPropertyExpression finished.");
     return phrase;
   }
 
@@ -954,6 +956,13 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     return phrase;
   }
 
+  /**
+   * In case the given text starts with the word "have" or "has" it returns the token list otherwise
+   * an empty list.
+   *
+   * @param text
+   * @return
+   */
   private List<String> startsWithHave(final String text) {
     final List<String> tokens = new ArrayList<>(Arrays.asList(text.split(" ")));
     if (tokens.get(0).equals(Words.has) || tokens.get(0).equals(Words.have)) {
