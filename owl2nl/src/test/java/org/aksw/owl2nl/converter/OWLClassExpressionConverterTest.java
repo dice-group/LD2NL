@@ -74,7 +74,7 @@ public class OWLClassExpressionConverterTest {
   public void testSelf() {
 
     Assert.assertEquals(//
-        "a narcissistic person that loves oneself", //
+        "a narcissistic person who loves oneself", //
         // a narcissistic person is someone who loves himself.
         converter.convert(//
             df.getOWLObjectIntersectionOf(narcisticPerson, df.getOWLObjectHasSelf(love)))//
