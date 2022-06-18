@@ -39,7 +39,8 @@ public class DBPedia {
    * @return
    */
   public static boolean isPerson(final String word) {
-    return word == null ? false : readClassLabels().contains(word.trim().toLowerCase());
+    return word == null || word.trim().isEmpty() ? false
+        : readClassLabels().contains(word.trim().toLowerCase());
   }
 
   private static final Set<String> readClassLabels() {

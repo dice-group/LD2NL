@@ -5,9 +5,14 @@ import org.aksw.triple2nl.gender.DictionaryBasedGenderDetector;
 import org.aksw.triple2nl.gender.Gender;
 import org.aksw.triple2nl.gender.GenderDetector;
 import org.aksw.triple2nl.gender.TypeAwareGenderDetector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 
 public class English implements IGrammar {
+
+  protected static final Logger LOG = LogManager.getLogger(English.class);
+
   WordTypeDetector wtd = null;
   TypeAwareGenderDetector tagd = null;
 
@@ -28,7 +33,7 @@ public class English implements IGrammar {
   @Override
   public boolean isNoun(final String word) {
     initWTD();
-    return wtd.isNoun(word);
+    return wtd.isNoun(word) || isPerson(word);
   }
 
   // privates
@@ -51,17 +56,20 @@ public class English implements IGrammar {
   }
 
   @Override
-  public boolean isPerson(final String word) {
-    return isPersonA(word) || isPersonB(word);
+  public boolean isPerson(final String words) {
+    final boolean is = words == null || words.trim().isEmpty() ? false : _isPerson(words);
+    LOG.debug("A {} {} a person.", words, is ? "is" : "is not");
+    return is;
   }
 
-  protected boolean isPersonA(final String word) {
+  protected boolean _isPerson(final String words) {
     initTAGD();
-    return !tagd.getGender(word).equals(Gender.UNKNOWN);
-  }
-
-  protected boolean isPersonB(final String word) {
-    return DBPedia.isPerson(word);
+    for (final String word : words.split(" ")) {
+      if (!tagd.getGender(word).equals(Gender.UNKNOWN) || DBPedia.isPerson(word)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
