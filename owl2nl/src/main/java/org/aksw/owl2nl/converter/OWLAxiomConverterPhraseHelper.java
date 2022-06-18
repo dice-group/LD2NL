@@ -1,4 +1,4 @@
-package org.aksw.owl2nl.util.nlg;
+package org.aksw.owl2nl.converter;
 
 import org.aksw.owl2nl.util.grammar.Words;
 
@@ -12,7 +12,7 @@ import simplenlg.phrasespec.PPPhraseSpec;
 import simplenlg.phrasespec.SPhraseSpec;
 import simplenlg.phrasespec.VPPhraseSpec;
 
-public class Phrases {
+public class OWLAxiomConverterPhraseHelper {
 
   public static NPPhraseSpec getAnIndividual(final NLGFactory nlgFactory) {
     final NPPhraseSpec s = getIndividual(nlgFactory);
@@ -31,7 +31,6 @@ public class Phrases {
     s.setFeature(Feature.TENSE, Tense.PRESENT);
     s.setFeature(Feature.PERSON, Person.THIRD);
     s.setFeature(Feature.NUMBER, NumberAgreement.SINGULAR);
-
     return s;
   }
 

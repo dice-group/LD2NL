@@ -29,7 +29,6 @@ import org.aksw.owl2nl.converter.visitors.OWLClassExpressionToNLGElement;
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.data.OWL2NLInput;
 import org.aksw.owl2nl.util.grammar.Words;
-import org.aksw.owl2nl.util.nlg.Phrases;
 import org.aksw.triple2nl.property.PropertyVerbalization;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -220,7 +219,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting SubClassOf axiom: {}", axiom);
     addClause(//
         ceConverter.asNLGElement(axiom.getSubClass(), true), //
-        Phrases.getBe(nlgFactory), //
+        OWLAxiomConverterPhraseHelper.getBe(nlgFactory), //
         ceConverter.asNLGElement(axiom.getSuperClass())//
     ).getObject().setFeature(Feature.COMPLEMENTISER, null);
   }
@@ -328,7 +327,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
 
     final NPPhraseSpec s = getSubject(axiom);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.synonym);
     o.setPlural(true);
 
@@ -340,7 +339,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting OWLDisjointObjectPropertiesAxiom");
 
     final NPPhraseSpec s = getSubject(axiom);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.pairwiseDisjoint);
     o.setPlural(true);
 
@@ -356,8 +355,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     );
 
     final NPPhraseSpec s =
-        Phrases.getProperty(nlgFactory, Words.domain, dataProperty, Words.object);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+        OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.domain, dataProperty, Words.object);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(//
         ceConverter.asNLGElement(axiom.getDomain(), false)//
     );
@@ -373,8 +372,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
         axiom.getProperty().asOWLObjectProperty()//
     );
 
-    final NPPhraseSpec s = Phrases.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final NPPhraseSpec s = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(//
         ceConverter.asNLGElement(axiom.getRange(), false)//
     );
@@ -392,7 +391,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final String inverse = getPropertyVerbalizationText(axiom.getSecondProperty());
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase();
 
     s.setDeterminer(Words.the);
@@ -431,17 +430,17 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
         getPropertyVerbalizationText(axiom.getProperty().asOWLObjectProperty());
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase();
 
     { // If an individual
       s.setPreModifier(Words.iff);
-      s.setNoun(Phrases.getAnIndividual(nlgFactory));
+      s.setNoun(OWLAxiomConverterPhraseHelper.getAnIndividual(nlgFactory));
     }
 
     final VPPhraseSpec vp = nlgFactory.createVerbPhrase();
     {// with the X property
-      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, propertyText, Words.object);
+      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
       final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
       pp.setPreposition(Words.with);
       pp.setPostModifier(np);
@@ -469,7 +468,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
       then.setAdverb(Words.then);
       o.setComplement(then);
     }
-    final NPPhraseSpec in = Phrases.getIndividual(nlgFactory);
+    final NPPhraseSpec in = OWLAxiomConverterPhraseHelper.getIndividual(nlgFactory);
     { // this other individual
       in.setDeterminer(Words.thiss);
       in.setPreModifier(Words.other);
@@ -478,14 +477,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final VPPhraseSpec notConnect = nlgFactory.createVerbPhrase(Words.connect);
     { // is not connected with the X property
       notConnect.setFeature(Feature.TENSE, Tense.PAST);
-      final VPPhraseSpec is = Phrases.getBe(nlgFactory);
+      final VPPhraseSpec is = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
       is.setFeature(Feature.NEGATED, true);
       is.setPostModifier(notConnect);
       in.setPostModifier(is);
 
       // with the X property
       final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, propertyText, Words.object);
+      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
       with.setPreposition(Words.with);
       with.setPostModifier(np);
       notConnect.setPostModifier(with);
@@ -493,7 +492,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     { // to the individual
       final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = Phrases.getTheIndividual(nlgFactory);
+      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getTheIndividual(nlgFactory);
       pp.setPreposition(Words.to);
       pp.setPostModifier(np);
 
@@ -576,7 +575,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
 
-    addClause(subPropertyElement, Phrases.getBe(nlgFactory), superPropertyElement);
+    addClause(subPropertyElement, OWLAxiomConverterPhraseHelper.getBe(nlgFactory), superPropertyElement);
   }
 
   /**
@@ -586,7 +585,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
 
     final NPPhraseSpec s = getSubject(axiom);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.synonym);
 
     s.setPlural(true);
@@ -609,7 +608,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting OWLDisjointDataPropertiesAxiom");
 
     final NPPhraseSpec s = getSubject(axiom);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(Words.pairwiseDisjoint);
     o.setPlural(true);
 
@@ -630,7 +629,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     LOG.debug("Converting OWLDataPropertyDomainAxiom");
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NLGElement o = ceConverter.asNLGElement(axiom.getDomain(), false);
     s.setDeterminer(Words.the);
     s.setNoun(//
@@ -660,7 +659,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     );
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(range.accept(ceConverter.owlDataRange));
     o.setDeterminer(Words.a);
 
@@ -676,7 +675,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   }
 
   protected void visitOWLFunctionalPropertyAxiom(final String verbalizationText) {
-    final NPPhraseSpec s = Phrases.getAnIndividual(nlgFactory);
+    final NPPhraseSpec s = OWLAxiomConverterPhraseHelper.getAnIndividual(nlgFactory);
     s.setFeature(Feature.PERSON, Person.FIRST);
 
     final VPPhraseSpec v = nlgFactory.createVerbPhrase();
@@ -742,7 +741,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     {
       // if an individual
       s.setPreModifier(Words.iff);
-      s.setNoun(Phrases.getAnIndividual(nlgFactory));
+      s.setNoun(OWLAxiomConverterPhraseHelper.getAnIndividual(nlgFactory));
     }
 
     {
@@ -755,7 +754,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     }
 
     // with another individual
-    final NPPhraseSpec eee = Phrases.getIndividual(nlgFactory);
+    final NPPhraseSpec eee = OWLAxiomConverterPhraseHelper.getIndividual(nlgFactory);
     eee.setDeterminer(Words.with);
     eee.setPreModifier(Words.another);
     v.setPostModifier(eee);
@@ -809,7 +808,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
       then.setAdverb(Words.then);
       oo.setComplement(then);
     }
-    final NPPhraseSpec in = Phrases.getIndividual(nlgFactory);
+    final NPPhraseSpec in = OWLAxiomConverterPhraseHelper.getIndividual(nlgFactory);
     { // this other individual
       in.setDeterminer(Words.the);
       // in.setPreModifier(Words.other);
@@ -818,14 +817,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final VPPhraseSpec connect = nlgFactory.createVerbPhrase(Words.connect);
     { // is also connected by the X property
       connect.setFeature(Feature.TENSE, Tense.PAST);
-      final VPPhraseSpec is = Phrases.getBe(nlgFactory);
+      final VPPhraseSpec is = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
       is.setPostModifier(connect);
       connect.setPreModifier(Words.also);
       in.setPostModifier(is);
 
       // by the X property
       final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = Phrases.getProperty(nlgFactory, superProperty, Words.object);
+      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, superProperty, Words.object);
       with.setPreposition(Words.by);
       with.setPostModifier(np);
       connect.setPostModifier(with);
@@ -833,7 +832,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     { // with the other individual
       final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = Phrases.getTheIndividual(nlgFactory);
+      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getTheIndividual(nlgFactory);
       np.setPreModifier(Words.other);
       pp.setPreposition(Words.with);
       pp.setPostModifier(np);
@@ -893,7 +892,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     final OWLDataRange datarange = axiom.getDataRange();
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase(Words.datatype);
-    final VPPhraseSpec v = Phrases.getBe(nlgFactory);
+    final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(datarange.accept(ceConverter.owlDataRange));
 
     s.setPreModifier(Words.the);
@@ -1072,7 +1071,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * @return added clause or null
    */
   private SPhraseSpec addClause(final Object s, final Object v, final Object o) {
-    final SPhraseSpec c = Phrases.createClause(nlgFactory, s, v, o);
+    final SPhraseSpec c = OWLAxiomConverterPhraseHelper.createClause(nlgFactory, s, v, o);
     return clauses.add(c) ? c : null;
   }
 
