@@ -23,9 +23,9 @@ package org.aksw.owl2nl.converter.visitors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.owl2nl.data.IInput;
 import org.aksw.owl2nl.util.grammar.Grammar;
@@ -71,6 +71,7 @@ import simplenlg.features.Feature;
 import simplenlg.features.InternalFeature;
 import simplenlg.features.Person;
 import simplenlg.framework.CoordinatedPhraseElement;
+import simplenlg.framework.ElementCategory;
 import simplenlg.framework.LexicalCategory;
 import simplenlg.framework.NLGElement;
 import simplenlg.framework.NLGFactory;
@@ -143,6 +144,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLClass ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
 
     final NPPhraseSpec nounPhrase;
     parameter.noun = true;
@@ -176,112 +178,136 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     return nounPhrase;
   }
 
-  @Override
-  public NLGElement visit(final OWLObjectIntersectionOf ce) {
-    final List<OWLClassExpression> operands = getOperandsByPriority(ce);
-
-    // process first class
-    final SPhraseSpec phrase = nlgFactory.createClause();
-
-    final OWLClassExpression first = operands.remove(0);
-    final NPPhraseSpec firstElement = (NPPhraseSpec) first.accept(this);
-    phrase.setSubject(firstElement);
-
-    // is first a owl class and a person?
-    boolean subjectIsPerson = false;
-    if (first.getClassExpressionType().getName().equals(ClassExpressionType.OWL_CLASS.getName())) {
-      String realised = firstElement.getNoun().getRealisation();
-      if (realised == null || realised.trim().isEmpty()) {
-        realised = realiser.realise(firstElement).toString();
-      }
-      if (realised == null || realised.trim().isEmpty()) {
-        LOG.warn("Could not get a label for: {}", firstElement.toString());
-      } else {
-        subjectIsPerson = en.isPerson(realised);
-      }
+  private boolean isPerson(final NPPhraseSpec firstElement) {
+    // get noun realization
+    String realised = firstElement.getNoun().getRealisation();
+    if (realised == null || realised.trim().isEmpty()) {
+      realised = realiser.realise(firstElement).toString();
     }
-    LOG.debug("operands: {}", operands.size());
-    if (operands.size() >= 2) {
+    if (realised == null || realised.trim().isEmpty()) {
+      LOG.warn("Could not get a label for: {}", firstElement.toString());
+    } else {
+      return en.isPerson(realised);
+    }
+    LOG.debug("Realised subject: {}", realised);
+    return false;
+  }
 
-      final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
-
-      // process the classes
-      final Iterator<OWLClassExpression> iterator = operands.iterator();
-      final List<OWLClass> classes = new ArrayList<>();
-      while (iterator.hasNext()) {
-        final OWLClassExpression operand = iterator.next();
-        if (!operand.isAnonymous()) {
-          classes.add(operand.asOWLClass());
-          iterator.remove();
-        }
-      }
-      for (final OWLClass cls : classes) {
-        final SPhraseSpec clause = nlgFactory.createClause(Words.that, Words.be);
-        clause.getVerb().setFeature(Feature.PERSON, Person.THIRD);
-        clause.setObject(cls.accept(this));
-        cc.addCoordinate(clause);
-      }
-
-      // process the rest
-      for (final OWLClassExpression operand : operands) {
-        final SPhraseSpec clause = nlgFactory.createClause();
-        final NLGElement el = operand.accept(this);
-        if (parameter.noun) {
-          clause.setSubject(Words.whose);
-          clause.setVerbPhrase(el);
-        } else {
-          clause.setSubject(Words.that);
-          clause.setVerbPhrase(el);
-        }
-        cc.addCoordinate(clause);
-      }
-
-      phrase.setVerbPhrase(cc);
-    } else { // !(operands.size() >= 2)
-
-      final OWLClassExpression operand = operands.get(0);
+  private CoordinatedPhraseElement processOperands(final List<OWLClassExpression> operands,
+      final boolean isPerson) {
+    final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
+    // process all owl classes
+    final List<OWLClass> classes = operands.stream()//
+        .filter(o -> !o.isAnonymous())//
+        .map(o -> o.asOWLClass())//
+        .collect(Collectors.toList());
+    operands.removeAll(classes);
+    for (final OWLClass cls : classes) {
+      final SPhraseSpec clause = nlgFactory.createClause(//
+          isPerson ? Words.who : Words.that, //
+          Words.be//
+      );
+      clause.getVerb().setFeature(Feature.PERSON, Person.THIRD);
+      final NLGElement object = cls.accept(this);
+      clause.setObject(object);
+      cc.addCoordinate(clause);
+    }
+    // process the rest
+    for (final OWLClassExpression operand : operands) {
       final SPhraseSpec clause = nlgFactory.createClause();
-      final NLGElement el = operand.accept(this);
+      clause.setSubject(isPerson ? Words.who : Words.that);
+      clause.setVerbPhrase(operand.accept(this));
+      cc.addCoordinate(clause);
+    }
+    return cc;
+  }
 
-      if (parameter.noun) {
+  private SPhraseSpec processOperand(final List<OWLClassExpression> operands,
+      final boolean isPerson, final boolean isOWLClass) {
 
-        final boolean isFillerOfOWLObjectSomeValuesFromAOWLThing = //
-            operand instanceof OWLObjectSomeValuesFrom //
-                && ((OWLObjectSomeValuesFrom) operand).getFiller().isOWLThing();
+    final OWLClassExpression operand = operands.get(0);
+    final SPhraseSpec clause = nlgFactory.createClause();
+    final NLGElement el = operand.accept(this);
 
-        if (operand instanceof OWLObjectHasSelf) {
-          if (subjectIsPerson) {
-            clause.setFeature(Feature.COMPLEMENTISER, Words.who);
-            clause.setVerbPhrase(el);
-          } else {
-            clause.setFeature(Feature.COMPLEMENTISER, Words.that);
-            clause.setVerbPhrase(el);
-          }
-        } else if (isFillerOfOWLObjectSomeValuesFromAOWLThing) {
-          // clause.setFeature(Feature.COMPLEMENTISER, "that");
-          clause.setVerb(Words.have);
-          clause.setObject(el);
-        } else {
-          clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
+    if (parameter.noun || isOWLClass && isPerson) {
+
+      final boolean isOWLObjectHasSelf = operand instanceof OWLObjectHasSelf;
+      final boolean isOWLObjectAllValuesFrom = operand instanceof OWLObjectAllValuesFrom;
+      final boolean isOWLObjectSomeValuesFrom = operand instanceof OWLObjectSomeValuesFrom;
+
+      final boolean isFillerOWLThing = isOWLObjectSomeValuesFrom ? //
+          ((OWLObjectSomeValuesFrom) operand).getFiller().isOWLThing() : false;
+
+      if (isOWLObjectHasSelf || isOWLObjectAllValuesFrom) {
+        if (isOWLClass && isPerson) {
+          clause.setFeature(Feature.COMPLEMENTISER, Words.who);
           clause.setVerbPhrase(el);
-          if (parameter.plural) {
-            LOG.debug("How to make it plural here?");
-          }
+        } else {
+          clause.setFeature(Feature.COMPLEMENTISER, Words.that);
+          clause.setVerbPhrase(el);
+        }
+      } else if (isOWLObjectSomeValuesFrom && isFillerOWLThing) {
+        // clause.setFeature(Feature.COMPLEMENTISER, "that");
+        clause.setVerb(Words.have);
+        clause.setObject(el);
+      } else if (isOWLClass && isPerson) {
+        final ElementCategory cat = el.getChildren().get(0).getCategory();
+        if (cat.equals(PhraseCategory.NOUN_PHRASE)) {
+          clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
+        } else if (cat.equals(PhraseCategory.VERB_PHRASE)
+            || cat.equals(PhraseCategory.ADVERB_PHRASE)) {
+          clause.setFeature(Feature.COMPLEMENTISER, Words.who);
+        }
+        clause.setVerbPhrase(el);
+        if (parameter.plural) {
+          // How to make it plural here?
         }
       } else {
-        // not a noun
-        clause.setFeature(Feature.COMPLEMENTISER, Words.that);
+        clause.setFeature(Feature.COMPLEMENTISER, Words.whose);
         clause.setVerbPhrase(el);
       }
+    } else {
+      clause.setFeature(Feature.COMPLEMENTISER, Words.that);
+      clause.setVerbPhrase(el);
+    }
+    return clause;
+  }
+
+  @Override
+  public NLGElement visit(final OWLObjectIntersectionOf ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
+    final List<OWLClassExpression> operands = getOperandsByPriority(ce);
+
+    final OWLClassExpression first = operands.remove(0);
+    final NPPhraseSpec subject = (NPPhraseSpec) first.accept(this);
+    final boolean isOWLClass = isOWLClass(first);
+    final boolean isPerson = isOWLClass && isPerson(subject);
+
+    LOG.debug("# operands: {}, is {}a person, is {}a OWLClass, parameter {}is noun",
+        operands.size(), isPerson ? "" : "not ", isOWLClass ? "" : "not ",
+        parameter.noun ? "" : "not ");
+
+    final SPhraseSpec phrase = nlgFactory.createClause();
+    phrase.setSubject(subject);
+
+    if (operands.size() > 1) {
+      final CoordinatedPhraseElement cc = processOperands(operands, isPerson);
+      phrase.setVerbPhrase(cc);
+    } else {
+      final SPhraseSpec clause = processOperand(operands, isPerson, isOWLClass);
+      //
       phrase.setComplement(clause);
     }
 
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLObjectUnionOf ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     final List<OWLClassExpression> operands = getOperandsByPriority(ce);
 
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
@@ -296,6 +322,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectComplementOf ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     boolean neg = true;
     final OWLClassExpression operand = ce.getOperand();
     NLGElement verbal = operand.accept(this);
@@ -337,7 +365,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    * @param pos
    * @return true if pos is of the form "V* N*"
    */
-  private boolean isVN(final String pos) {
+  protected boolean isVN(final String pos) {
     final String[] posTags = pos.split(" ");
     if (posTags.length > 1 && posTags[0].startsWith("V") && posTags[1].startsWith("N")) {
       return true;
@@ -347,6 +375,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectSomeValuesFrom ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     parameter.modalDepth++;
     final OWLObjectPropertyExpression property = ce.getProperty();
     final OWLClassExpression filler = ce.getFiller();
@@ -461,7 +491,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectAllValuesFrom ce) {
-    LOG.debug("OWLObjectAllValuesFrom");
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
 
     parameter.modalDepth++;
     final SPhraseSpec phrase = nlgFactory.createClause();
@@ -544,13 +574,15 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     } else {
       // property is anonymous: not label exists, mostly for an inverse property
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLObjectHasValue ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     final OWLObjectPropertyExpression property = ce.getProperty();
@@ -581,25 +613,39 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
 
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLObjectMinCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processObjectCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.least));
   }
 
   @Override
   public NLGElement visit(final OWLObjectMaxCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processObjectCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.most));
   }
 
   @Override
   public NLGElement visit(final OWLObjectExactCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processObjectCardinalityRestriction(ce, Words.exactly);
   }
+
+  // #########################################################
+  // ################# helpers ###############################
+  // #########################################################
+
+  // protected
+
+  // private
 
   private NLGElement processObjectCardinalityRestriction(final OWLObjectCardinalityRestriction ce,
       final String modifier) {
@@ -610,7 +656,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     final NLGElement phrase = processOCRn(property, filler, cardinality, modifier);
 
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     return phrase;
   }
 
@@ -715,6 +761,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLObjectHasSelf ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     final SPhraseSpec phrase = nlgFactory.createClause();
     final OWLObjectPropertyExpression property = ce.getProperty();
     if (!property.isAnonymous()) {
@@ -726,12 +774,14 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       phrase.setObject(n);
 
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLObjectOneOf ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     // if it contains more than one value, i.e. oneOf(v1_,...,v_n) with n > 1, we rewrite it as
     // unionOf(oneOf(v_1),...,oneOf(v_n))
     final Set<OWLIndividual> individuals = ce.getIndividuals();
@@ -748,6 +798,8 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLDataSomeValuesFrom ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     parameter.modalDepth++;
     final SPhraseSpec phrase = nlgFactory.createClause();
 
@@ -778,13 +830,15 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLDataAllValuesFrom ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     parameter.modalDepth++;
     final SPhraseSpec phrase = nlgFactory.createClause();
 
@@ -828,13 +882,15 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
     parameter.modalDepth--;
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLDataHasValue ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     final SPhraseSpec phrase = nlgFactory.createClause();
 
     final OWLDataPropertyExpression property = ce.getProperty();
@@ -877,23 +933,29 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
 
     return phrase;
   }
 
   @Override
   public NLGElement visit(final OWLDataMinCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processDataCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.least));
   }
 
   @Override
   public NLGElement visit(final OWLDataExactCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processDataCardinalityRestriction(ce, Words.exactly);
   }
 
   @Override
   public NLGElement visit(final OWLDataMaxCardinality ce) {
+    LOG.debug("{} called.", ce.getClass().getSimpleName());
+
     return processDataCardinalityRestriction(ce, Words.at.concat(" ").concat(Words.most));
   }
 
@@ -951,7 +1013,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
     } else {
     }
-    LOG.debug(ce + " = " + realiser.realise(phrase));
+    LOG.debug("{} = {}", ce, realiser.realise(phrase));
 
     return phrase;
   }
@@ -995,5 +1057,10 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
    */
   protected List<OWLClassExpression> getOperandsByPriority(final OWLNaryBooleanClassExpression ce) {
     return ce.getOperandsAsList();
+  }
+
+  private boolean isOWLClass(final OWLClassExpression ce) {
+    return ClassExpressionType.OWL_CLASS.getName()//
+        .equals(ce.getClassExpressionType().getName());
   }
 }

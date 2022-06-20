@@ -120,9 +120,9 @@ public class OWLClassExpressionConverter extends AConverter {
     OWLClassExpression rtn = ce;
 
     if (ce.isAnonymous()) {
-      LOG.info("rewrite before: {}", rtn.toString());
+      LOG.debug("rewrite before: {}", rtn.toString());
       rtn = rewriteAnonymous(ce, inIntersection);
-      LOG.info("rewrite after: {}", rtn.toString());
+      LOG.debug("rewrite after: {}", rtn.toString());
     }
     return rtn;
   }

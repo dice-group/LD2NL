@@ -85,11 +85,10 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testQualifiedNumberRestrictions() {
     LOG.info("testQualifiedNumberRestrictions");
-    Assert.assertEquals(//
-        "a person that has at least three children that a professor whose a woman",
-        // TODO: pluralize!
+    Assert.assertEquals(// TODO:
+        // a person who has at least three children who are professor and woman
         // a person who has at least three children who are professors and females
-        converter.convert(//
+        "a person who has at least three children that a professor that a woman", converter.convert(//
             df.getOWLObjectIntersectionOf(person, df.getOWLObjectMinCardinality(3, hasChild,
                 df.getOWLObjectIntersectionOf(professor, woman))))//
     );
@@ -275,8 +274,6 @@ public class OWLClassExpressionConverterTest {
   public void testAllValuesFromB() {
     Assert.assertEquals(//
         "something whose nr of inhabitant is greater than or equals to 10000000", //
-        // final String expected = "everything whose nr of inhabitant is greater than or equal to
-        // 10000000"
         converter.convert(df.getOWLDataAllValuesFrom(nrOfInhabitants, minInclusive))//
     );
   }
@@ -287,7 +284,6 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testAllValuesFromC() {
     final String expected = "something that earns only greater than or equals to 10000000";
-    // final String expected = "everyone who earns greater than or equal to 10000000"
     Assert.assertEquals(expected,
         converter.convert(df.getOWLDataAllValuesFrom(earns, minInclusive)));
   }
@@ -319,7 +315,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testIntersectionA() {
     Assert.assertEquals(//
-        "a person that works for a company", //
+        "a person who works for a company", //
         converter.convert(
             df.getOWLObjectIntersectionOf(df.getOWLObjectSomeValuesFrom(worksFor, company), person))//
     );
@@ -388,7 +384,7 @@ public class OWLClassExpressionConverterTest {
 
     Assert.assertEquals(
         "something that something that works not for a company"
-            + " or a person and that something whose birth place is Paderborn and that has"
+            + " or a person and that something that birth place is Paderborn and that has"
             + " at most 500000 nr of inhabitants that are greater than or equals to 10000000",
         converter.convert(ce)//
     );
@@ -429,7 +425,7 @@ public class OWLClassExpressionConverterTest {
     // works for a company
     /* someone whose work place is paderborn and whose amount of salary is 40000 */
     Assert.assertEquals(//
-        "something that works place Paderborn and whose amount of salary is 40000", //
+        "something that works place Paderborn and that amount of salary is 40000", //
         converter.convert(//
             df.getOWLObjectIntersectionOf(df.getOWLDataHasValue(amountOfSalary, salary),
                 df.getOWLObjectHasValue(workPlace, paderborn)))//
@@ -449,9 +445,9 @@ public class OWLClassExpressionConverterTest {
   }
 
   public void testComplex() {
-    // a person that sings karaoke
+    // a person who sings karaoke
     Assert.assertEquals(//
-        "a person that sings karaoke", //
+        "a person who sings karaoke", //
         converter
             .convert(df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person))//
     );
@@ -459,56 +455,56 @@ public class OWLClassExpressionConverterTest {
 
   @Test
   public void testComplex8() {
-    // a person that sings karaoke or a person that sings jazz
+    // a person who sings karaoke or a person who sings jazz
     final OWLObjectUnionOf ce1 = df.getOWLObjectUnionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
 
-    // "a person that sings jazz or karaoke"
+    // "a person who sings jazz or karaoke"
     Assert.assertEquals(//
-        "a person that sings jazz or a person that sings karaoke", //
+        "a person who sings jazz or a person who sings karaoke", //
         converter.convert(ce1)//
     );
   }
 
   @Test
   public void testComplex7() {
-    // a person that sings karaoke or jazz
+    // a person who sings karaoke or jazz
     final OWLObjectIntersectionOf ce = df.getOWLObjectIntersectionOf(df.getOWLObjectIntersectionOf(
         df.getOWLObjectHasValue(sings, karaoke), df.getOWLObjectHasValue(sings, jazz)), person);
 
     // "that something that sings jazz and karaoke"
     Assert.assertEquals(//
-        "a person that something that sings jazz and that sings karaoke", //
+        "a person whose something that sings jazz and that sings karaoke", //
         converter.convert(ce)//
     );
   }
 
   @Test
   public void testComplex6() {
-    // a person that sings karaoke and a person that sings jazz
+    // a person who sings karaoke and a person who sings jazz
     final OWLObjectIntersectionOf ce2 = df.getOWLObjectIntersectionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, karaoke), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, jazz), person));
 
     Assert.assertEquals(//
-        "something that a person that sings jazz and that a person that sings karaoke", //
-        // "a person that sings jazz and karaoke"
+        "something that a person who sings jazz and that a person who sings karaoke", //
+        // "a person who sings jazz and karaoke"
         converter.convert(ce2)//
     );
   }
 
   @Test
   public void testComplex5() {
-    // a person that plays Cricket or a person that plays football or a person that plays hockey.
+    // a person who plays Cricket or a person who plays football or a person who plays hockey.
     final OWLObjectUnionOf ce = df.getOWLObjectUnionOf(
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, cricket), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, football), person),
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, hockey), person));
 
     Assert.assertEquals(//
-        "a person that plays cricket, a person that plays football or a person that plays hockey", //
-        // "a person that plays cricket, football or hockey"
+        "a person who plays cricket, a person who plays football or a person who plays hockey", //
+        // "a person who plays cricket, football or hockey"
         converter.convert(ce)//
     );
   }
@@ -524,8 +520,8 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, golf), person));
 
     Assert.assertEquals(//
-        "a person that plays cricket, a person that plays football, a person that plays golf, a person that plays hockey or a person that plays tennis", //
-        // "a person that plays cricket, football, golf, hockey or tennis"
+        "a person who plays cricket, a person who plays football, a person who plays golf, a person who plays hockey or a person who plays tennis", //
+        // "a person who plays cricket, football, golf, hockey or tennis"
         converter.convert(ce)//
     );
   }
@@ -539,8 +535,8 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, hiphop), person));
 
     Assert.assertEquals(//
-        "something that a person that sings hiphop, that a person that sings jazz, that a person that sings karaoke and that a person that sings rock",
-        // "a person that sings hiphop, jazz, karaoke and rock"
+        "something that a person who sings hiphop, that a person who sings jazz, that a person who sings karaoke and that a person who sings rock",
+        // "a person who sings hiphop, jazz, karaoke and rock"
         converter.convert(ce)//
     );
   }
@@ -554,8 +550,8 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(sings, rock), person), ce1);
 
     Assert.assertEquals(//
-        "something that a person that sings rock and that a person that sings jazz or a person that sings karaoke",
-        // "a person that sings rock and jazz or karaoke"
+        "something that a person who sings rock and that a person who sings jazz or a person who sings karaoke",
+        // "a person who sings rock and jazz or karaoke"
         converter.convert(ce)//
     );
   }
@@ -569,8 +565,8 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(plays, cricket), person), ce2);
 
     Assert.assertEquals(//
-        "a person that plays cricket or something that a person that sings jazz and that a person that sings karaoke",
-        // "a person that plays cricket or sings jazz and sings karaoke"
+        "a person who plays cricket or something that a person who sings jazz and that a person who sings karaoke",
+        // "a person who plays cricket or sings jazz and sings karaoke"
         converter.convert(ce)//
     );
   }

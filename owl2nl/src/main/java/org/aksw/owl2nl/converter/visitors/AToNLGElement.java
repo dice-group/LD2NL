@@ -94,7 +94,7 @@ abstract class AToNLGElement {
       // p.getPOSTags()
       LOG.info("new: {}", p.getVerbalizationText());
     }
-    LOG.info(p.getExpandedVerbalizationText());
+    LOG.debug(p.getExpandedVerbalizationText());
     return p;
   }
 

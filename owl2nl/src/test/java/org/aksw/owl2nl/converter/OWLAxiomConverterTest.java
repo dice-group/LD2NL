@@ -25,10 +25,12 @@ import static org.aksw.owl2nl.converter.DataHelper.df;
 import static org.aksw.owl2nl.converter.DataHelper.dpo;
 import static org.aksw.owl2nl.converter.DataHelper.minExclusive;
 import static org.aksw.owl2nl.converter.DataHelper.temperature;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.activePrinciple;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.animal;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.boy;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.child;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.dog;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.drug;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.french;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.girl;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.homoSapien;
@@ -37,7 +39,10 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.man;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.narcisticPerson;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.person;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.place;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.placebo;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.professor;
 import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.thing;
+import static org.aksw.owl2nl.converter.DataHelper.OWLClassHelper.university;
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.hasAge;
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.lastName;
 import static org.aksw.owl2nl.converter.DataHelper.OWLDataPropertyHelper.name;
@@ -54,6 +59,7 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.frien
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasChild;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasDog;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.hasSSN;
+import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.has_for_active_principle;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.know;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.locatedIn;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.love;
@@ -69,8 +75,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.aksw.owl2nl.converter.DataHelper.OWLClassHelper;
-import org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -449,6 +453,7 @@ public class OWLAxiomConverterTest {
 
   public Pair<String, String> testsOWLEquivalentClassesAxiomB() {
     return Pair.of(//
+        // "Every boy is a child who is a man. ", //
         "Every boy is a child whose a man. ", //
         axiomConverter.convert(
             df.getOWLEquivalentClassesAxiom(boy, df.getOWLObjectIntersectionOf(child, man)))//
@@ -457,25 +462,22 @@ public class OWLAxiomConverterTest {
 
   public Pair<String, String> testsOWLEquivalentClassesAxiomD() {
     return Pair.of(//
-        "Every professor is a person that works for an university. ", //
-        axiomConverter.convert(
-            df.getOWLEquivalentClassesAxiom(OWLClassHelper.professor, df.getOWLObjectIntersectionOf(
-                df.getOWLObjectSomeValuesFrom(worksFor, OWLClassHelper.university), person)))//
+        "Every professor is a person who works for an university. ", //
+        axiomConverter
+            .convert(df.getOWLEquivalentClassesAxiom(professor, df.getOWLObjectIntersectionOf(
+                df.getOWLObjectSomeValuesFrom(worksFor, university), person)))//
     );
   }
 
   public Pair<String, String> testsOWLEquivalentClassesAxiomE() {
     return Pair.of(//
         "Every placebo is a drug that has for active principle an active principle. ",
-        axiomConverter.convert(//
-            df.getOWLEquivalentClassesAxiom(//
-                DataHelper.OWLClassHelper.placebo, //
-                df.getOWLObjectIntersectionOf(//
-                    DataHelper.OWLClassHelper.drug, //
-                    df.getOWLObjectSomeValuesFrom(OWLObjectPropertyHelper.has_for_active_principle,
-                        OWLClassHelper.activePrinciple)//
-                )//
+        axiomConverter.convert(df.getOWLEquivalentClassesAxiom(//
+            placebo, df.getOWLObjectIntersectionOf(//
+                drug, //
+                df.getOWLObjectSomeValuesFrom(has_for_active_principle, activePrinciple)//
             )//
+        )//
         )//
     );
   }
@@ -483,19 +485,15 @@ public class OWLAxiomConverterTest {
   public Pair<String, String> testsOWLEquivalentClassesAxiomC() {
     return Pair.of(//
         "Every placebo is a drug that does not have for active principle an active principle. ",
-        axiomConverter.convert(//
-            df.getOWLEquivalentClassesAxiom(//
-                DataHelper.OWLClassHelper.placebo, //
-                df.getOWLObjectIntersectionOf(//
-                    DataHelper.OWLClassHelper.drug, //
-                    df.getOWLObjectComplementOf(//
-                        df.getOWLObjectSomeValuesFrom(
-                            OWLObjectPropertyHelper.has_for_active_principle,
-                            OWLClassHelper.activePrinciple//
-                        )//
+        axiomConverter.convert(df.getOWLEquivalentClassesAxiom(//
+            placebo, df.getOWLObjectIntersectionOf(//
+                drug, //
+                df.getOWLObjectComplementOf(//
+                    df.getOWLObjectSomeValuesFrom(has_for_active_principle, activePrinciple//
                     )//
                 )//
             )//
+        )//
         )//
     );
   }
@@ -556,7 +554,7 @@ public class OWLAxiomConverterTest {
   @Test
   public void testNothing() {
     final Pair<String, String> pair = Pair.of(//
-        "Every person without children is a person that has no child. ", //
+        "Every person without children is a person who has no child. ", //
         axiomConverter.convert(df.getOWLEquivalentClassesAxiom(//
             df.getOWLClass("personWithoutChildren", dpo), //
             df.getOWLObjectIntersectionOf(//
@@ -580,7 +578,6 @@ public class OWLAxiomConverterTest {
     Assert.assertEquals(pair.getLeft(), pair.getRight());
   }
 
-  // TODO: Every narcissistic person is a person who loves oneself.
   @Test
   public void testSelfB() {
     final Pair<String, String> pair = Pair.of(//
@@ -609,18 +606,18 @@ public class OWLAxiomConverterTest {
    * not explicit in the OWL 2 specification<br>
    * <code>
   public void testsSWRLRule() {
-
+  
     final Set<SWRLAtom> concequent = new HashSet<>();
     final Set<SWRLAtom> antecedent = new HashSet<>();
-
+  
     concequent.add(df.getSWRLClassAtom(person, df.getSWRLIndividualArgument(albert)));
     antecedent.add(df.getSWRLClassAtom(professor, df.getSWRLIndividualArgument(albert)));
-
+  
     final String text = axiomConverter.convert(df.getSWRLRule(antecedent, concequent));
-
+  
     LOG.info(text);
   }
-
+  
   public Pair<String, String> testsOWLSubPropertyChainOfAxiom() {
   }
   </code>

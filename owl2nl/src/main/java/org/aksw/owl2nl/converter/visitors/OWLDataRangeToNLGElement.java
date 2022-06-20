@@ -74,6 +74,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDatatype node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     return nlgFactory.createNounPhrase(getLexicalForm(node));
   }
 
@@ -86,6 +88,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDataOneOf node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     final Set<OWLLiteral> values = node.getValues();
     if (values.size() > 1) {
       final Set<OWLDataRange> operands = new HashSet<>(values.size());
@@ -107,6 +111,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDataComplementOf node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     final NLGElement nlgElement = node.getDataRange().accept(this);
     nlgElement.setFeature(Feature.NEGATED, true);
     return nlgElement;
@@ -120,6 +126,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDataIntersectionOf node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
     for (final OWLDataRange op : node.getOperands()) {
       cc.addCoordinate(op.accept(this));
@@ -135,6 +143,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDataUnionOf node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     final CoordinatedPhraseElement cc = nlgFactory.createCoordinatedPhrase();
     cc.setConjunction(Words.or);
     for (final OWLDataRange op : node.getOperands()) {
@@ -151,6 +161,8 @@ public class OWLDataRangeToNLGElement extends AToNLGElement
    */
   @Override
   public NLGElement visit(final OWLDatatypeRestriction node) {
+    LOG.debug("{} called.", node.getClass().getSimpleName());
+
     final Set<OWLFacetRestriction> facetRestrictions = node.getFacetRestrictions();
 
     final List<NPPhraseSpec> phrases = new ArrayList<>(facetRestrictions.size());

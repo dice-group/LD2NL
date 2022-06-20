@@ -47,10 +47,6 @@ public class OWLPropertyExpressionConverter {
   }
 
   public NLGElement asNLGElement(final OWLPropertyExpression pe) {
-    return asNLGElement(pe, false);
-  }
-
-  public NLGElement asNLGElement(final OWLPropertyExpression pe, final boolean isTransitive) {
     return pe.accept(propertyVisitor);
   }
 }

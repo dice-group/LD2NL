@@ -90,7 +90,6 @@ import simplenlg.features.Tense;
 import simplenlg.framework.CoordinatedPhraseElement;
 import simplenlg.framework.LexicalCategory;
 import simplenlg.framework.NLGElement;
-import simplenlg.framework.PhraseCategory;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.phrasespec.AdvPhraseSpec;
 import simplenlg.phrasespec.NPPhraseSpec;
@@ -145,59 +144,41 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     this(Lexicon.getDefaultLexicon());
   }
 
-  protected List<NLGElement> optimize(final List<NLGElement> clauses) {
-    if (clauses.size() < 2) {
-      return clauses;
-    }
-
-    // final PhraseSet pset = new PhraseSet(DiscourseFunction.SUBJECT, clauses.get(0));
-    // pset.addPhrases(clauses.subList(1, clauses.size()));
-
-    final List<NLGElement> reduced = reductionRule.apply(clauses);
-    if (!reduced.isEmpty() && reduced.size() < clauses.size()) {
-      return reduced;
-    }
-
-    return clauses;
-  }
-
-  protected void print(final List<NLGElement> clauses) {
-    for (final NLGElement clause : clauses) {
-      if (clause.getCategory().equals(PhraseCategory.CLAUSE)) {
-        final NLGElement subject = ((SPhraseSpec) clause).getSubject();
-        final NLGElement object = ((SPhraseSpec) clause).getObject();
-
-        LOG.trace("s: {} ", realiser.realise(subject).toString());
-        LOG.trace("o: {} ", realiser.realise(object).toString());
-      }
-    }
-  }
-
   /**
    * Converts the OWL axiom into natural language. Only logical axioms are supported, i.e.
    * declaration axioms and annotation axioms are not converted and <code>null</code> will be
    * returned instead.
    *
    * @param axiom the OWL axiom
-   * @return the natural language expression
+   * @return the natural language expression or null
    */
   public String convert(final OWLAxiom axiom) {
     LOG.debug("============================================");
 
     clauses.clear();
 
-    if (!axiom.isLogicalAxiom()) {
-      LOG.debug("Non logical axioms aren't supported yet.");
-      return null;
-    } else {
-      LOG.debug(axiom);
+    if (axiom.isLogicalAxiom()) {
+      LOG.debug("Axiom:{}", axiom);
+
       axiom.accept(this);
-      final StringBuilder sb = new StringBuilder();
-      for (final NLGElement clause : realiser.realise(optimize(clauses))) {
-        sb.append(StringUtils.capitalize(clause.toString())).append(". ");
-      }
-      return sb.toString();
+      return getOptimizedRealisation();
+    } else {
+      LOG.warn("Non logical axioms aren't supported yet.");
+      return null;
     }
+  }
+
+  /**
+   * Optimizes and realizes all clauses.
+   *
+   * @return nl
+   */
+  protected String getOptimizedRealisation() {
+    final StringBuilder sb = new StringBuilder();
+    for (final NLGElement clause : realiser.realise(optimize(clauses))) {
+      sb.append(StringUtils.capitalize(clause.getRealisation())).append(". ");
+    }
+    return sb.toString();
   }
 
   // #########################################################
@@ -216,7 +197,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLSubClassOfAxiom axiom) {
-    LOG.debug("Converting SubClassOf axiom: {}", axiom);
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     addClause(//
         ceConverter.asNLGElement(axiom.getSubClass(), true), //
         OWLAxiomConverterPhraseHelper.getBe(nlgFactory), //
@@ -238,9 +220,9 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLEquivalentClassesAxiom axiom) {
-    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
-    LOG.debug("Converting EquivalentClasses axiom: {}, {}", axiom, classExpressions);
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
+    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
     for (int i = 0; i < classExpressions.size(); i++) {
       for (int j = i + 1; j < classExpressions.size(); j++) {
         df.getOWLSubClassOfAxiom(//
@@ -266,9 +248,9 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDisjointClassesAxiom axiom) {
-    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
-    LOG.debug("Converting DisjointClasses axiom: {}, {}", axiom, classExpressions);
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
+    final List<OWLClassExpression> classExpressions = axiom.getClassExpressionsAsList();
     for (int i = 0; i < classExpressions.size(); i++) {
       for (int j = i + 1; j < classExpressions.size(); j++) {
         df.getOWLSubClassOfAxiom(//
@@ -295,7 +277,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDisjointUnionAxiom axiom) {
-    LOG.debug("Converting OWLDisjointUnionAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final Set<OWLClassExpression> classExpressions = axiom.getClassExpressions();
 
@@ -312,19 +294,18 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLSubObjectPropertyOfAxiom axiom) {
-    LOG.debug("Converting OWLSubObjectPropertyOf");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     addClause( //
-        peConverter.asNLGElement(axiom.getSubProperty(), true), //
+        peConverter.asNLGElement(axiom.getSubProperty()), //
         Words.imply, //
         peConverter.asNLGElement(axiom.getSuperProperty())//
-    ).getObject()// Do we need this?
-        .setFeature(Feature.COMPLEMENTISER, null);
+    ).getObject().setFeature(Feature.COMPLEMENTISER, null);
   }
 
   @Override
   public void visit(final OWLEquivalentObjectPropertiesAxiom axiom) {
-    LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final NPPhraseSpec s = getSubject(axiom);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
@@ -336,7 +317,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLDisjointObjectPropertiesAxiom axiom) {
-    LOG.debug("Converting OWLDisjointObjectPropertiesAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final NPPhraseSpec s = getSubject(axiom);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
@@ -348,14 +329,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLObjectPropertyDomainAxiom axiom) {
-    LOG.debug("Converting OWLObjectPropertyDomainAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String dataProperty = getPropertyVerbalizationText(//
         axiom.getProperty().asOWLObjectProperty()//
     );
 
-    final NPPhraseSpec s =
-        OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.domain, dataProperty, Words.object);
+    final NPPhraseSpec s = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.domain,
+        dataProperty, Words.object);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(//
         ceConverter.asNLGElement(axiom.getDomain(), false)//
@@ -366,13 +347,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLObjectPropertyRangeAxiom axiom) {
-    LOG.debug("Converting OWLObjectPropertyRangeAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String dataProperty = getPropertyVerbalizationText(//
         axiom.getProperty().asOWLObjectProperty()//
     );
 
-    final NPPhraseSpec s = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.range, dataProperty, Words.object);
+    final NPPhraseSpec s = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, Words.range,
+        dataProperty, Words.object);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
     final NPPhraseSpec o = nlgFactory.createNounPhrase(//
         ceConverter.asNLGElement(axiom.getRange(), false)//
@@ -385,7 +367,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLInverseObjectPropertiesAxiom axiom) {
-    LOG.debug("Converting OWLInverseObjectPropertiesAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String forward = getPropertyVerbalizationText(axiom.getFirstProperty());
     final String inverse = getPropertyVerbalizationText(axiom.getSecondProperty());
@@ -416,7 +398,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLFunctionalObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLFunctionalObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
     visitOWLFunctionalPropertyAxiom(verbalizationText);
@@ -424,7 +406,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLAsymmetricObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLAsymmetricObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String propertyText =
         getPropertyVerbalizationText(axiom.getProperty().asOWLObjectProperty());
@@ -440,7 +422,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
     final VPPhraseSpec vp = nlgFactory.createVerbPhrase();
     {// with the X property
-      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
+      final NPPhraseSpec np =
+          OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
       final PPPhraseSpec pp = nlgFactory.createPrepositionPhrase();
       pp.setPreposition(Words.with);
       pp.setPostModifier(np);
@@ -484,7 +467,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
       // with the X property
       final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
+      final NPPhraseSpec np =
+          OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, propertyText, Words.object);
       with.setPreposition(Words.with);
       with.setPostModifier(np);
       notConnect.setPostModifier(with);
@@ -506,7 +490,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLReflexiveObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLReflexiveObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -515,17 +500,20 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLSymmetricObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLSymmetricObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     df.getOWLSubObjectPropertyOfAxiom(//
         axiom.getProperty(), //
         axiom.getProperty().getInverseProperty()//
     ).accept(this);
   }
 
-  // SubObjectPropertyOf(ObjectPropertyChain(OPE OPE) OPE)
+  /**
+   * SubObjectPropertyOf(ObjectPropertyChain(OPE OPE) OPE)
+   */
   @Override
   public void visit(final OWLTransitiveObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLTransitiveObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final List<OWLObjectPropertyExpression> chain = new ArrayList<>();
     chain.add(axiom.getProperty());
@@ -538,7 +526,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLIrreflexiveObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLIrreflexiveObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -547,7 +536,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLInverseFunctionalObjectPropertyAxiom axiom) {
-    LOG.debug("Converting OWLInverseFunctionalObjectPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     axiom.asOWLSubClassOfAxiom().accept(this);
   }
 
@@ -565,24 +555,25 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLSubDataPropertyOfAxiom axiom) {
-    LOG.debug("Converting OWLSubDataPropertyOfAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final OWLDataPropertyExpression subProperty = axiom.getSubProperty();
     final OWLDataPropertyExpression superProperty = axiom.getSuperProperty();
 
-    final NLGElement subPropertyElement = peConverter.asNLGElement(subProperty, true); // why true?
+    final NLGElement subPropertyElement = peConverter.asNLGElement(subProperty);
     final NLGElement superPropertyElement = peConverter.asNLGElement(superProperty);
 
     superPropertyElement.setFeature(Feature.COMPLEMENTISER, null);
 
-    addClause(subPropertyElement, OWLAxiomConverterPhraseHelper.getBe(nlgFactory), superPropertyElement);
+    addClause(subPropertyElement, OWLAxiomConverterPhraseHelper.getBe(nlgFactory),
+        superPropertyElement);
   }
 
   /**
    */
   @Override
   public void visit(final OWLEquivalentDataPropertiesAxiom axiom) {
-    LOG.debug("Converting OWLEquivalentDataPropertiesAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final NPPhraseSpec s = getSubject(axiom);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
@@ -605,7 +596,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDisjointDataPropertiesAxiom axiom) {
-    LOG.debug("Converting OWLDisjointDataPropertiesAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final NPPhraseSpec s = getSubject(axiom);
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
@@ -626,7 +617,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDataPropertyDomainAxiom axiom) {
-    LOG.debug("Converting OWLDataPropertyDomainAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
     final VPPhraseSpec v = OWLAxiomConverterPhraseHelper.getBe(nlgFactory);
@@ -650,7 +641,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    */
   @Override
   public void visit(final OWLDataPropertyRangeAxiom axiom) {
-    LOG.debug("Converting OWLDataPropertyRangeAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final OWLDataRange range = axiom.getRange();
 
@@ -710,7 +701,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLFunctionalDataPropertyAxiom axiom) {
-    LOG.debug("Converting OWLFunctionalDataPropertyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final String verbalizationText = getPropertyVerbalizationText(axiom.getProperty());
     visitOWLFunctionalPropertyAxiom(verbalizationText);
@@ -730,6 +721,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   // ORDER!
   @Override
   public void visit(final OWLSubPropertyChainOfAxiom axiom) {
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+
     final NPPhraseSpec s = nlgFactory.createNounPhrase();
     final VPPhraseSpec v = nlgFactory.createVerbPhrase();
     final NPPhraseSpec o = nlgFactory.createNounPhrase();
@@ -824,7 +817,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
       // by the X property
       final PPPhraseSpec with = nlgFactory.createPrepositionPhrase();
-      final NPPhraseSpec np = OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, superProperty, Words.object);
+      final NPPhraseSpec np =
+          OWLAxiomConverterPhraseHelper.getProperty(nlgFactory, superProperty, Words.object);
       with.setPreposition(Words.by);
       with.setPostModifier(np);
       connect.setPostModifier(with);
@@ -848,7 +842,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
   // TODO:
   @Override
   public void visit(final OWLHasKeyAxiom axiom) {
-    LOG.debug("Converting OWLHasKeyAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final OWLClassExpression ce = axiom.getClassExpression();
     axiom.getDataPropertyExpressions();
@@ -886,7 +880,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLDatatypeDefinitionAxiom axiom) {
-    LOG.debug("Converting OWLDatatypeDefinitionAxiom");
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
 
     final OWLDatatype datatype = axiom.getDatatype();
     final OWLDataRange datarange = axiom.getDataRange();
@@ -910,7 +904,8 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final SWRLRule axiom) {
-    LOG.debug("Converting SWRLRule");
+    info(axiom);
+
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
@@ -933,37 +928,37 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLClassAssertionAxiom axiom) {
-    LOG.debug("OWLClassAssertionAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLObjectPropertyAssertionAxiom axiom) {
-    LOG.debug("OWLObjectPropertyAssertionAxiom ");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLDataPropertyAssertionAxiom axiom) {
-    LOG.debug("OWLDataPropertyAssertionAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLNegativeObjectPropertyAssertionAxiom axiom) {
-    LOG.debug("OWLNegativeObjectPropertyAssertionAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLNegativeDataPropertyAssertionAxiom axiom) {
-    LOG.debug("OWLNegativeDataPropertyAssertionAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLDifferentIndividualsAxiom axiom) {
-    LOG.debug("OWLDifferentIndividualsAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLSameIndividualAxiom axiom) {
-    LOG.debug("OWLSameIndividualAxiom");
+    info(axiom);
   }
 
   // #########################################################
@@ -972,32 +967,84 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
 
   @Override
   public void visit(final OWLAnnotationAssertionAxiom axiom) {
-    LOG.debug("OWLAnnotationAssertionAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLSubAnnotationPropertyOfAxiom axiom) {
-    LOG.debug("OWLSubAnnotationPropertyOfAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLAnnotationPropertyDomainAxiom axiom) {
-    LOG.debug("OWLAnnotationPropertyDomainAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLAnnotationPropertyRangeAxiom axiom) {
-    LOG.debug("OWLAnnotationPropertyRangeAxiom");
+    info(axiom);
   }
 
   @Override
   public void visit(final OWLDeclarationAxiom axiom) {
-    LOG.debug("OWLDeclarationAxiom");
+    info(axiom);
   }
 
   // #########################################################
   // ################# helpers ###############################
   // #########################################################
+
+  // protected
+
+  /**
+   * Prints information about unimplemented methods.
+   *
+   * @param axiom
+   */
+  protected void info(final Object axiom) {
+    LOG.debug("{} called.", axiom.getClass().getSimpleName());
+    LOG.warn("Not implemented yet.");
+  }
+
+  protected List<NLGElement> optimize(final List<NLGElement> clauses) {
+    if (clauses.size() < 2) {
+      return clauses;
+    }
+
+    // final PhraseSet pset = new PhraseSet(DiscourseFunction.SUBJECT, clauses.get(0));
+    // pset.addPhrases(clauses.subList(1, clauses.size()));
+
+    final List<NLGElement> reduced = reductionRule.apply(clauses);
+    if (!reduced.isEmpty() && reduced.size() < clauses.size()) {
+      return reduced;
+    }
+
+    return clauses;
+  }
+
+  /**
+   * <code>
+    protected void print(final List<NLGElement> clauses) {
+      for (final NLGElement clause : clauses) {
+        if (clause.getCategory().equals(PhraseCategory.CLAUSE)) {
+          final NLGElement subject = ((SPhraseSpec) clause).getSubject();
+          final NLGElement object = ((SPhraseSpec) clause).getObject();
+  
+          LOG.trace("s: {} ", realiser.realise(subject).toString());
+          LOG.trace("o: {} ", realiser.realise(object).toString());
+        }
+      }
+    }
+  </code>
+   */
+
+  // private
+
+  /**
+   *
+   * @param axiom
+   * @return
+   */
   private NPPhraseSpec getSubject(final OWLPropertyAxiom axiom) {
 
     final CoordinatedPhraseElement coo = nlgFactory.createCoordinatedPhrase();
@@ -1075,10 +1122,20 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     return clauses.add(c) ? c : null;
   }
 
+  /**
+   *
+   * @param p
+   * @return
+   */
   private PropertyVerbalization getPropertyVerbalization(final OWLPropertyExpression p) {
     return ((OWLClassExpressionToNLGElement) ceConverter.owlClassExpression).propertyVerbalizer(p);
   }
 
+  /**
+   *
+   * @param p
+   * @return
+   */
   private String getPropertyVerbalizationText(final OWLPropertyExpression p) {
     return getPropertyVerbalization(p).getVerbalizationText();
   }

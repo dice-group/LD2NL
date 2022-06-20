@@ -36,28 +36,6 @@ import simplenlg.framework.NLGFactory;
 
 public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     implements OWLPropertyExpressionVisitorEx<NLGElement> {
-
-  // // holds parameter
-  // protected Parameter parameter = new Parameter();
-  //
-  // /**
-  // * Holds parameters used in the OWLPropertyExpressiontoNLGElement class.
-  // */
-  // public class Parameter2 {
-  //
-  // public OWLPropertyExpression root;
-  //
-  // // True if the transitive object property is getting called
-  // public boolean isTransitiveObjectProperty = false;
-  //
-  // // Counts transitive object property as it requires 3 different subject-object combinations
-  // public int countTransitive = 0;
-  // }
-  //
-  // public void setParameter(final Parameter parameter) {
-  // this.parameter = parameter;
-  // }
-
   /**
    * OWLPropertyExpressiontoNLGElement constructor.
    *
@@ -68,40 +46,53 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
     super(nlgFactory, input);
   }
 
+  /**
+   * Operation of the OWLAnnotationProperty is not supported yet!
+   */
   @Override
-  public NLGElement visit(final OWLAnnotationProperty owlAnnotationProperty) {
+  public NLGElement visit(final OWLAnnotationProperty ap) {
     throw new UnsupportedOperationException(
-        "Convertion of OWLAnnotationProperty not supported yet!");
+        "Operation of the OWLAnnotationProperty is not supported yet!");
   }
 
+  /**
+   * Gets the inverse of the given OWLObjectInverseOf object and calls its to accept this visitor.
+   */
   @Override
-  public NLGElement visit(final OWLObjectInverseOf owlObjectInverseOf) {
-    return owlObjectInverseOf.getInverse().accept(this);
+  public NLGElement visit(final OWLObjectInverseOf oio) {
+    LOG.debug("{} called.", oio.getClass().getSimpleName());
+    return oio.getInverse().accept(this);
   }
 
   @Override
   public NLGElement visit(final OWLObjectProperty pe) {
-    LOG.info("visit OWLObjectProperty");
+    LOG.debug("{} called.", pe.getClass().getSimpleName());
     return visitOWLProperty(pe);
   }
 
   @Override
   public NLGElement visit(final OWLDataProperty pe) {
-    LOG.info("visit OWLDataProperty");
+    LOG.debug("{} called.", pe.getClass().getSimpleName());
     return visitOWLProperty(pe);
   }
 
-  public NLGElement visitOWLProperty(final OWLProperty pe) {
-    NLGElement phrase = null;
+  protected NLGElement visitOWLProperty(final OWLProperty pe) {
 
     final PropertyVerbalization verbal = propertyVerbalizer(pe);
     final String verbalizationText = verbal.getVerbalizationText();
+
+    NLGElement phrase = null;
     if (verbal.isNounType()) {
       phrase = nlgFactory.createNounPhrase(getLexicalForm(pe));
     } else if (verbal.isVerbType()) {
       phrase = nlgFactory.createVerbPhrase(verbalizationText);
       phrase.setFeature(Feature.FORM, Form.PRESENT_PARTICIPLE);
+    } else {
+      LOG.warn("verbal type not found!");
     }
+    LOG.debug("Verbal:\"{}\" type:{}, tense:{}", //
+        verbalizationText, verbal.getVerbalizationType().name(), verbal.getTense().name()//
+    );
     return phrase;
   }
 }

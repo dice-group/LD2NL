@@ -42,11 +42,13 @@ public class OWLIndividualToNLGElement extends AToNLGElement
 
   @Override
   public NLGElement visit(final OWLNamedIndividual individual) {
+    LOG.debug("{} called.", individual.getClass().getSimpleName());
     return nlgFactory.createNounPhrase(getLexicalForm(individual));
   }
 
   @Override
   public NLGElement visit(final OWLAnonymousIndividual individual) {
+    LOG.debug("{} called.", individual.getClass().getSimpleName());
     throw new UnsupportedOperationException(
         "Convertion of anonymous individuals not supported yet!");
   }
