@@ -77,7 +77,9 @@ abstract class AToNLGElement {
    * @return PropertyVerbalization
    */
   public PropertyVerbalization propertyVerbalizer(final OWLPropertyExpression property) {
+
     final String l = getLexicalFormFromOntology(property);
+    LOG.debug(l);
     IRI iri = null;
     if (property.isDataPropertyExpression()) {
       iri = ((OWLDataPropertyExpression) property)//
@@ -92,10 +94,19 @@ abstract class AToNLGElement {
       // TODO: update the rest after setting a new text?
       // p.getTense()
       // p.getPOSTags()
-      LOG.info("new: {}", p.getVerbalizationText());
+      LOG.debug("new: {}", p.getVerbalizationText());
     }
     LOG.debug(p.getExpandedVerbalizationText());
     return p;
+  }
+
+  /**
+   *
+   * @param propertyVerbalization
+   * @return
+   */
+  public String propertyVerbalizerText(final PropertyVerbalization propertyVerbalization) {
+    return propertyVerbalization.getExpandedVerbalizationText();
   }
 
   /**

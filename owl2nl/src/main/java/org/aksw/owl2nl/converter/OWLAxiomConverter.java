@@ -909,14 +909,14 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
     /**
      * not explicit in the OWL 2 specification<br>
      * <code>
-    
+
     final Set<SWRLAtom> concequent = axiom.getHead();
     final Set<SWRLAtom> antecedent = axiom.getBody();
-    
+
     LOG.info("type {} ", axiom.getAxiomType());
-    
+
     LOG.info("type {} ", axiom.getSimplified());
-    
+
     LOG.info("head:{}\nbody:{}", concequent, antecedent);
     </code>
      */
@@ -1029,7 +1029,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
         if (clause.getCategory().equals(PhraseCategory.CLAUSE)) {
           final NLGElement subject = ((SPhraseSpec) clause).getSubject();
           final NLGElement object = ((SPhraseSpec) clause).getObject();
-  
+
           LOG.trace("s: {} ", realiser.realise(subject).toString());
           LOG.trace("o: {} ", realiser.realise(object).toString());
         }
@@ -1137,6 +1137,7 @@ public class OWLAxiomConverter extends AConverter implements OWLAxiomVisitor {
    * @return
    */
   private String getPropertyVerbalizationText(final OWLPropertyExpression p) {
-    return getPropertyVerbalization(p).getVerbalizationText();
+    return ((OWLClassExpressionToNLGElement) ceConverter.owlClassExpression)
+        .propertyVerbalizerText(getPropertyVerbalization(p));
   }
 }

@@ -386,7 +386,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     if (!property.isAnonymous()) {
 
       final PropertyVerbalization verbal = propertyVerbalizer(property);
-      String verbalText = verbal.getExpandedVerbalizationText();
+      String verbalText = propertyVerbalizerText(verbal);
 
       if (verbal.isNounType()) {
         LOG.debug("property is noun POS: {}", verbal.getPOSTags());
@@ -502,7 +502,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     if (!property.isAnonymous()) {
       LOG.debug(property.toString());
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
+      String verbalizationText = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase =
             nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
@@ -590,7 +590,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      final String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
+      final String verbalizationText = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase =
             nlgFactory.createNounPhrase(PlingStemmer.stem(verbalizationText));
@@ -671,7 +671,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     if (!property.isAnonymous()) {
 
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      String verbalizationText = propertyVerbalization.getExpandedVerbalizationText();
+      String verbalizationText = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
 
         final NLGElement word = nlgFactory.createWord(PlingStemmer.stem(//
@@ -770,7 +770,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       final NLGElement x = nlgFactory.createWord(Words.oneself, LexicalCategory.ADVERB);
       final NPPhraseSpec n = nlgFactory.createNounPhrase();
       n.setNoun(x);
-      phrase.setVerb(propertyVerbalizer(property).getExpandedVerbalizationText());
+      phrase.setVerb(propertyVerbalizerText(propertyVerbalizer(property)));
       phrase.setObject(n);
 
     }
@@ -814,7 +814,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
       }
 
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      final String t = propertyVerbalization.getExpandedVerbalizationText();
+      final String t = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(PlingStemmer.stem(t));
         phrase.setSubject(propertyNounPhrase);
@@ -847,7 +847,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      final String t = propertyVerbalization.getExpandedVerbalizationText();
+      final String t = propertyVerbalizerText(propertyVerbalization);
 
       if (propertyVerbalization.isNounType()) {
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(PlingStemmer.stem(t));
@@ -901,7 +901,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
       // final String verbalizationText = propertyVerbalization.getVerbalizationText();
-      final String t = propertyVerbalization.getExpandedVerbalizationText();
+      final String t = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
         // verbalizationText = PlingStemmer.stem(verbalizationText);
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(t);
@@ -970,7 +970,7 @@ public class OWLClassExpressionToNLGElement extends AToNLGElement
 
     if (!property.isAnonymous()) {
       final PropertyVerbalization propertyVerbalization = propertyVerbalizer(property);
-      final String t = propertyVerbalization.getExpandedVerbalizationText();
+      final String t = propertyVerbalizerText(propertyVerbalization);
       if (propertyVerbalization.isNounType()) {
         final NLGElement word = nlgFactory.createWord(PlingStemmer.stem(t), LexicalCategory.NOUN);
         final NPPhraseSpec propertyNounPhrase = nlgFactory.createNounPhrase(word);

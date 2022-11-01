@@ -79,7 +79,8 @@ public class OWLPropertyExpressiontoNLGElement extends AToNLGElement
   protected NLGElement visitOWLProperty(final OWLProperty pe) {
 
     final PropertyVerbalization verbal = propertyVerbalizer(pe);
-    final String verbalizationText = verbal.getVerbalizationText();
+
+    final String verbalizationText = propertyVerbalizerText(verbal);
 
     NLGElement phrase = null;
     if (verbal.isNounType()) {
