@@ -1,3 +1,1 @@
-#moduleName=owl2nl
-
-mvn -T 1C clean install -am
+mvn -T 1C clean compile install -am
