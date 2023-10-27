@@ -1,10 +1,12 @@
 package org.aksw.owl2nl.pipeline.ui;
 
 import java.nio.file.Paths;
+import java.util.Map;
 import org.aksw.owl2nl.pipeline.Pipeline;
 import org.aksw.owl2nl.pipeline.data.input.IRAKIInput.Type;
 import org.aksw.owl2nl.pipeline.data.input.RAKIInput;
 import org.aksw.owl2nl.pipeline.data.output.IOutput;
+import org.aksw.owl2nl.pipeline.data.output.OutputJavaObjects;
 import org.aksw.owl2nl.pipeline.data.output.OutputJsonTrainingData;
 import org.aksw.owl2nl.pipeline.data.output.OutputTerminal;
 import org.aksw.owl2nl.pipeline.io.RakiIOTest;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import simplenlg.lexicon.Lexicon;
 
 public class RAKICommandLineInterfaceTest {
@@ -85,6 +88,29 @@ public class RAKICommandLineInterfaceTest {
     Assert.assertFalse(ja.isEmpty());
     Assert.assertTrue(ja.length() == 3);
     String s = ja.toString();
+    Assert.assertTrue(s.contains("Every man is a human."));
+    Assert.assertTrue(s.contains("The range of the has children object property is a human."));
+    Assert.assertTrue(s.contains("The domain of the has children object property is a human."));
+  }
+
+  /**
+   * Test Java Map output with labels from the ontology
+   */
+  @Test
+  public void testOutputJavaObjects() {
+
+    IOutput<Map<OWLAxiom, String>> out = new OutputJavaObjects();
+    run(out);
+
+    Map<OWLAxiom, String> map = out.getResults();
+    map.forEach((k, v) -> {
+      LOG.info(k.toString() + ": " + v);
+    });
+
+    Assert.assertNotNull(map);
+    Assert.assertFalse(map.isEmpty());
+    Assert.assertTrue(map.size() == 3);
+    String s = map.toString();
     Assert.assertTrue(s.contains("Every man is a human."));
     Assert.assertTrue(s.contains("The range of the has children object property is a human."));
     Assert.assertTrue(s.contains("The domain of the has children object property is a human."));
