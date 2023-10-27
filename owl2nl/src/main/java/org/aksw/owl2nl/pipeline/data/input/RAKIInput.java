@@ -23,21 +23,18 @@ abstract class AInputExtended extends AInput {
   Path axiomsFile;
 
   @Override
-  public IInput setOntology(final IRI ontology) {
-    try {
-      super.setOntology(ontology);
+  public IInput setOntology(final IRI ontology)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
+    super.setOntology(ontology);
 
-      final File file = new File(ontology.getShortForm());
-      OWLManager.createOWLOntologyManager().saveOntology(owlOntology, IRI.create(file.toURI()));
-      ontologyFile = file.toPath();
-    } catch (final OWLOntologyStorageException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-    }
+    final File file = new File(ontology.getShortForm());
+    owlOntology.saveOntology(IRI.create(file.toURI()));
+    ontologyFile = file.toPath();
     return this;
   }
 
   @Override
-  public IInput setOntology(final Path ontology) {
+  public IInput setOntology(final Path ontology) throws OWLOntologyCreationException {
     ontologyFile = ontology;
     return super.setOntology(ontology);
   }
