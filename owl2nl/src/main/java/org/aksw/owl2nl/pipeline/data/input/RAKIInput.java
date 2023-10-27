@@ -3,15 +3,14 @@ package org.aksw.owl2nl.pipeline.data.input;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Set;
-
 import org.aksw.owl2nl.data.AInput;
 import org.aksw.owl2nl.data.IInput;
+import org.aksw.owl2nl.pipeline.io.RakiIO;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDFS;
-import org.aksw.owl2nl.pipeline.io.RakiIO;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;

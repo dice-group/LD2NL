@@ -21,7 +21,7 @@ public class RakiIO {
   protected static final Logger LOG = LogManager.getLogger(RakiIO.class);
 
   public static synchronized Model readRDFXML(final String file) {
-    try {
+    try { 
       return ModelFactory.createDefaultModel().read(
           new ByteArrayInputStream(Files.readAllBytes(Paths.get(file))), Lang.RDFXML.getName());
     } catch (final IOException e) {

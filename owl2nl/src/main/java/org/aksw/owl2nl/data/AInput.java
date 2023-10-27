@@ -21,12 +21,10 @@
 package org.aksw.owl2nl.data;
 
 import java.nio.file.Path;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
 import simplenlg.lexicon.Lexicon;
 
 public abstract class AInput implements IInput {
@@ -34,13 +32,11 @@ public abstract class AInput implements IInput {
   protected Lexicon lexicon = Lexicon.getDefaultLexicon();
   protected OWLOntology owlOntology = null;
 
-  @Deprecated
   protected OWLOntology loadOntology(final Path path) {
     try {
       return OWLManager//
           .createOWLOntologyManager()//
           .loadOntologyFromOntologyDocument(path.toFile());
-      // .loadOntology(IRI.create(path.toFile()));
     } catch (final OWLOntologyCreationException e) {
       LOG.error(e.getLocalizedMessage(), e);
       return null;
@@ -64,7 +60,6 @@ public abstract class AInput implements IInput {
     return this;
   }
 
-  @Deprecated
   @Override
   public IInput setOntology(final Path ontology) {
     owlOntology = loadOntology(ontology);

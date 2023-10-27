@@ -67,6 +67,10 @@
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.dllearner</groupId>
+					<artifactId>components-core</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>xerces</groupId>
 					<artifactId>xercesImpl</artifactId>
 				</exclusion>
@@ -84,21 +88,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-			<version>3.12.0</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.intellij</groupId>
-			<artifactId>annotations</artifactId>
-			<version>7.0.3</version>
-		</dependency>
-		<!-- <dependency> <groupId>com.github.sebischair</groupId> <artifactId>SimpleNLG-DE</artifactId>
-			<version>1.1</version> </dependency> -->
+		<!-- <dependency> <groupId>com.github.sebischair</groupId>
+		<artifactId>SimpleNLG-DE</artifactId>
+			<version>1.1</version> </dependency>-->
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>

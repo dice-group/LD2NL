@@ -1,13 +1,11 @@
 package org.aksw.owl2nl.pipeline.ui;
 
 import java.nio.file.Paths;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.aksw.owl2nl.pipeline.Pipeline;
 import org.aksw.owl2nl.pipeline.data.input.RAKIInput;
 import org.aksw.owl2nl.pipeline.data.output.OutputJsonTrainingData;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import gnu.getopt.Getopt;
 
 public class RAKICommandLineInterface {

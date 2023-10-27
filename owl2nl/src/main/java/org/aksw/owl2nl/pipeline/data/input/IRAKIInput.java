@@ -1,7 +1,6 @@
 package org.aksw.owl2nl.pipeline.data.input;
 
 import java.nio.file.Path;
-
 import org.aksw.owl2nl.data.IInput;
 import org.semanticweb.owlapi.model.IRI;
 

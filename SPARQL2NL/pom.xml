@@ -216,11 +216,11 @@
 						<id>download-files</id>
 						<phase>process-resources</phase>
 						<configuration>
-						<target>
-							<ant antfile="ant.xml">
-								<target name="go"/>
-							</ant>
-						</target>
+							<target>
+								<ant antfile="ant.xml">
+									<target name="go" />
+								</ant>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
