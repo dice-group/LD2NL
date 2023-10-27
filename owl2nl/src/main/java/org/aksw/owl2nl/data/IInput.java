@@ -26,6 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import simplenlg.lexicon.Lexicon;
 
 public interface IInput {
@@ -34,9 +36,9 @@ public interface IInput {
 
   IInput setLexicon(Lexicon lexicon);
 
-  IInput setOntology(IRI ontology);
+  IInput setOntology(IRI ontology) throws OWLOntologyCreationException, OWLOntologyStorageException;
 
-  IInput setOntology(Path ontology);
+  IInput setOntology(Path ontology) throws OWLOntologyCreationException;
 
   Set<OWLAxiom> getAxioms();
 

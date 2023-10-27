@@ -23,11 +23,13 @@ package org.aksw.owl2nl.data;
 import org.junit.Assert;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public class OWL2NLInputTest {
 
   @Test
-  public void test() {
+  public void test() throws OWLOntologyCreationException, OWLOntologyStorageException {
     final IInput input = new OWL2NLInput().setOntology(//
         IRI.create(OWL2NLInputTest.class.getClassLoader().getResource("test.owl"))//
     );

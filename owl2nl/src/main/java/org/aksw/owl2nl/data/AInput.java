@@ -25,6 +25,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import simplenlg.lexicon.Lexicon;
 
 public abstract class AInput implements IInput {
@@ -32,37 +33,21 @@ public abstract class AInput implements IInput {
   protected Lexicon lexicon = Lexicon.getDefaultLexicon();
   protected OWLOntology owlOntology = null;
 
-  protected OWLOntology loadOntology(final Path path) {
-    try {
-      return OWLManager//
-          .createOWLOntologyManager()//
-          .loadOntologyFromOntologyDocument(path.toFile());
-    } catch (final OWLOntologyCreationException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-      return null;
-    }
-  }
-
-  protected OWLOntology loadOntology(final IRI ontology) {
-    try {
-      return OWLManager//
-          .createOWLOntologyManager()//
-          .loadOntology(ontology);
-    } catch (final OWLOntologyCreationException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-      return null;
-    }
-  }
 
   @Override
-  public IInput setOntology(final IRI ontology) {
-    owlOntology = loadOntology(ontology);
+  public IInput setOntology(final IRI ontology)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
+    owlOntology = OWLManager//
+        .createOWLOntologyManager()//
+        .loadOntology(ontology);
     return this;
   }
 
   @Override
-  public IInput setOntology(final Path ontology) {
-    owlOntology = loadOntology(ontology);
+  public IInput setOntology(final Path ontology) throws OWLOntologyCreationException {
+    owlOntology = OWLManager//
+        .createOWLOntologyManager()//
+        .loadOntologyFromOntologyDocument(ontology.toFile());
     return this;
   }
 
