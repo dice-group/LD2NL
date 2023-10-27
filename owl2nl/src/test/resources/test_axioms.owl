@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.com/father#"
+xml:base="http://example.com/father"
+xmlns:owl="http://www.w3.org/2002/07/owl#"
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:xml="http://www.w3.org/XML/1998/namespace"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+<owl:Ontology rdf:about="http://example.com/father"/>
+
+
+<!-- http://example.com/father#hasChild -->
+<owl:ObjectProperty rdf:about="http://example.com/father#hasChild">
+  <rdfs:domain rdf:resource="http://example.com/father#person"/>
+  <rdfs:range rdf:resource="http://example.com/father#person"/>
+</owl:ObjectProperty>
+
+
+<!-- http://example.com/father#male -->
+<owl:Class rdf:about="http://example.com/father#male">
+  <rdfs:subClassOf rdf:resource="http://example.com/father#person"/>
+</owl:Class>
+
+</rdf:RDF>
