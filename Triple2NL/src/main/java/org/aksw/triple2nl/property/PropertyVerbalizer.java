@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.triple2nl.converter.DefaultIRIConverter;
 import org.aksw.triple2nl.converter.IRIConverter;
 import org.aksw.triple2nl.nlp.StanfordCoreNLPWrapper;
@@ -435,46 +434,5 @@ public class PropertyVerbalizer {
     }
 
     propertyVerbalization.setExpandedVerbalizationText(expandedForm);
-  }
-
-  public static void main(String args[]) throws Exception {
-    PropertyVerbalizer pp = new PropertyVerbalizer(
-        new QueryExecutionFactoryHttp("http://dbpedia.org/sparql"), "cache", null);
-
-    String propertyURI = "http://dbpedia.org/ontology/birthPlace";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/birthPlace";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/hasColor";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/isHardWorking";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/bornIn";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/cross";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/producedBy";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/worksFor";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/workedFor";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/knownFor";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/name";
-    System.out.println(pp.verbalize(propertyURI));
-
-    propertyURI = "http://dbpedia.org/ontology/isGoldMedalWinner";
-    System.out.println(pp.verbalize(propertyURI));
   }
 }
