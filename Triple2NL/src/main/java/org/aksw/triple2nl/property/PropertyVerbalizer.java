@@ -72,7 +72,7 @@ public class PropertyVerbalizer {
   private Preposition preposition;
   private Dictionary database;
 
-  private final String VERB_PATTERN = "^((VP)|(have NP)|(be NP P)|(be VP P)|(VP NP)).*";
+  private final String VERB_PATTERN = "^((VP)|(have NP)|(be NP P)|(be VP P))";
   private StanfordCoreNLPWrapper pipeline;
   private boolean useLinguisticalAnalysis = true;
 
@@ -115,11 +115,14 @@ public class PropertyVerbalizer {
     propertyText = normalize(propertyText);
 
     // try to use linguistic information
-    PropertyVerbalization propertyVerbalization =
-        getTypeByLinguisticAnalysis(propertyURI, propertyText);
+    PropertyVerbalization propertyVerbalization = null;
+    if (useLinguisticalAnalysis) {
+      propertyVerbalization = getTypeByLinguisticAnalysis(propertyURI, propertyText);
+    }
 
     // if this failed use WordNet heuristic
-    if (propertyVerbalization.getVerbalizationType() == PropertyVerbalizationType.UNSPECIFIED
+    if (propertyVerbalization == null
+        || propertyVerbalization.getVerbalizationType() == PropertyVerbalizationType.UNSPECIFIED
         || propertyText.split(" ").length == 1) {
       logger.debug("...using WordNet-based analysis...");
       PropertyVerbalizationType verbalizationType = getTypeByWordnet(propertyText);
