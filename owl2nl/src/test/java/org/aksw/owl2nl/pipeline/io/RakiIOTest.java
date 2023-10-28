@@ -13,7 +13,7 @@ public class RakiIOTest {
   @Test
   public void test() {
     Model model = RakiIO.readRDFXML(//
-        IRI.create(RakiIOTest.class.getClassLoader().getResource("test.owl")//
+        IRI.create(RakiIOTest.class.getClassLoader().getResource("test_ontology.owl")//
         ).toURI().getPath());
 
     Assert.assertNotNull(model);
