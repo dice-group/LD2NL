@@ -5,7 +5,10 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.aksw.owl2nl.pipeline.Pipeline;
 import org.aksw.owl2nl.pipeline.data.input.RAKIInput;
+import org.aksw.owl2nl.pipeline.data.output.IOutput;
+import org.aksw.owl2nl.pipeline.data.output.OutputHTMLTable;
 import org.aksw.owl2nl.pipeline.data.output.OutputJsonTrainingData;
+import org.aksw.owl2nl.pipeline.data.output.OutputTerminal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semanticweb.owlapi.model.IRI;
@@ -27,7 +30,8 @@ public class RAKICommandLineInterface {
     String ontology = null;
     String type = null;
     boolean isURL = false;
-    final Getopt g = new Getopt("Verbalizer Pipeline", args, "a:x o:x s:x t:x u:x");
+    String outputType = null;
+    final Getopt g = new Getopt("Verbalizer Pipeline", args, "a:x o:x s:x m:x u:x t:x");
     int c;
     while ((c = g.getopt()) != -1) {
       switch (c) {
@@ -40,11 +44,14 @@ public class RAKICommandLineInterface {
         case 's':
           output = String.valueOf(g.getOptarg());
           break;
-        case 't':
+        case 'm':
           type = String.valueOf(g.getOptarg());
           break;
         case 'u':
           isURL = Boolean.valueOf(g.getOptarg());
+          break;
+        case 't':
+          outputType = String.valueOf(g.getOptarg());
           break;
         default:
           LOG.info("getopt() returned " + c + "\n");
@@ -81,19 +88,23 @@ public class RAKICommandLineInterface {
         .setAxioms(Paths.get(axioms));
     if (oOntology instanceof IRI) {
       in.setOntology((IRI) oOntology);
-      LOG.info("IS IRI");
     } else if (oOntology instanceof String) {
-      LOG.info("STRING");
       in.setOntology(Paths.get(((String) ontology)));
     }
 
-    Pipeline//
-        .getInstance()//
-        .setInput(in)//
-        .setOutput(output == null ? new OutputJsonTrainingData()
-            : new OutputJsonTrainingData(Paths.get(output)))//
-        // .setOutput(new OutputTerminal())//
-        .run();
+    // sets the output type
+    IOutput<?> out = null;
+    if (outputType.startsWith("txt")) {
+      out = new OutputTerminal(Paths.get(output));
+    } else if (outputType.startsWith("html")) {
+      out = new OutputHTMLTable(Paths.get(output));
+    } else {
+      // default json
+      out = new OutputJsonTrainingData(Paths.get(output));
+    }
+
+    // run
+    Pipeline.getInstance().setInput(in).setOutput(out).run();
 
     LOG.info("\n==============================\nPipeline exit.");
   }
