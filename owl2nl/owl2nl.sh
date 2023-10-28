@@ -2,9 +2,9 @@
 #
 # examples:
 #
-# ./cli.sh -t json -a ./src/test/resources/test_axioms.owl -o ./src/test/resources/test_ontology.owl -s test_out.json -m rule -u false
+# ./owl2nl.sh -t json -a ./src/test/resources/test_axioms.owl -o ./src/test/resources/test_ontology.owl -s test_out.json -m rule -u false
 #
-# ./cli.sh -t html -a ./src/test/resources/test_axioms.owl -o https://raw.githubusercontent.com/dice-group/LD2NL/master/owl2nl/src/test/resources/test_ontology.owl -s test_out.html -m rule -u true
+# ./owl2nl.sh -t html -a ./src/test/resources/test_axioms.owl -o https://raw.githubusercontent.com/dice-group/LD2NL/master/owl2nl/src/test/resources/test_ontology.owl -s test_out.html -m rule -u true
 #
 ####################################################################################
 usage () {
