@@ -56,7 +56,6 @@ import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.plays
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.sings;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.workPlace;
 import static org.aksw.owl2nl.converter.DataHelper.OWLObjectPropertyHelper.worksFor;
-
 import org.aksw.owl2nl.data.OWL2NLInput;
 import org.junit.Assert;
 import org.junit.Test;
@@ -307,7 +306,7 @@ public class OWLClassExpressionConverterTest {
   @Test
   public void testhasValueC() {
     Assert.assertEquals(//
-        "something that works place Paderborn", //
+        "something whose work place is Paderborn", //
         converter.convert(df.getOWLObjectHasValue(workPlace, paderborn))//
     );
   }
@@ -425,7 +424,7 @@ public class OWLClassExpressionConverterTest {
     // works for a company
     /* someone whose work place is paderborn and whose amount of salary is 40000 */
     Assert.assertEquals(//
-        "something that works place Paderborn and that amount of salary is 40000", //
+        "something that work place is Paderborn and that amount of salary is 40000", //
         converter.convert(//
             df.getOWLObjectIntersectionOf(df.getOWLDataHasValue(amountOfSalary, salary),
                 df.getOWLObjectHasValue(workPlace, paderborn)))//
@@ -439,7 +438,7 @@ public class OWLClassExpressionConverterTest {
         df.getOWLObjectIntersectionOf(df.getOWLObjectHasValue(workPlace, paderborn)));
 
     Assert.assertEquals(//
-        "something that works place something that works place Paderborn", //
+        "something whose work place is something whose work place is Paderborn", //
         converter.convert(ce)//
     );
   }
