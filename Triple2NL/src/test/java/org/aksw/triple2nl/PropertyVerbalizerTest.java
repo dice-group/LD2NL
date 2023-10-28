@@ -27,10 +27,11 @@ public class PropertyVerbalizerTest {
     Assert.assertEquals(propertyURI, pv.getProperty());
 
     Assert.assertEquals(Tense.PRESENT, pv.getTense());
-    Assert.assertEquals(PropertyVerbalizationType.VERB, pv.getVerbalizationType());
+
     Assert.assertEquals("VP DET NP", pv.getPOSTags());
     Assert.assertEquals("resting place", pv.getVerbalizationText());
     Assert.assertEquals("resting place", pv.getExpandedVerbalizationText());
+    Assert.assertEquals(PropertyVerbalizationType.NOUN, pv.getVerbalizationType());
   }
 
   @Test
