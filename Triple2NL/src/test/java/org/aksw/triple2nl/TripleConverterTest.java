@@ -57,6 +57,23 @@ public class TripleConverterTest {
     converter = new TripleConverter(KS.getQueryExecutionFactory(), "cache", (Lexicon) null);
   }
 
+  /**
+   * Test method for
+   * {@link org.aksw.triple2nl.TripleConverter#convertTriplesToText(java.util.Collection)}.
+   */
+  @Test
+  public void testConvertTriplesToTextPP() {
+    List<Triple> triples = new ArrayList<Triple>();
+    Node subject = NodeFactory.createURI("http://dbpedia.org/resource/Ismail_Merchant");
+
+    triples.add(
+        Triple.create(subject, NodeFactory.createURI("http://dbpedia.org/ontology/restingPlace"),
+            NodeFactory.createURI("http://dbpedia.org/resource/India")));
+
+    String text = converter.convert(triples);
+    System.out.println(triples + "\n-> " + text);
+    assertEquals("Ismail Merchant's resting place is India.", text);
+  }
 
 
   /**
