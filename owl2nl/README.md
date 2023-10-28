@@ -10,15 +10,35 @@ In the root folder (parent of `owl2nl`) run: `mvn -T 1C clean install test -pl o
 
 
 ### Convert OWL into Natural Language:
-In the `owl2nl` folder add your owl file (`test.owl`) and run:
 
 ```
-mvn exec:java -B -Dexec.mainClass=org.aksw.owl2nl.ui.OWL2NLCommandLineInterface -Dexec.args="-o test.owl"
+Usage: owl2nl.sh  -t <txt|html|json> \
+                  -a <axioms file> \
+                  -o <ontology file or url> \
+                  -s <file> \
+                  -m <rule|model> \
+                  -u <true|false>
+
+  -t Output type: txt, html, json
+  -a File input path with axioms in OWL format to verbalize
+  -o File input path with an ontology to use for additional labels
+  -s File output path to store the results depending on type
+  -m Verbalization type to use: rule or model
+  -u is the ontology given by file (false) or url (true)
 
 ```
+#### Examples:
+```
+./owl2nl.sh -a ./src/test/resources/test_axioms.owl \
+            -u false -o ./src/test/resources/test_ontology.owl \
+            -t json -s test_out.json -m rule
+```
 
-For more information take a look at `cli.sh` and `cli2html.sh` as well as at the java tests in `src/test/java/org/aksw/owl2nl/converter`
-
+```
+./owl2nl.sh -a ./src/test/resources/test_axioms.owl \
+            -u true -o https://raw.githubusercontent.com/dice-group/LD2NL/master/owl2nl/src/test/resources/test_ontology.owl \
+            -t html -s test_out.html -m rule
+```
 ### Example Verbalization
 
 #### DL:
