@@ -1,10 +1,12 @@
 package org.aksw.owl2nl.pipeline.data.output;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.aksw.owl2nl.evaluation.visual.HTMLTableGenerator;
+import org.aksw.owl2nl.pipeline.io.RakiIO;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
 import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.semanticweb.owlapi.io.OWLObjectRenderer;
@@ -13,6 +15,14 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 public class OutputHTMLTable implements IOutput<String> {
   StringBuilder sb = new StringBuilder();
   final OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImplExt();
+  protected Path file = null;
+
+  public OutputHTMLTable() {}
+
+  public OutputHTMLTable(final Path file) {
+    this.file = file;
+  }
+
 
   @Override
   public String write(Map<OWLAxiom, String> verbalizationResults) {
@@ -35,6 +45,10 @@ public class OutputHTMLTable implements IOutput<String> {
     sb = new StringBuilder();
     sb.append(HTMLTableGenerator//
         .generateHTMLTable(Arrays.asList("ID", "Axiom", "Axiom", "NL"), data));
+
+    if (file != null) {
+      RakiIO.write(file, getResults().getBytes());
+    }
     return getResults();
   }
 

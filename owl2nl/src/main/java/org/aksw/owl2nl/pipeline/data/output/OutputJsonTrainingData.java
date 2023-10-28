@@ -3,7 +3,6 @@ package org.aksw.owl2nl.pipeline.data.output;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.aksw.owl2nl.pipeline.io.RakiIO;
 import org.dllearner.utilities.owl.ManchesterOWLSyntaxOWLObjectRendererImplExt;
 import org.json.JSONArray;
