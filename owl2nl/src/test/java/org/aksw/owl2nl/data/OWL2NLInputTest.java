@@ -31,10 +31,10 @@ public class OWL2NLInputTest {
   @Test
   public void test() throws OWLOntologyCreationException, OWLOntologyStorageException {
     final IInput input = new OWL2NLInput().setOntology(//
-        IRI.create(OWL2NLInputTest.class.getClassLoader().getResource("test.owl"))//
+        IRI.create(OWL2NLInputTest.class.getClassLoader().getResource("test_axioms.owl"))//
     );
 
     Assert.assertNotNull(input);
-    Assert.assertEquals(16, input.getAxioms().size());
+    Assert.assertEquals(5, input.getAxioms().size());
   }
 }
