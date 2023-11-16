@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import simplenlg.lexicon.Lexicon;
 
 public class RAKICommandLineInterfaceTest {
@@ -33,8 +34,10 @@ public class RAKICommandLineInterfaceTest {
    * 
    * @return an instance of RAKIInput
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
-  protected RAKIInput getRAKIInput() throws OWLOntologyCreationException {
+  protected RAKIInput getRAKIInput()
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
     RAKIInput in = new RAKIInput();
     in.setType(Type.RULES)//
         .setAxioms(Paths.get(axioms))//
@@ -48,8 +51,10 @@ public class RAKICommandLineInterfaceTest {
    * 
    * @param an instance of IOutput
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
-  protected void run(IOutput<?> out) throws OWLOntologyCreationException {
+  protected void run(IOutput<?> out)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
     Pipeline.getInstance()//
         .setInput(getRAKIInput())//
         .setOutput(out)//
@@ -60,9 +65,11 @@ public class RAKICommandLineInterfaceTest {
    * Test Terminal/String output with labels from the ontology
    * 
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
   @Test
-  public void testOutputTerminal() throws OWLOntologyCreationException {
+  public void testOutputTerminal()
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
 
     IOutput<String> out = new OutputTerminal();
     run(out);
@@ -81,9 +88,11 @@ public class RAKICommandLineInterfaceTest {
    * Test Json output with labels from the ontology
    * 
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
   @Test
-  public void testOutputJsonTrainingData() throws OWLOntologyCreationException {
+  public void testOutputJsonTrainingData()
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
 
     IOutput<JSONArray> out = new OutputJsonTrainingData();
     run(out);
@@ -105,9 +114,11 @@ public class RAKICommandLineInterfaceTest {
    * Test Java Map output with labels from the ontology
    * 
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
   @Test
-  public void testOutputJavaObjects() throws OWLOntologyCreationException {
+  public void testOutputJavaObjects()
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
 
     IOutput<Map<OWLAxiom, String>> out = new OutputJavaObjects();
     run(out);
@@ -130,9 +141,11 @@ public class RAKICommandLineInterfaceTest {
    * Test Terminal/String output with labels from the ontology
    * 
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
   @Test
-  public void testOutputHTMLTable() throws OWLOntologyCreationException {
+  public void testOutputHTMLTable()
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
 
     IOutput<String> out = new OutputHTMLTable();
     run(out);

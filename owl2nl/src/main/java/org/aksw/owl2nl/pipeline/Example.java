@@ -1,6 +1,5 @@
 package org.aksw.owl2nl.pipeline;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import org.aksw.owl2nl.pipeline.data.input.IRAKIInput.Type;
@@ -13,41 +12,44 @@ import org.aksw.owl2nl.pipeline.ui.RAKICommandLineInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import simplenlg.lexicon.Lexicon;
 
 public class Example {
 
   protected static final Logger LOG = LogManager.getLogger(RAKICommandLineInterface.class);
-  protected static final String file = "father.owl";
+  protected static final String ontology = "src/test/resources/test_ontology.owl";
+  protected static final String axioms = "src/test/resources/test_axioms.owl";
 
   /**
    * 
    * @param args
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    */
-  public static void main(final String[] args) throws OWLOntologyCreationException {
-    // exampleA();
+  public static void main(final String[] args)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
+    exampleA();
+    exampleB();
     exampleC();
   }
 
   /**
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    * 
    */
-  public static void exampleC() throws OWLOntologyCreationException {
-    // final IRI axioms = IRI.create(Example.class.getClassLoader().getResource("test.owl"));
-    final String axioms = file;
-    final String ontology = file;
+  public static void exampleC() throws OWLOntologyCreationException, OWLOntologyStorageException {
     // final IOutput<JSONArray> out = new OutputJsonTrainingData();
     IOutput<String> out = new OutputTerminal();
 
     RAKIInput in = new RAKIInput();
     in.setType(Type.RULES)//
-        .setAxioms(Paths.get(file))//
-
-        .setOntology(Paths.get(file))//
+        .setAxioms(Paths.get(axioms))//
+        .setOntology(IRI.create(Paths.get(ontology).toAbsolutePath().toUri()))//
     // .setLexicon(Lexicon.getDefaultLexicon());
     ;
 
@@ -61,17 +63,17 @@ public class Example {
 
   /**
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    *
    */
-  public static void exampleA() throws OWLOntologyCreationException {
-    final String ontology = file;
-    final String axioms = file;
+  public static void exampleA() throws OWLOntologyCreationException, OWLOntologyStorageException {
     final String output = "out.txt";
 
     final RAKIInput in = new RAKIInput();
     in//
+        .setType(Type.RULES)//
         .setAxioms(Paths.get(axioms))//
-        .setOntology(Paths.get(ontology))//
+        .setOntology(IRI.create(Paths.get(ontology).toAbsolutePath().toUri()))//
         .setLexicon(Lexicon.getDefaultLexicon());
 
     final IOutput<JSONArray> out = new OutputJsonTrainingData(Paths.get(output));
@@ -85,15 +87,16 @@ public class Example {
 
   /**
    * @throws OWLOntologyCreationException
+   * @throws OWLOntologyStorageException
    *
    */
-  public static void exampleB() throws OWLOntologyCreationException {
+  public static void exampleB() throws OWLOntologyCreationException, OWLOntologyStorageException {
 
     final RAKIInput in = new RAKIInput();
     {
-      final Path axioms = Paths.get(file);
-      in.setAxioms(axioms);
-      in.setOntology(axioms);
+      in.setType(Type.RULES);
+      in.setAxioms(Paths.get(axioms));
+      in.setOntology(IRI.create(Paths.get(ontology).toAbsolutePath().toUri()));//
     }
 
     final IOutput<Map<OWLAxiom, String>> out = new OutputJavaObjects();

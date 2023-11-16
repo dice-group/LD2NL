@@ -89,7 +89,8 @@ public class RAKICommandLineInterface {
     if (oOntology instanceof IRI) {
       in.setOntology((IRI) oOntology);
     } else if (oOntology instanceof String) {
-      in.setOntology(Paths.get(((String) ontology)));
+      // IRI iri = IRI.create(Paths.get(((String) oOntology)).toAbsolutePath().toUri());
+      in.setOntology(Paths.get(((String) oOntology)));
     }
 
     // sets the output type
