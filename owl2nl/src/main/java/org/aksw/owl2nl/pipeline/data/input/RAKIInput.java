@@ -32,12 +32,6 @@ abstract class AInputExtended extends AInput {
     ontologyFile = file.toPath();
     return this;
   }
-
-  @Override
-  public IInput setOntology(final Path ontology) throws OWLOntologyCreationException {
-    ontologyFile = ontology;
-    return super.setOntology(ontology);
-  }
 }
 
 
@@ -54,6 +48,16 @@ public class RAKIInput extends AInputExtended implements IRAKIInput {
 
   protected Model axiomsModel = null;
   protected Type type = Type.NOTSET;
+
+  @Override
+  public IInput setOntology(final IRI ontology)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
+
+    super.setOntology(ontology);
+    init();
+
+    return this;
+  }
 
   protected String getlabel(final IRI iri, final String lang, final Model model) {
     String label = null; // with lang
@@ -115,6 +119,7 @@ public class RAKIInput extends AInputExtended implements IRAKIInput {
   @Override
   public IRAKIInput setAxioms(final Path axiomsPath) {
     axiomsFile = axiomsPath;
+    init();
     try {
       axioms = OWLManager//
           .createOWLOntologyManager()//
@@ -135,7 +140,7 @@ public class RAKIInput extends AInputExtended implements IRAKIInput {
       final File file = new File(axiomsIRI.getShortForm());
       OWLManager.createOWLOntologyManager().saveOntology(axiomsOnto, IRI.create(file.toURI()));
       axiomsFile = file.toPath();
-
+      init();
     } catch (final OWLOntologyCreationException | OWLOntologyStorageException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }

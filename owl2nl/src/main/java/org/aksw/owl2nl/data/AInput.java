@@ -37,18 +37,16 @@ public abstract class AInput implements IInput {
   @Override
   public IInput setOntology(final IRI ontology)
       throws OWLOntologyCreationException, OWLOntologyStorageException {
-    owlOntology = OWLManager//
-        .createOWLOntologyManager()//
-        .loadOntology(ontology);
+
+    owlOntology = OWLManager.createOWLOntologyManager().loadOntology(ontology);
     return this;
   }
 
   @Override
-  public IInput setOntology(final Path ontology) throws OWLOntologyCreationException {
-    owlOntology = OWLManager//
-        .createOWLOntologyManager()//
-        .loadOntologyFromOntologyDocument(ontology.toFile());
-    return this;
+  public IInput setOntology(final Path ontology)
+      throws OWLOntologyCreationException, OWLOntologyStorageException {
+
+    return setOntology(IRI.create(ontology.toAbsolutePath().toUri()));
   }
 
   @Override

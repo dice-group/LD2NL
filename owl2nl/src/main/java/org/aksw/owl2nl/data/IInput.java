@@ -36,9 +36,9 @@ public interface IInput {
 
   IInput setLexicon(Lexicon lexicon);
 
-  IInput setOntology(IRI ontology) throws OWLOntologyCreationException, OWLOntologyStorageException;
+  IInput setOntology(IRI o) throws OWLOntologyCreationException, OWLOntologyStorageException;
 
-  IInput setOntology(Path ontology) throws OWLOntologyCreationException;
+  IInput setOntology(Path o) throws OWLOntologyCreationException, OWLOntologyStorageException;
 
   Set<OWLAxiom> getAxioms();
 
