@@ -20,30 +20,42 @@
  */
 package org.aksw.owl2nl.data;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import org.aksw.owl2nl.pipeline.data.input.RAKIInput;
 import org.junit.Assert;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-public class OWL2NLInputTest {
+public class OWL2NLRAKIInputTest {
 
   @Test
   public void test() throws OWLOntologyCreationException, OWLOntologyStorageException {
-    final IInput input = new OWL2NLInput().setOntology(//
-        IRI.create(OWL2NLInputTest.class.getClassLoader().getResource("test_axioms.owl"))//
-    );
+    IRI iri = IRI.create(OWL2NLRAKIInputTest.class.getClassLoader().getResource("test_axioms.owl"));
+    final IInput input = new RAKIInput()//
+        .setAxioms(iri)//
+        .setOntology(iri);
 
     Assert.assertNotNull(input);
-    Assert.assertEquals(5, input.getAxioms().size());
+    Assert.assertEquals(5, ((RAKIInput) input).getAxioms().size());
   }
 
   @Test
-  public void testIRI() throws OWLOntologyCreationException, OWLOntologyStorageException {
+  public void testIRI() throws OWLOntologyCreationException, OWLOntologyStorageException,
+      MalformedURLException, URISyntaxException {
 
-    IRI iri = IRI.create(
-        "https://raw.githubusercontent.com/dice-group/LD2NL/master/owl2nl/src/test/resources/test_axioms.owl");
-    final IInput input = new OWL2NLInput().setOntology(iri);
+    String str =
+        "https://raw.githubusercontent.com/dice-group/LD2NL/master/owl2nl/src/test/resources/test_axioms.owl";
+    URL url = new URI(str).toURL();
+
+    IRI iri = IRI.create(url);
+    final IInput input = new RAKIInput()//
+        .setAxioms(iri)//
+        .setOntology(iri);
 
     Assert.assertNotNull(input);
     Assert.assertEquals(5, input.getAxioms().size());
