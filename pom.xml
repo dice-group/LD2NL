@@ -317,12 +317,24 @@
 				<groupId>edu.stanford.nlp</groupId>
 				<artifactId>stanford-corenlp</artifactId>
 				<version>3.9.2</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>edu.stanford.nlp</groupId>
 				<artifactId>stanford-corenlp</artifactId>
 				<version>3.9.2</version>
 				<classifier>models</classifier>
+				<exclusions>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
