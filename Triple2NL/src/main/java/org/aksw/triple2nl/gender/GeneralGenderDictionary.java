@@ -21,14 +21,14 @@
 package org.aksw.triple2nl.gender;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Lorenz Buehmann
+ * @author Rene Speck
  */
 public class GeneralGenderDictionary extends GenderDictionary {
 
@@ -36,22 +36,20 @@ public class GeneralGenderDictionary extends GenderDictionary {
   public static String FEMALE_GENDER_FILE_LOCATION = "gender/female.txt";
 
   public GeneralGenderDictionary() {
-    try {
-      ClassPathResource maleResource = new ClassPathResource(MALE_GENDER_FILE_LOCATION);
-      ClassPathResource femaleResource = new ClassPathResource(FEMALE_GENDER_FILE_LOCATION);
 
-      male = new BufferedReader(
-          new InputStreamReader(maleResource.getInputStream(), StandardCharsets.UTF_8)).lines()
-              .map(name -> name.toLowerCase()).collect(Collectors.toSet());
+    InputStream maleResource = GeneralGenderDictionary.class.getClassLoader()
+        .getResourceAsStream(MALE_GENDER_FILE_LOCATION);
+    InputStream femaleResource = GeneralGenderDictionary.class.getClassLoader()
+        .getResourceAsStream(MALE_GENDER_FILE_LOCATION);
 
-      female = new BufferedReader(
-          new InputStreamReader(femaleResource.getInputStream(), StandardCharsets.UTF_8)).lines()
-              .map(name -> name.toLowerCase()).collect(Collectors.toSet());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    male = new BufferedReader(new InputStreamReader(maleResource, StandardCharsets.UTF_8)).lines()
+        .map(name -> name.toLowerCase()).collect(Collectors.toSet());
 
+    female = new BufferedReader(new InputStreamReader(femaleResource, StandardCharsets.UTF_8))
+        .lines().map(name -> name.toLowerCase()).collect(Collectors.toSet());
 
     setCaseSensitive(false);
   }
 }
+
+
