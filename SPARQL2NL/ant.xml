@@ -4,7 +4,7 @@
     </target>
     <target name="download-files" depends="check-files" unless="lex.exists">
         <get 
-            src="https://hobbitdata.informatik.uni-leipzig.de/LD2NL/NIHLexicon.zip"
+            src="https://files.dice-research.org/archive/LD2NL/NIHLexicon.zip"
             dest="src/main/resources/NIHLexicon.zip" verbose="true"
             usetimestamp="true" />
         <unzip src="src/main/resources/NIHLexicon.zip"
