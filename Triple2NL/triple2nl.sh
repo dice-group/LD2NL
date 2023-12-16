@@ -1,6 +1,8 @@
 #!/bin/bash
 #
 # examples:
+# ./triple2nl.sh -i /path/test.rdf -o /path/test/out/ -r true
+
 #
 
 ####################################################################################
