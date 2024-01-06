@@ -26,7 +26,10 @@ LD2NL currently consists of the following modules:
 Each module has its own README.md file.
 
 ### Compile LD2NL
-`mvn -T 1C clean install test`
+
+Build with Java 8.
+
+`mvn -U -T 1C clean install test`
 
 ### Support and Feedback
 If you need help or you have questions do not hesitate to write an issue in the right sidebar.
